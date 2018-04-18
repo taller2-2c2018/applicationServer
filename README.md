@@ -12,7 +12,17 @@
 source ./venv/bin/activate
 ```
 
-2. Run the program with the following command
+2. Run in a separate console the the following command to run a local mongoDB instance
+```
+sudo service mongod start
+```
+
+3. To startup the application run this command
 ```
 python app.py
+```
+
+4. To stop the mongoDB instance
+```
+sudo service mongod stop
 ```
