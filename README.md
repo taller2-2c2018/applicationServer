@@ -26,3 +26,8 @@ python app.py
 ```
 sudo service mongod stop
 ```
+
+5. Data sample
+```
+curl -X POST -H "Content-Type:application/json" 127.0.0.1:5000/user/ --data '{"user":"newUser", "password":"1234rfghu9"}'
+```

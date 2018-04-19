@@ -1,8 +1,10 @@
 import os
 from flask import Flask
-from pymongo import MongoClient
+from flask_restful import Api
 from flask_pymongo import PyMongo
+from .controller.userController import UserResource
 import pprint
+from appserver.logger import LoggerFactory
 
 MONGO_URL = os.environ.get('MONGO_URL')
 if not MONGO_URL:
@@ -11,28 +13,28 @@ if not MONGO_URL:
 app = Flask(__name__)
 app.config['MONGO_URI'] = MONGO_URL
 mongoDB = PyMongo(app)
+api = Api(app)
+api.add_resource(UserResource, '/user/')
+LOGGER = LoggerFactory.get_logger(__name__)
 
-mongoClient = MongoClient('localhost', 27017)
-dataBase = mongoClient.applicationServerDB
-table = dataBase.table
 
+class Configuration(object):
+    def get_database(self):
+        return mongoDB.db
 
 
 @app.route('/')
 def hello_world():
-    app.logger.info('Logging info before setting into database')
-    mongoDB.db.collection.insert({"key":"PEPOTE"})
+    LOGGER.info('Logging info before setting into database')
+    mongoDB.db.collection.insert({"key":"value"})
     return 'Inserted key value!'
+
 
 @app.route('/get')
 def getValues():
-    got_table = mongoDB.db.collection.find({"key":"value"})
     pprint.pprint(mongoDB.db.collection.find_one())
-    table_string = str(got_table)
 
-    app.logger.warn('%s', table_string)
     return pprint.pformat(mongoDB.db.collection.find_one())
-
 
 
 if __name__ == '__main__':
