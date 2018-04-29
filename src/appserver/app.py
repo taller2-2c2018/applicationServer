@@ -2,8 +2,8 @@ import os
 from flask import Flask
 from flask_restful import Api
 from flask_pymongo import PyMongo
-from .controller.userController import UserResource
 import pprint
+from appserver.controller.userController import UserResource
 from appserver.logger import LoggerFactory
 
 MONGO_URL = os.environ.get('MONGO_URL')
@@ -38,4 +38,5 @@ def getValues():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
+

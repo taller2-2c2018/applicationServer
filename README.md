@@ -17,9 +17,10 @@ source ./venv/bin/activate
 sudo service mongod start
 ```
 
-3. To startup the application run this command
+3. To startup the application run these commands
 ```
-python app.py
+~ cd src
+~ python run.py
 ```
 
 4. To stop the mongoDB instance
