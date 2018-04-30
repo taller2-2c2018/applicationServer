@@ -5,7 +5,8 @@ from flask_pymongo import PyMongo
 import pprint
 from appserver.controller.userController import UserResource
 from appserver.logger import LoggerFactory
-from redis import Redis
+from appserver.monitor.monitor import monitor
+from appserver.monitor.monitor import monitor_controller
 
 app = Flask(__name__)
 
@@ -17,12 +18,11 @@ if not MONGO_URL:
 app.config['MONGO_URI'] = MONGO_URL
 mongoDB = PyMongo(app)
 
-# Redis config
-redis = Redis(host='redis', port=6379)
 
 
 api = Api(app)
 api.add_resource(UserResource, '/user/')
+
 LOGGER = LoggerFactory.get_logger(__name__)
 
 
@@ -31,24 +31,19 @@ class Configuration(object):
         return mongoDB.db
 
 
+app.register_blueprint(monitor_controller)
+
 @app.route('/')
+@monitor
 def hello_world():
-    redis.incr('hits')
     LOGGER.info('Logging info before setting into database')
     mongoDB.db.collection.insert({"key":"value"})
     return 'Inserted key value!'
 
-@app.route('/getHits')
-def get_hits():
-    return redis.get('hits')
 
 @app.route('/get')
 def getValues():
     pprint.pprint(mongoDB.db.collection.find_one())
 
     return pprint.pformat(mongoDB.db.collection.find_one())
-
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
 
