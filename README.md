@@ -4,31 +4,31 @@
 [![Build Status](https://travis-ci.org/taller2-2c2018/applicationServer.svg?branch=master)](https://travis-ci.org/taller2-2c2018/applicationServer)
 [![codecov](https://codecov.io/gh/taller2-2c2018/applicationServer/branch/master/graph/badge.svg)](https://codecov.io/gh/taller2-2c2018/applicationServer)
 
+## Descripción
 
-## How to run it locally
+Esta es una aplicación flask conectada a una base de datos mongodb, y una base de datos redis.
 
-1. Activate the virtual environment with the following command
+## Correr con docker:
+
+### Requerimientos:
+- Docker
+- Docker-compose
+
+En el directorio raíz del proyecto ejecutar el siguiente comando:  
 ```
-source ./venv/bin/activate
+$~ docker-compose up
+```
+Esto levanta una instancias del aplication server, conectado con un container que contiene la base de datos MongoDB, y la base de datos Redis.
+
+### Conexión a docker
+
+Para ejecutar comandos como pip install \<paquete>, se puede conectar al docker container de la siguiente manera: 
+
+```
+$~ docker exec -it <nombre_del_container> sh
 ```
 
-2. Run in a separate console the the following command to run a local mongoDB instance
-```
-sudo service mongod start
-```
-
-3. To startup the application run these commands
-```
-~ cd src
-~ python run.py
-```
-
-4. To stop the mongoDB instance
-```
-sudo service mongod stop
-```
-
-5. Data sample
+## Data sample
 ```
 curl -X POST -H "Content-Type:application/json" 127.0.0.1:5000/user/ --data '{"user":"newUser", "password":"1234rfghu9"}'
 ```

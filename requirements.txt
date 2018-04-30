@@ -18,6 +18,7 @@ pylint==1.8.4
 pymongo==3.6.1
 pytest==3.5.1
 pytz==2018.4
+redis==2.10.6
 six==1.11.0
 Werkzeug==0.14.1
 wrapt==1.10.11
