@@ -1,6 +1,13 @@
 FROM python:3-alpine
 ADD . /src
 WORKDIR /src
+
+# Change TimeZone
+RUN apk add --update tzdata
+ENV TZ=America/Argentina/Buenos_Aires
+# Clean APK cache
+RUN rm -rf /var/cache/apk/*
+
 RUN pip install -r requirements.txt
 RUN pip install gunicorn
 

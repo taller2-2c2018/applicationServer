@@ -1,26 +1,41 @@
 import time
 from functools import wraps
-from redis import Redis
-from flask import Blueprint
+from flask import Blueprint, request, jsonify
+from appserver import app
 
 monitor_controller = Blueprint('monitor', __name__)
 
-# Redis config
-redis = Redis(host='redis', port=6379)
+monitor_collection = app.database.monitor
 
 
 def monitor(method):
     @wraps(method)
     def decorated_function(*args, **kwargs):
-        redis.incr('hits')
         ts = time.time()
         result = method(*args, **kwargs)
         te = time.time()
-        redis.set('timeElapsed', str(int((te - ts) * 1000)) +  'ms')
+
+        request_data = {
+            "route": request.path,
+            "date_time": time.strftime("%d/%m/%Y %H:%M:%S"),
+            "day_hour": time.strftime('%Y%m%d_%H'),
+            "time_elapsed": int((te - ts) * 1000)
+        }
+        monitor_collection.insert_one(request_data)
         return result
 
     return decorated_function
 
+
 @monitor_controller.route('/monitor/')
 def monitor_route():
-    return redis.get('timeElapsed')
+    cursor = monitor_collection.find()
+    data = []
+    for row in cursor:
+        data.append({
+            "route": row["route"],
+            "date_time": row["date_time"],
+            "day_hour": row["day_hour"],
+            "time_elapsed": row["time_elapsed"]
+        })
+    return jsonify(data)

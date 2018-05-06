@@ -10,9 +10,6 @@ services:
     volumes:
     - ./src:/src
     links:
-    - redis
     - db:database
-  redis:
-    image: redis
   db:
     image: mongo:latest 
