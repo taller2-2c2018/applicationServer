@@ -6,7 +6,7 @@
 
 ## Descripción
 
-Esta es una aplicación flask conectada a una base de datos mongodb, y una base de datos redis.
+Esta es una aplicación flask conectada a una base de datos mongodb.
 
 ## Correr con docker:
 
@@ -18,7 +18,7 @@ En el directorio raíz del proyecto ejecutar el siguiente comando:
 ```
 $~ docker-compose up
 ```
-Esto levanta una instancias del aplication server, conectado con un container que contiene la base de datos MongoDB, y la base de datos Redis.
+Esto levanta una instancias del aplication server, conectado con un container que contiene la base de datos MongoDB.
 
 ### Conexión a docker
 
