@@ -22,6 +22,7 @@ def hello_world():
 
 
 @app.route('/get')
+@monitor
 def getValues():
     pprint.pprint(collection.find_one())
     return pprint.pformat(collection.find_one())
