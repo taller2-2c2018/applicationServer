@@ -7,7 +7,8 @@ user_collection = app.database.user
 
 
 class UserRepository(object):
-    def insert(self, user):
+    @staticmethod
+    def insert(user):
         LOGGER.info('Inserting new vale into user_table')
-        user_id = user_collection.insert(user)
+        user_id = user_collection.insert_one(user)
         return user_id

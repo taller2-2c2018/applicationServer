@@ -10,6 +10,6 @@ class UserFriendshipResource(Resource):
 
     def post(self):
         LOGGER.info('Sending new friendship request')
-        requestJson = request.get_json()
-        return_value = UserService().send_user_friendship_request(requestJson)
+        request_json = request.get_json()
+        return_value = UserService().send_user_friendship_request(request_json)
         return return_value
