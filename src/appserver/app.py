@@ -12,5 +12,5 @@ api.add_resource(UserAuthenticateResource, '/user/authenticate')
 api.add_resource(UserFriendshipResource, '/user/friendship')
 app.register_blueprint(monitor_controller)
 LOGGER = LoggerFactory.get_logger(__name__)
-collection = app.database.collection
+database = app.database
 
