@@ -3,6 +3,7 @@ from appserver.externalcommunication.sharedServer import SharedServer
 from appserver.repository.userRepository import UserRepository
 from appserver.repository.friendshipRepository import FriendshipRepository
 from appserver.logger import LoggerFactory
+from appserver.datastructure.ApplicationResponse import ApplicationResponse
 
 LOGGER = LoggerFactory().get_logger('UserService')
 
@@ -19,7 +20,7 @@ class UserService(object):
         if shared_server_response_validation.hasErrors:
             return shared_server_response_validation.message
         UserRepository.insert(request_json)
-        return shared_server_response
+        return ApplicationResponse.get_created("Created user successfully")
 
     @staticmethod
     def authenticate_user(request_json):
