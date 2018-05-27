@@ -11,5 +11,8 @@ services:
     - ./src:/src
     links:
     - db:database
+    - redis
   db:
-    image: mongo:latest 
+    image: mongo:latest
+  redis:
+    image: redis

@@ -1,5 +1,6 @@
 import os
 from flask_pymongo import PyMongo
+from redis import Redis
 
 
 class Configuration(object):
@@ -12,3 +13,6 @@ class Configuration(object):
             # MONGO_URL = "mongodb://localhost:27017/"
         app.config['MONGO_URI'] = MONGO_URL
         return PyMongo(app)
+
+    def set_up_redis(self):
+        return Redis(host='redis', port=6379)
