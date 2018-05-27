@@ -4,7 +4,7 @@ from appserver.logger import LoggerFactory
 
 USER = 'nledesma@taller.com.ar'
 PASSWORD = 'nledesma'
-HOST = 'https://apinodebackend.herokuapp.com/v0/api'
+HOST = 'http://sharedserver:3000/v0/api'
 TOKEN_PATH = '/token'
 USER_REGISTER_PATH = '/users'
 
@@ -28,7 +28,7 @@ class SharedServer(object):
             "username": request_json['username'],
             "facebookAuthToken": request_json['facebookAuthToken']
         }
-        return requests.post(HOST + USER_REGISTER_PATH, json=data, headers={'Authorization': SharedServer.get_token()})
+        return SharedServer.request_shared_server(json=data, path=HOST+USER_REGISTER_PATH)
 
     @staticmethod
     def get_token():
@@ -46,3 +46,7 @@ class SharedServer(object):
             app.memory_database.set('app_token', response.json()['token']['token'])
             token = response.json()['token']['token']
         return token
+
+    @staticmethod
+    def request_shared_server(json, path):
+        return requests.post(path , json=json, headers={'Authorization': SharedServer.get_token()})
