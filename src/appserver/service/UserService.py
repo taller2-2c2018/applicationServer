@@ -2,6 +2,9 @@ from appserver.validator.jsonValidator import JsonValidator
 from appserver.externalcommunication.sharedServer import SharedServer
 from appserver.repository.userRepository import UserRepository
 from appserver.repository.friendshipRepository import FriendshipRepository
+from appserver.logger import LoggerFactory
+
+LOGGER = LoggerFactory().get_logger('UserService')
 
 
 class UserService(object):
@@ -10,7 +13,8 @@ class UserService(object):
         validation_response = JsonValidator.validate_user_authenticate(request_json)
         if validation_response.hasErrors:
             return validation_response.message
-        shared_server_response = SharedServer.registerUser(request_json)
+        LOGGER.info("Json is valid.")
+        shared_server_response = SharedServer.register_user(request_json)
         shared_server_response_validation = JsonValidator.validate_shared_server_register_user(shared_server_response)
         if shared_server_response_validation.hasErrors:
             return shared_server_response_validation.message

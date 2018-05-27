@@ -12,6 +12,6 @@ class UserRegisterResource(Resource):
     @monitor
     def post(self):
         LOGGER.info('Registering a new user')
-        requestJson = request.get_json()
-        return_value = UserService().register_new_user(requestJson)
+        request_json = request.get_json()
+        return_value = UserService().register_new_user(request_json)
         return return_value

@@ -9,6 +9,7 @@ class JsonValidator(object):
 
     @staticmethod
     def validate_user_authenticate(json):
+        LOGGER.info("Validating user authentication json.")
         if json is None:
             return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
         validation_response = ValidationResponse(False, "")
@@ -37,5 +38,9 @@ class JsonValidator(object):
 
     @staticmethod
     def validate_shared_server_register_user(shared_server_response):
-        # TODO validate shared server register user response
-        return ValidationResponse(False)
+        LOGGER.info("Validating shared server response:" + shared_server_response.text)
+        status_code = shared_server_response.status_code
+        if status_code == 200 or status_code == 201:
+            return ValidationResponse(False)
+        return ValidationResponse(True, "Failed the communication with shared server user registration. "
+                                        "Got a status code: " + str(status_code))

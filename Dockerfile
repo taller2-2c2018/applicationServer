@@ -9,6 +9,7 @@ ENV TZ=America/Argentina/Buenos_Aires
 RUN rm -rf /var/cache/apk/*
 
 RUN pip install -r requirements.txt
+RUN pip install requests
 RUN pip install gunicorn
 
 ENV FLASK_APP=run.py
