@@ -2,14 +2,13 @@ import requests
 from appserver import app
 from appserver.logger import LoggerFactory
 
-USER = 'nledesma@taller.com.ar'
-PASSWORD = 'nledesma'
-HOST = 'http://sharedserver:3000/v0/api'
 TOKEN_PATH = '/token'
-USER_REGISTER_PATH = '/users'
-
+USER_PATH = '/users'
 LOGGER = LoggerFactory().get_logger('SharedServerClient')
 
+HOST = app.shared_server_host
+SERVER_USER = app.server_user
+SEVER_PASSWORD = app.server_password
 
 class SharedServer(object):
 
@@ -28,7 +27,7 @@ class SharedServer(object):
             "username": request_json['username'],
             "facebookAuthToken": request_json['facebookAuthToken']
         }
-        return SharedServer.request_shared_server(json=data, path=HOST+USER_REGISTER_PATH)
+        return SharedServer.request_shared_server(json=data, path=HOST + USER_PATH)
 
     @staticmethod
     def get_token():
@@ -38,8 +37,8 @@ class SharedServer(object):
         if token is None:
             LOGGER.info("Token not found in memory, requesting to shared server")
             data = {
-                'username': USER,
-                'password': PASSWORD
+                'username': SERVER_USER,
+                'password': SEVER_PASSWORD
             }
             response = requests.post(HOST + TOKEN_PATH, json=data)
             LOGGER.info("Got token from shared server: " + response.text)
@@ -49,4 +48,4 @@ class SharedServer(object):
 
     @staticmethod
     def request_shared_server(json, path):
-        return requests.post(path , json=json, headers={'Authorization': SharedServer.get_token()})
+        return requests.post(path, json=json, headers={'Authorization': SharedServer.get_token()})
