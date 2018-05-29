@@ -20,7 +20,7 @@ class JsonValidator(object):
         return validation_response
 
     @staticmethod
-    def validate_user_friendship(json):
+    def validate_user_friendship_post(json):
         if json is None:
             return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
         validation_response = ValidationResponse(False, "")
@@ -28,6 +28,15 @@ class JsonValidator(object):
         validation_response = JsonValidator.__check_validity(json, "mTargetUsername", validation_response)
         validation_response = JsonValidator.__check_validity(json, "mDescription", validation_response)
         validation_response = JsonValidator.__check_validity(json, "mPicture", validation_response)
+
+        return validation_response
+
+    @staticmethod
+    def validate_user_friendship_get(json):
+        if json is None:
+            return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
+        validation_response = ValidationResponse(False, "")
+        validation_response = JsonValidator.__check_validity(json, "mUsername", validation_response)
 
         return validation_response
 
