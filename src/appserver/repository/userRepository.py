@@ -23,3 +23,19 @@ class UserRepository(object):
     def username_exists(username):
         LOGGER.info("Trying to see if " + username + " exists in database")
         return user_collection.find_one({"username": username})
+
+    @staticmethod
+    def add_friendship(user_that_accepts_friendship, target_user):
+        UserRepository.add_friend_to_list(user_that_accepts_friendship, target_user)
+        UserRepository.add_friend_to_list(target_user, user_that_accepts_friendship)
+
+    @staticmethod
+    def add_friend_to_list(user, friend_to_add):
+        user_entity = user_collection.find_one({"username": user})
+        if "friendshipList" not in user_entity:
+            friendship_list = [friend_to_add]
+        else:
+            friendship_list = user_entity["friendshipList"]
+            friendship_list.append(friend_to_add)
+        user_collection.update_one({'username': user}, {"$set": {"friendshipList": friendship_list}}, upsert=False)
+

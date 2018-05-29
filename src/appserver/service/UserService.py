@@ -53,3 +53,15 @@ class UserService(object):
         username = request_header["mUsername"]
         friendship_list = FriendshipRepository.get_friendship_requests_of_username(username)
         return ApplicationResponse.get_success(friendship_list)
+
+    @staticmethod
+    def accept_friendship_request(request_header, target_user):
+        validation_response = JsonValidator.validate_user_friendship_get(request_header)
+        if validation_response.hasErrors:
+            return validation_response.message
+        user_that_accepts_friendship = request_header["mUsername"]
+        if FriendshipRepository.friendship_exists(user_that_accepts_friendship, target_user):
+            FriendshipRepository.accept_friendship(user_that_accepts_friendship, target_user)
+            UserRepository.add_friendship(user_that_accepts_friendship, target_user)
+            return ApplicationResponse.get_success("Friendship was accepted successfully")
+        return ApplicationResponse.get_bad_request("Friendship request couldn't be found")

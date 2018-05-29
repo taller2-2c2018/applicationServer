@@ -20,3 +20,16 @@ class FriendshipRepository(object):
         friendship_list = friendship_collection.find({"mTargetUsername": username})
 
         return json_util.dumps(friendship_list)
+
+    @staticmethod
+    def friendship_exists(user_that_accepts_friendship, target_user):
+        LOGGER.info('Seeing if friendship exists')
+        return friendship_collection.find(
+            {"mRequesterUsername": user_that_accepts_friendship, "mTargetUsername": target_user})
+
+    @staticmethod
+    def accept_friendship(user_that_accepts_friendship, target_user):
+        LOGGER.info('Removing friendship request from database')
+        # TODO ver por que esto no funciona, no remueve la solicitud, si lo escribo a mano con las comillas lo agarra bien
+        friendship_collection.remove({'RequesterUsername': user_that_accepts_friendship, "mTargetUsername": target_user})
+
