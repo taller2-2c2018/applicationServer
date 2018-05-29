@@ -11,3 +11,4 @@ test/__pycache__/
 DEV/
 ENV/
 .idea
+*.env
