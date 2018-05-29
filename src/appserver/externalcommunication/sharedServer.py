@@ -16,7 +16,8 @@ class SharedServer(object):
     @staticmethod
     def authenticate_user(request_json):
         # TODO finish this and make it connect with the real shared server
-        return "Functionality authenticate user not finished"
+        LOGGER.info("Validating user, hardcoded data response")
+        return {"metadata": { "version": "string"},   "token": {"expiresAt": 0,     "token": "defaultUserToken"   } }
 
     @staticmethod
     def register_user(request_json):
@@ -49,4 +50,4 @@ class SharedServer(object):
 
     @staticmethod
     def request_shared_server(json, path):
-        return requests.post(path , json=json, headers={'Authorization': SharedServer.get_token()})
+        return requests.post(path, json=json, headers={'Authorization': SharedServer.get_token()})

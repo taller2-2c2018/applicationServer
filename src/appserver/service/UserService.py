@@ -27,13 +27,21 @@ class UserService(object):
         validation_response = JsonValidator.validate_user_authenticate(request_json)
         if validation_response.hasErrors:
             return validation_response.message
-        return SharedServer.authenticate_user(request_json)
+        response = SharedServer.authenticate_user(request_json)
+        LOGGER.info("Response gotten from server: " + str(response))
+        token = response["token"]
+        user = request_json["username"]
+        UserRepository.update_user_token(user, token)
+        return ApplicationResponse.get_success("Logged in successfully. Token: " + token["token"])
 
     @staticmethod
     def send_user_friendship_request(request_json):
         validation_response = JsonValidator.validate_user_friendship(request_json)
         if validation_response.hasErrors:
             return validation_response.message
-        FriendshipRepository.insert(request_json)
-        return "The request has been sent successfully"
+        target_username = request_json["mTargetUsername"]
+        if UserRepository.username_exists(target_username):
+            FriendshipRepository.insert(request_json)
+            return ApplicationResponse.get_success("Friendship request sent successfully")
+        return ApplicationResponse.get_bad_request("Target username doesn't exist")
 

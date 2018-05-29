@@ -24,8 +24,10 @@ class JsonValidator(object):
         if json is None:
             return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
         validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity(json, "requesterUser", validation_response)
-        validation_response = JsonValidator.__check_validity(json, "targetUser", validation_response)
+        validation_response = JsonValidator.__check_validity(json, "mRequesterUsername", validation_response)
+        validation_response = JsonValidator.__check_validity(json, "mTargetUsername", validation_response)
+        validation_response = JsonValidator.__check_validity(json, "mDescription", validation_response)
+        validation_response = JsonValidator.__check_validity(json, "mPicture", validation_response)
 
         return validation_response
 
