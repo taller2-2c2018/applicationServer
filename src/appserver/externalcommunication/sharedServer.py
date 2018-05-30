@@ -2,13 +2,14 @@ import requests
 from appserver import app
 from appserver.logger import LoggerFactory
 
+LOGGER = LoggerFactory().get_logger('SharedServerClient')
 TOKEN_PATH = '/token'
 USER_PATH = '/users'
-LOGGER = LoggerFactory().get_logger('SharedServerClient')
 
 HOST = app.shared_server_host
 SERVER_USER = app.server_user
 SEVER_PASSWORD = app.server_password
+
 
 class SharedServer(object):
 
@@ -20,7 +21,7 @@ class SharedServer(object):
 
     @staticmethod
     def register_user(request_json):
-        LOGGER.info("Sending request to shared server")
+        LOGGER.info("Sending request to shared server: " + HOST + USER_PATH)
         data = {
             "id": None,
             "_rev": None,

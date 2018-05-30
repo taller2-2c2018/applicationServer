@@ -39,3 +39,7 @@ class UserRepository(object):
             friendship_list.append(friend_to_add)
         user_collection.update_one({'username': user}, {"$set": {"friendshipList": friendship_list}}, upsert=False)
 
+    @staticmethod
+    def create_profile(username, profile):
+        LOGGER.info("Creating profile por user: " + username)
+        user_collection.update_one({"username": username}, {"$set": profile}, upsert=False)

@@ -47,7 +47,7 @@ class UserService(object):
 
     @staticmethod
     def get_friendship_requests(request_header):
-        validation_response = JsonValidator.validate_user_friendship_get(request_header)
+        validation_response = JsonValidator.validate_header_has_username(request_header)
         if validation_response.hasErrors:
             return validation_response.message
         username = request_header["mUsername"]
@@ -56,7 +56,7 @@ class UserService(object):
 
     @staticmethod
     def accept_friendship_request(request_header, target_user):
-        validation_response = JsonValidator.validate_user_friendship_get(request_header)
+        validation_response = JsonValidator.validate_header_has_username(request_header)
         if validation_response.hasErrors:
             return validation_response.message
         user_that_accepts_friendship = request_header["mUsername"]
@@ -65,3 +65,16 @@ class UserService(object):
             UserRepository.add_friendship(user_that_accepts_friendship, target_user)
             return ApplicationResponse.get_success("Friendship was accepted successfully")
         return ApplicationResponse.get_bad_request("Friendship request couldn't be found")
+
+    @staticmethod
+    def create_user_profile(request_json, request_header):
+        validation_response = JsonValidator.validate_header_has_username(request_header)
+        if validation_response.hasErrors:
+            return validation_response.message
+        validation_response = JsonValidator.validate_profile_datafields(request_json)
+        if validation_response.hasErrors:
+            return validation_response.message
+        username = request_header["mUsername"]
+        UserRepository.create_profile(username, request_json)
+
+        return ApplicationResponse.get_created("Created profile successfully")

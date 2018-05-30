@@ -3,6 +3,7 @@ from flask_pymongo import PyMongo
 from redis import Redis
 from dotenv import load_dotenv, find_dotenv
 
+
 class Configuration(object):
     def set_up_environment(self):
         is_dev = os.environ.get('DEVELOPMENT', None)
@@ -19,14 +20,18 @@ class Configuration(object):
         app.config['MONGO_URI'] = MONGO_URL
         return PyMongo(app)
 
-    def set_up_redis(self):
+    @staticmethod
+    def set_up_redis():
         return Redis(host=os.getenv("REDIS_HOST"), port=6379)
 
+    @staticmethod
     def get_shared_server_host_url():
         return os.getenv("SHARED_SERVER_HOST")
 
+    @staticmethod
     def get_server_user():
         return os.getenv("SERVER_USER")
 
+    @staticmethod
     def get_server_password():
         return os.getenv("SERVER_PASSWORD")
