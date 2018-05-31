@@ -1,6 +1,8 @@
 language: python
 python:
   - "3.6.4"
+services:
+  - mongodb
+  - redis-server
 install: "pip install -r requirements-test.txt"
-script: python -m pytest --cov-config .coveragerc --cov=$(pwd)
-after_success: codecov --token=$CODECOV_TOKEN
+script: bash travis-test.sh
