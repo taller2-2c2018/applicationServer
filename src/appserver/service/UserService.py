@@ -4,6 +4,8 @@ from appserver.repository.userRepository import UserRepository
 from appserver.repository.friendshipRepository import FriendshipRepository
 from appserver.logger import LoggerFactory
 from appserver.datastructure.ApplicationResponse import ApplicationResponse
+from bson.json_util import dumps
+
 
 LOGGER = LoggerFactory().get_logger('UserService')
 
@@ -78,3 +80,9 @@ class UserService(object):
         UserRepository.create_profile(username, request_json)
 
         return ApplicationResponse.get_created("Created profile successfully")
+
+    @staticmethod
+    def get_user_profile(username):
+        profile = UserRepository.get_profile(username)
+
+        return ApplicationResponse.get_success(dumps(profile))

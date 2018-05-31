@@ -14,7 +14,7 @@ api.add_resource(UserRegisterResource, '/user/register')
 api.add_resource(UserAuthenticateResource, '/user/authenticate')
 api.add_resource(UserFriendshipResource, '/user/friendship')
 api.add_resource(UserFriendshipAcceptResource, '/user/friendship/accept/<username>')
-api.add_resource(UserProfileResource, '/user/profile')
+api.add_resource(UserProfileResource, '/user/profile', '/user/profile/<username>')
 # Redis config
 redis = Redis(host='redis', port=6379)
 app.register_blueprint(monitor_controller)

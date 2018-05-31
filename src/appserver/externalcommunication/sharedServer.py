@@ -17,7 +17,7 @@ class SharedServer(object):
     def authenticate_user(request_json):
         # TODO finish this and make it connect with the real shared server
         LOGGER.info("Validating user, hardcoded data response")
-        return {"metadata": { "version": "string"},   "token": {"expiresAt": 0,     "token": "defaultUserToken"   } }
+        return {"metadata": {"version": "string"}, "token": {"expiresAt": 0, "token": "defaultUserToken"}}
 
     @staticmethod
     def register_user(request_json):
