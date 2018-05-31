@@ -46,6 +46,17 @@ class JsonValidator(object):
         return validation_response
 
     @staticmethod
+    def validate_story_datafields(json):
+        if json is None:
+            return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
+        validation_response = ValidationResponse(False, "")
+        validation_response = JsonValidator.__check_validity(json, "mTitle", validation_response)
+        validation_response = JsonValidator.__check_validity(json, "mDescription", validation_response)
+        validation_response = JsonValidator.__check_validity(json, "mPicture", validation_response)
+
+        return validation_response
+
+    @staticmethod
     def validate_header_has_username(json):
         if json is None:
             return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
