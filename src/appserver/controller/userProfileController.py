@@ -19,8 +19,7 @@ class UserProfileResource(Resource):
         return return_value
 
     @monitor
-    def get(self):
-        LOGGER.info('Getting all requests for given user')
-        request_header = request.headers
-        return_value = UserService().get_friendship_requests(request_header)
+    def get(self, username):
+        LOGGER.info('Getting profile of ' + username)
+        return_value = UserService().get_user_profile(username)
         return return_value

@@ -43,3 +43,8 @@ class UserRepository(object):
     def create_profile(username, profile):
         LOGGER.info("Creating profile por user: " + username)
         user_collection.update_one({"username": username}, {"$set": profile}, upsert=False)
+
+    @staticmethod
+    def get_profile(username):
+        return user_collection.find_one({"username": username}, {"_id": 0, "mFirstName": 1, "mLastname": 1, "mBirthDate": 1,
+                                                                 "mFacebookUrl": 1, "mPicture": 1, "mSex": 1})
