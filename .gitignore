@@ -1,5 +1,6 @@
 .idea
 .coverage
+.vscode
 .pytest_cache/
 coverage.xml
 internalGuide.md
@@ -7,3 +8,7 @@ test-env/
 venv/
 __pycache__/
 test/__pycache__/
+DEV/
+ENV/
+.idea
+*.env
