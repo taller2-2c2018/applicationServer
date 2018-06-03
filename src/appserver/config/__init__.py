@@ -22,7 +22,7 @@ class Configuration(object):
 
     @staticmethod
     def set_up_redis():
-        return Redis(host=os.getenv("REDIS_HOST"), port=6379)
+        return Redis(host=os.environ.get('REDIS_HOST'), port=os.environ.get('REDIS_PORT'), password=os.environ.get('REDIS_PWD'))
 
     @staticmethod
     def get_shared_server_host_url():
