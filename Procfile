@@ -1,1 +1,1 @@
-web: gunicorn --pythonpath src src.run
+web: gunicorn --pythonpath src src.run_heroku
