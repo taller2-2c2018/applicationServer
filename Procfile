@@ -1,1 +1,1 @@
-web: sh -c 'cd ./src/ && flask run'
+web: gunicorn --pythonpath src src.run
