@@ -6,3 +6,4 @@ omit =
   *venv*
   *test-env*
   *__init__*
+  *Controller.py
