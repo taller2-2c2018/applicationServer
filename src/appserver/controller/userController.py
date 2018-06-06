@@ -42,3 +42,12 @@ def get_friendship_requests_for_user():
     request_header = request.headers
     return_value = UserService().get_friendship_requests(request_header)
     return return_value
+
+
+@userEndpoint.route("/friendship/accept/<username>", methods=['POST'])
+@monitor
+def accept_user_friendship(username):
+    LOGGER.info('Sending new friendship request')
+    request_header = request.headers
+    return_value = UserService().accept_friendship_request(request_header, username)
+    return return_value
