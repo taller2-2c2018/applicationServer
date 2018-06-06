@@ -24,3 +24,21 @@ def authenticate_user():
     request_json = request.get_json()
     return_value = UserService().authenticate_user(request_json)
     return return_value
+
+
+@userEndpoint.route("/friendship", methods=['POST'])
+@monitor
+def send_friendship():
+    LOGGER.info('Sending new friendship request')
+    request_json = request.get_json()
+    return_value = UserService().send_user_friendship_request(request_json)
+    return return_value
+
+
+@userEndpoint.route("/friendship", methods=['GET'])
+@monitor
+def get_friendship_requests_for_user():
+    LOGGER.info('Getting all requests for given user')
+    request_header = request.headers
+    return_value = UserService().get_friendship_requests(request_header)
+    return return_value
