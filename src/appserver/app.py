@@ -2,13 +2,11 @@ from flask_restful import Api
 
 from appserver.controller.storyController import storiesEndpoint
 from appserver.controller.userController import userEndpoint
-from appserver.controller.userProfileController import UserProfileResource
 from appserver.logger import LoggerFactory
 from appserver.monitor.monitor import monitor_controller
 from . import app
 
 api = Api(app)
-api.add_resource(UserProfileResource, '/user/profile', '/user/profile/<username>')
 app.register_blueprint(userEndpoint, url_prefix='/user')
 app.register_blueprint(storiesEndpoint, url_prefix='/story')
 app.register_blueprint(monitor_controller)

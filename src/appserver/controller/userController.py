@@ -51,3 +51,21 @@ def accept_user_friendship(username):
     request_header = request.headers
     return_value = UserService().accept_friendship_request(request_header, username)
     return return_value
+
+
+@userEndpoint.route("/profile", methods=['POST'])
+@monitor
+def create_user_profile():
+    LOGGER.info('Adding new profile to user')
+    request_json = request.get_json()
+    request_header = request.headers
+    return_value = UserService().create_user_profile(request_json, request_header)
+    return return_value
+
+
+@userEndpoint.route("/profile/<username>", methods=['GET'])
+@monitor
+def get_user_profile(username):
+    LOGGER.info('Getting profile of ' + username)
+    return_value = UserService().get_user_profile(username)
+    return return_value
