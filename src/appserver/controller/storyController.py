@@ -1,11 +1,10 @@
 from flask import request, Blueprint
-from flask_restful import Resource
+
 from appserver.logger import LoggerFactory
-from appserver.service.StoryService import StoryService
 from appserver.monitor.monitor import monitor
+from appserver.service.StoryService import StoryService
 
-
-LOGGER = LoggerFactory().get_logger('StoryResource')
+LOGGER = LoggerFactory().get_logger('StoryController')
 storiesEndpoint = Blueprint('storiesEndpoint', __name__)
 
 

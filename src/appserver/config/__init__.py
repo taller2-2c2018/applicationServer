@@ -2,12 +2,16 @@ import os
 from flask_pymongo import PyMongo
 from redis import Redis
 from dotenv import load_dotenv, find_dotenv
+from appserver.logger import LoggerFactory
+
+LOGGER = LoggerFactory().get_logger('ConfigurationInit')
 
 
 class Configuration(object):
     def set_up_environment(self):
         is_dev = os.environ.get('DEVELOPMENT', None)
         if is_dev:
+            LOGGER.info('Loading environment variables from .env files')
             load_dotenv(find_dotenv())
 
     def set_up_mongodb(self, app):
