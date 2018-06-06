@@ -30,6 +30,5 @@ class FriendshipRepository(object):
     @staticmethod
     def accept_friendship(user_that_accepts_friendship, target_user):
         LOGGER.info('Removing friendship request from database')
-        # TODO ver por que esto no funciona, no remueve la solicitud, si lo escribo a mano con las comillas lo agarra bien
-        friendship_collection.remove({'RequesterUsername': user_that_accepts_friendship, "mTargetUsername": target_user})
+        friendship_collection.remove({'mRequesterUsername': target_user, "mTargetUsername": user_that_accepts_friendship})
 
