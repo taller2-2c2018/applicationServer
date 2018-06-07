@@ -16,8 +16,9 @@ class UserService(object):
         validation_response = JsonValidator.validate_user_authenticate(request_json)
         if validation_response.hasErrors:
             return validation_response.message
-        LOGGER.info("Json is valid.")
+        LOGGER.info("Register user Json is valid.")
         shared_server_response = SharedServer.register_user(request_json)
+        LOGGER.info("Response from shared server: " + str(shared_server_response))
         shared_server_response_validation = JsonValidator.validate_shared_server_register_user(shared_server_response)
         if shared_server_response_validation.hasErrors:
             return shared_server_response_validation.message
