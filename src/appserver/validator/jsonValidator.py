@@ -13,9 +13,9 @@ class JsonValidator(object):
         if json is None:
             return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
         validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity(json, "username", validation_response)
-        validation_response = JsonValidator.__check_validity(json, "password", validation_response)
-        validation_response = JsonValidator.__check_validity(json, "facebookAuthToken", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "username", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "password", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "facebookAuthToken", validation_response)
 
         return validation_response
 
@@ -24,10 +24,10 @@ class JsonValidator(object):
         if json is None:
             return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
         validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity(json, "mRequesterUsername", validation_response)
-        validation_response = JsonValidator.__check_validity(json, "mTargetUsername", validation_response)
-        validation_response = JsonValidator.__check_validity(json, "mDescription", validation_response)
-        validation_response = JsonValidator.__check_validity(json, "mPicture", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "mRequesterUsername", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "mTargetUsername", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "mDescription", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "mPicture", validation_response)
 
         return validation_response
 
@@ -36,12 +36,12 @@ class JsonValidator(object):
         if json is None:
             return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
         validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity(json, "mFirstName", validation_response)
-        validation_response = JsonValidator.__check_validity(json, "mLastName", validation_response)
-        validation_response = JsonValidator.__check_validity(json, "mBirthDate", validation_response)
-        validation_response = JsonValidator.__check_validity(json, "mPicture", validation_response)
-        validation_response = JsonValidator.__check_validity(json, "mFacebookUrl", validation_response)
-        validation_response = JsonValidator.__check_validity(json, "mSex", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "mFirstName", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "mLastName", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "mBirthDate", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "mPicture", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "mFacebookUrl", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "mSex", validation_response)
 
         return validation_response
 
@@ -50,25 +50,33 @@ class JsonValidator(object):
         if json is None:
             return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
         validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity(json, "mTitle", validation_response)
-        validation_response = JsonValidator.__check_validity(json, "mDescription", validation_response)
-        validation_response = JsonValidator.__check_validity(json, "mPicture", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "mTitle", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "mDescription", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "mPicture", validation_response)
 
         return validation_response
 
     @staticmethod
-    def validate_header_has_username(json):
-        if json is None:
+    def validate_header_has_username(header):
+        if header is None:
             return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
         validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity(json, "mUsername", validation_response)
+        validation_response = JsonValidator.__check_validity_header(header, "mUsername", validation_response)
 
         return validation_response
 
     @staticmethod
-    def __check_validity(json, field_name, validation_response):
-        if field_name not in json or json[field_name] is '':
-            validation_response.message += "Json must have " + field_name + " field and must not be empty. "
+    def __check_validity_json(json, field_name, validation_response):
+        return JsonValidator.__check_validity(json, field_name, validation_response, 'Json')
+
+    @staticmethod
+    def __check_validity_header(header, field_name, validation_response):
+        return JsonValidator.__check_validity(header, field_name, validation_response, 'Header')
+
+    @staticmethod
+    def __check_validity(request_map, field_name, validation_response, request_type):
+        if field_name not in request_map or request_map[field_name] is '':
+            validation_response.message += request_type + " must have " + field_name + " field and must not be empty. "
             validation_response.hasErrors = True
         return validation_response
 
