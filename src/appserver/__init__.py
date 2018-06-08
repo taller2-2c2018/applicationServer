@@ -19,6 +19,9 @@ server_user = Configuration.get_server_user()
 LOGGER.info("Server user: " + server_user)
 server_password = Configuration.get_server_password()
 LOGGER.info("Server password: " + server_password)
+android_app_token = Configuration.get_android_app_token()
+LOGGER.info("Android app token: " + android_app_token)
+
 
 with app.app_context():
     app.database = mongodb.db
@@ -26,3 +29,4 @@ with app.app_context():
     app.shared_server_host = shared_server_host
     app.server_user = server_user
     app.server_password = server_password
+    app.android_app_token = android_app_token

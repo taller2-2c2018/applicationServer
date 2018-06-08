@@ -8,13 +8,22 @@ LOGGER = LoggerFactory().get_logger('JsonValidator')
 class JsonValidator(object):
 
     @staticmethod
+    def validate_user_register(json):
+        LOGGER.info("Validating user authentication json.")
+        if json is None:
+            return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
+        validation_response = ValidationResponse(False, "")
+        validation_response = JsonValidator.__check_validity_json(json, "facebookUserId", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "facebookAuthToken", validation_response)
+        return validation_response
+
+    @staticmethod
     def validate_user_authenticate(json):
         LOGGER.info("Validating user authentication json.")
         if json is None:
             return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
         validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity_json(json, "username", validation_response)
-        validation_response = JsonValidator.__check_validity_json(json, "password", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "facebookUserId", validation_response)
         validation_response = JsonValidator.__check_validity_json(json, "facebookAuthToken", validation_response)
 
         return validation_response
@@ -87,4 +96,13 @@ class JsonValidator(object):
         if status_code == 200 or status_code == 201:
             return ValidationResponse(False)
         return ValidationResponse(True, "Failed the communication with shared server user registration. "
+                                        "Got a status code: " + str(status_code))
+
+    @staticmethod
+    def validate_shared_server_authorization(shared_server_response):
+        LOGGER.info("Validating shared server response:" + str(shared_server_response))
+        status_code = shared_server_response["code"]
+        if status_code == 200 or status_code == 201:
+            return ValidationResponse(False)
+        return ValidationResponse(True, "Failed the communication with shared server user authentication. "
                                         "Got a status code: " + str(status_code))

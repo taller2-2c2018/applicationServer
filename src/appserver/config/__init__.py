@@ -26,7 +26,11 @@ class Configuration(object):
 
     @staticmethod
     def set_up_redis():
-        return Redis(host=os.environ.get('REDIS_HOST'), port=os.environ.get('REDIS_PORT'), password=os.environ.get('REDIS_PWD'))
+        return Redis(
+            host=os.environ.get('REDIS_HOST'),
+            port=os.environ.get('REDIS_PORT'),
+            password=os.environ.get('REDIS_PWD')
+        )
 
     @staticmethod
     def get_shared_server_host_url():
@@ -39,3 +43,11 @@ class Configuration(object):
     @staticmethod
     def get_server_password():
         return os.getenv("SERVER_PASSWORD")
+
+    @staticmethod
+    def get_server_password():
+        return os.getenv("SERVER_PASSWORD")
+
+    @staticmethod
+    def get_android_app_token():
+        return os.getenv("ANDROID_APP_TOKEN")

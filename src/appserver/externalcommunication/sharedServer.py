@@ -5,6 +5,7 @@ from appserver.logger import LoggerFactory
 LOGGER = LoggerFactory().get_logger('SharedServerClient')
 TOKEN_PATH = '/token'
 USER_PATH = '/users'
+AUTH_PATH = '/authorization'
 
 HOST = app.shared_server_host
 SERVER_USER = app.server_user
@@ -15,9 +16,12 @@ class SharedServer(object):
 
     @staticmethod
     def authenticate_user(request_json):
-        # TODO finish this and make it connect with the real shared server
-        LOGGER.info("Validating user, hardcoded data response")
-        return {"metadata": {"version": "string"}, "token": {"expiresAt": 0, "token": "defaultUserToken"}}
+        LOGGER.info("Authenticating user against sharedServer")
+        data = {
+            "facebook_id": request_json['facebookUserId'],
+        }
+        response = SharedServer.request_shared_server(json=data, path=HOST + AUTH_PATH)
+        return response.json()
 
     @staticmethod
     def register_user(request_json):
@@ -25,8 +29,9 @@ class SharedServer(object):
         data = {
             "id": None,
             "_rev": None,
-            "password": request_json['password'],
-            "username": request_json['username'],
+            "nombre": request_json["first_name"],
+            "apellido": request_json['last_name'],
+            "facebook_id": request_json['facebookUserId'],
             "facebookAuthToken": request_json['facebookAuthToken']
         }
         return SharedServer.request_shared_server(json=data, path=HOST + USER_PATH)

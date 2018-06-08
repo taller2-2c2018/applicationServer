@@ -1,5 +1,6 @@
 from appserver.validator.jsonValidator import JsonValidator
 from appserver.externalcommunication.sharedServer import SharedServer
+from appserver.externalcommunication.facebook import Facebook
 from appserver.repository.userRepository import UserRepository
 from appserver.repository.friendshipRepository import FriendshipRepository
 from appserver.logger import LoggerFactory
@@ -17,6 +18,14 @@ class UserService(object):
         if validation_response.hasErrors:
             return validation_response.message
         LOGGER.info("Register user Json is valid.")
+
+        facebook_token_is_valid = Facebook.user_token_is_valid(request_json)
+        if not facebook_token_is_valid:
+            return "Invalid credentials"
+        LOGGER.info("Facebook user token is valid")
+
+        Facebook.get_user_identification(request_json)
+
         shared_server_response = SharedServer.register_user(request_json)
         LOGGER.info("Response from shared server: " + str(shared_server_response))
         shared_server_response_validation = JsonValidator.validate_shared_server_register_user(shared_server_response)
@@ -30,12 +39,23 @@ class UserService(object):
         validation_response = JsonValidator.validate_user_authenticate(request_json)
         if validation_response.hasErrors:
             return validation_response.message
+
+        facebook_token_is_valid = Facebook.user_token_is_valid(request_json)
+        if not facebook_token_is_valid:
+            return "Invalid credentials"
+        LOGGER.info("Facebook user token is valid")
+
         response = SharedServer.authenticate_user(request_json)
         LOGGER.info("Response gotten from server: " + str(response))
-        token = response["token"]
-        user = request_json["username"]
-        UserRepository.update_user_token(user, token)
-        return ApplicationResponse.get_success("Logged in successfully. Token: " + token["token"])
+
+        shared_server_response_validation = JsonValidator.validate_shared_server_authorization(response)
+
+        data = response["data"]
+        facebook_id = data["facebook_id"]
+        token = data["token"]
+        expires_at = data["expires_at"]
+        UserRepository.update_user_token(facebook_id, token, expires_at)
+        return ApplicationResponse.get_success("Logged in successfully. Token: " + token)
 
     @staticmethod
     def send_user_friendship_request(request_json):

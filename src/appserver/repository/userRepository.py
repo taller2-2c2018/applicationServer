@@ -14,10 +14,15 @@ class UserRepository(object):
         return user_id
 
     @staticmethod
-    def update_user_token(user, token):
+    def update_user_token(facebook_id, token, expires_at):
         LOGGER.info('Updating token to existing user')
-        user_id = user_collection.find_one({"username": user})["_id"]
-        user_collection.update_one({'_id': user_id}, {"$set": token}, upsert=False)
+        user_id = user_collection.find_one({"facebookUserId": facebook_id})["_id"]
+        user_collection.update_one({'_id': user_id}, {
+            "$set": {
+                       "token": token,
+                       "expires_at": expires_at
+            }
+        }, upsert=False)
 
     @staticmethod
     def username_exists(username):
