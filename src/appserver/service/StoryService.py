@@ -15,23 +15,23 @@ class StoryService(object):
     def post_new_story(request_json, request_header):
         validation_response = JsonValidator.validate_header_has_username(request_header)
         if validation_response.hasErrors:
-            return validation_response.message
+            return ApplicationResponse.bad_request_message(validation_response.message)
         validation_response = JsonValidator.validate_story_datafields(request_json)
         if validation_response.hasErrors:
-            return validation_response.message
+            return ApplicationResponse.bad_request_message(validation_response.message)
         username = request_header["mUsername"]
         request_json["mUsername"] = username
         request_json["mDate"] = str(datetime.now())
         request_json["mPictureUser"] = UserRepository.get_profile(username)["mPicture"]
         StoryRepository().create_story(request_json)
 
-        return ApplicationResponse.get_created("Created story successfully")
+        return ApplicationResponse.created_message("Created story successfully")
 
     @staticmethod
     def get_friends_stories(request_header):
         validation_response = JsonValidator.validate_header_has_username(request_header)
         if validation_response.hasErrors:
-            return validation_response.message
+            return ApplicationResponse.bad_request_message(validation_response.message)
         username = request_header["mUsername"]
         friendship_list = UserRepository.get_friendship_list(username)["friendshipList"]
         LOGGER.info("Got friendshipList" + str(friendship_list))
@@ -41,4 +41,4 @@ class StoryService(object):
             for story in stories:
                 stories_list.append(story)
 
-        return ApplicationResponse.get_success(dumps(stories_list))
+        return ApplicationResponse.success(dumps(stories_list))
