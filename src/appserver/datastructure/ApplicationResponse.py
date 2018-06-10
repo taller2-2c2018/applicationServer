@@ -9,29 +9,23 @@ NOT_FOUND = 404
 
 class ApplicationResponse:
     @staticmethod
-    def success(data):
-        return Response(data, status=SUCCESS, mimetype='application/json')
+    def success(message='', data=None):
+        return ApplicationResponse.__json_response(SUCCESS, message, data)
 
     @staticmethod
-    def success_message(message):
-        message_json = ApplicationResponse.__message_json(CREATED, message)
-        return Response(message_json, status=SUCCESS, mimetype='application/json')
+    def created(message='', data=None):
+        return ApplicationResponse.__json_response(CREATED, message, data)
 
     @staticmethod
-    def created(data):
-        return Response(data, status=CREATED, mimetype='application/json')
+    def bad_request(message=''):
+        return ApplicationResponse.__json_response(BAD_REQUEST, message, None)
 
     @staticmethod
-    def created_message(message):
-        message_json = ApplicationResponse.__message_json(CREATED, message)
-        return Response(message_json, status=CREATED, mimetype='application/json')
-
-    @staticmethod
-    def bad_request_message(error_message):
-        message_json = ApplicationResponse.__message_json(BAD_REQUEST, error_message)
-        return Response(message_json, status=BAD_REQUEST, mimetype='application/json')
-
-    @staticmethod
-    def __message_json(status, message):
-        response = {'status': status, 'message': message}
+    def __create_json(status, message="", data=None):
+        response = {'status': status, 'message': message, 'data': data}
         return json.dumps(response)
+
+    @staticmethod
+    def __json_response(status, message, data):
+        message_json = ApplicationResponse.__create_json(status, message, data)
+        return Response(message_json, status=status, mimetype='application/json')
