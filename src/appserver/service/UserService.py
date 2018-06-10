@@ -60,8 +60,7 @@ class UserService(object):
         expires_at = data["expires_at"]
         UserRepository.update_user_token(facebook_id, token, expires_at)
         response = {'message': 'Logged in successfully.', 'token': token}
-        response_json = json.dumps(response)
-        return ApplicationResponse.success(data=response_json)
+        return ApplicationResponse.success(data=response)
 
     @staticmethod
     def send_user_friendship_request(request_json):
