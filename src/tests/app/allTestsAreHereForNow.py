@@ -37,6 +37,17 @@ class Tests(BaseTestCase):
         self.assertEqual(inserted_user['last_name'], 'last_name')
         self.assertEqual(inserted_user['first_name'], 'first_name')
 
+    @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
+    @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
+    def test_register_existing_user_doesnt_add_it_again(self):
+        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        response_register_user = UserService.register_new_user(
+            {'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+
+        self.assertEqual(response_register_user.status_code, 400)
+        self.assertEqual(response_register_user.get_json()['message'], 'User already registered.')
+
     # def test_authenticate_user(self):
     #     response = UserService.authenticate_user(
     #         {"username": "username", "password": "password", "facebookAuthToken": "facebookAuthToken"})

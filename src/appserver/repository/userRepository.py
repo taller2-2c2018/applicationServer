@@ -25,9 +25,9 @@ class UserRepository(object):
         }, upsert=False)
 
     @staticmethod
-    def username_exists(username):
-        LOGGER.info("Trying to see if " + username + " exists in database")
-        return user_collection.find_one({"username": username})
+    def username_exists(facebook_user_id):
+        LOGGER.info("Trying to see if " + facebook_user_id + " exists in database")
+        return user_collection.find_one({'facebookUserId': facebook_user_id}) is not None
 
     @staticmethod
     def add_friendship(user_that_accepts_friendship, target_user):
