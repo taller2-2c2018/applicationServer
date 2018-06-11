@@ -7,6 +7,7 @@ from appserver.logger import LoggerFactory
 from appserver.repository.friendshipRepository import FriendshipRepository
 from appserver.repository.userRepository import UserRepository
 from appserver.validator.jsonValidator import JsonValidator
+from appserver.validator.databaseValidator import DatabaseValidator
 
 LOGGER = LoggerFactory().get_logger('UserService')
 
@@ -26,11 +27,16 @@ class UserService(object):
 
         Facebook.get_user_identification(request_json)
 
+        validation_existing_user = DatabaseValidator.validate_is_existing_user(request_json)
+        if validation_existing_user.hasErrors:
+            return ApplicationResponse.bad_request(message=validation_existing_user.message)
+
         shared_server_response = SharedServer.register_user(request_json)
         LOGGER.info("Response from shared server: " + str(shared_server_response))
         shared_server_response_validation = JsonValidator.validate_shared_server_register_user(shared_server_response)
         if shared_server_response_validation.hasErrors:
             return ApplicationResponse.bad_request(message=shared_server_response_validation.message)
+
         UserRepository.insert(request_json)
         return ApplicationResponse.created(message='Created user successfully')
 
