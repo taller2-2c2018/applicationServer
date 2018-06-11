@@ -1,22 +1,42 @@
 import unittest
+from unittest.mock import *
+
+from appserver.app import database
 from appserver.service.UserService import UserService
 from tests.app.testCommons import BaseTestCase
-from appserver.app import database
+
+
+def mock_user_identification(request_json):
+    request_json['last_name'] = 'last_name'
+    request_json['first_name'] = 'first_name'
+
+
+def mock_register_user(request_json):
+    shared_server_response = Mock()
+    shared_server_response.text = 'text'
+    shared_server_response.status_code = 200
+
+    return shared_server_response
 
 
 class Tests(BaseTestCase):
-    def test_dummy(self):
-        self.assertEqual(1, 1)
 
-    # def test_register_user(self):
-    #     UserService.register_new_user(
-    #         {"username": "username", "password": "password", "facebookAuthToken": "facebookAuthToken"})
-    #     inserted_user = database.user.find_one({"username": "username"})
-    #
-    #     self.assertEqual(inserted_user["username"], "username")
-    #     self.assertEqual(inserted_user["password"], "password")
-    #     self.assertEqual(inserted_user["facebookAuthToken"], "facebookAuthToken")
-    #
+    @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
+    @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
+    def test_register_user(self):
+        response_register_user = UserService.register_new_user(
+            {'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+
+        self.assertEqual(response_register_user.status_code, 201)
+
+        inserted_user = database.user.find_one({'facebookUserId': 'facebookUserId'})
+
+        self.assertEqual(inserted_user['facebookUserId'], 'facebookUserId')
+        self.assertEqual(inserted_user['facebookAuthToken'], 'facebookAuthToken')
+        self.assertEqual(inserted_user['last_name'], 'last_name')
+        self.assertEqual(inserted_user['first_name'], 'first_name')
+
     # def test_authenticate_user(self):
     #     response = UserService.authenticate_user(
     #         {"username": "username", "password": "password", "facebookAuthToken": "facebookAuthToken"})

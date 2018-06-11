@@ -1,14 +1,12 @@
-import json
-
-from appserver.validator.jsonValidator import JsonValidator
-from appserver.externalcommunication.sharedServer import SharedServer
-from appserver.externalcommunication.facebook import Facebook
-from appserver.repository.userRepository import UserRepository
-from appserver.repository.friendshipRepository import FriendshipRepository
-from appserver.logger import LoggerFactory
-from appserver.datastructure.ApplicationResponse import ApplicationResponse
 from bson.json_util import dumps
 
+from appserver.datastructure.ApplicationResponse import ApplicationResponse
+from appserver.externalcommunication.facebook import Facebook
+from appserver.externalcommunication.sharedServer import SharedServer
+from appserver.logger import LoggerFactory
+from appserver.repository.friendshipRepository import FriendshipRepository
+from appserver.repository.userRepository import UserRepository
+from appserver.validator.jsonValidator import JsonValidator
 
 LOGGER = LoggerFactory().get_logger('UserService')
 
