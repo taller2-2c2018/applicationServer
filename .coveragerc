@@ -11,3 +11,5 @@ omit =
   run.py
   */tests/*
  */datastructure/*
+ /home/*
+ tests/*
