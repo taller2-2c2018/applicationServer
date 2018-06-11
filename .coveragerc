@@ -1,9 +1,0 @@
-[run]
-source = application-server
-branch = True
-omit =
-  *test*
-  *venv*
-  *test-env*
-  *__init__*
-  *Controller.py
