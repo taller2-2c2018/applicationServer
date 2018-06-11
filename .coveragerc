@@ -10,6 +10,6 @@ omit =
   run_heroku.py
   run.py
   */tests/*
- */datastructure/*
- /home/*
- tests/*
+  */datastructure/*
+  /home/*
+  tests/*
