@@ -13,7 +13,7 @@ LOGGER = LoggerFactory().get_logger('UserService')
 class StoryService(object):
     @staticmethod
     def post_new_story(request_json, request_header):
-        validation_response = JsonValidator.validate_header_has_username(request_header)
+        validation_response = JsonValidator.validate_header_has_facebook_user_id(request_header)
         if validation_response.hasErrors:
             return ApplicationResponse.bad_request(message=validation_response.message)
         validation_response = JsonValidator.validate_story_datafields(request_json)
@@ -29,7 +29,7 @@ class StoryService(object):
 
     @staticmethod
     def get_friends_stories(request_header):
-        validation_response = JsonValidator.validate_header_has_username(request_header)
+        validation_response = JsonValidator.validate_header_has_facebook_user_id(request_header)
         if validation_response.hasErrors:
             return ApplicationResponse.bad_request(message=validation_response.message)
         username = request_header["mUsername"]

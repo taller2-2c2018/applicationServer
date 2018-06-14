@@ -33,10 +33,8 @@ class JsonValidator(object):
         if json is None:
             return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
         validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity_json(json, "mRequesterUsername", validation_response)
         validation_response = JsonValidator.__check_validity_json(json, "mTargetUsername", validation_response)
         validation_response = JsonValidator.__check_validity_json(json, "mDescription", validation_response)
-        validation_response = JsonValidator.__check_validity_json(json, "mPicture", validation_response)
 
         return validation_response
 
@@ -66,11 +64,11 @@ class JsonValidator(object):
         return validation_response
 
     @staticmethod
-    def validate_header_has_username(header):
+    def validate_header_has_facebook_user_id(header):
         if header is None:
             return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
         validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity_header(header, "mUsername", validation_response)
+        validation_response = JsonValidator.__check_validity_header(header, "facebookUserId", validation_response)
 
         return validation_response
 

@@ -16,8 +16,8 @@ class FriendshipRepository(object):
 
     @staticmethod
     def get_friendship_requests_of_username(username):
-        LOGGER.info("Getting al friendship requests of " + username)
-        friendship_list = friendship_collection.find({"mTargetUsername": username})
+        LOGGER.info('Getting all friendship requests of ' + username)
+        friendship_list = friendship_collection.find({'target': username})
 
         return json_util.dumps(friendship_list)
 
@@ -30,5 +30,5 @@ class FriendshipRepository(object):
     @staticmethod
     def accept_friendship(user_that_accepts_friendship, target_user):
         LOGGER.info('Removing friendship request from database')
-        friendship_collection.remove({'mRequesterUsername': target_user, "mTargetUsername": user_that_accepts_friendship})
+        friendship_collection.remove({'requester': target_user, "target": user_that_accepts_friendship})
 
