@@ -1,4 +1,6 @@
 from flask import Flask
+from flask_cors import CORS
+
 from appserver.config import Configuration
 from appserver.logger import LoggerFactory
 
@@ -6,6 +8,8 @@ LOGGER = LoggerFactory().get_logger('ConfigurationSetup')
 
 
 app = Flask(__name__)
+CORS(app)
+
 
 Configuration().set_up_environment()
 
