@@ -31,7 +31,8 @@ def authenticate_user():
 def send_friendship():
     LOGGER.info('Sending new friendship request')
     request_json = request.get_json()
-    return_value = UserService().send_user_friendship_request(request_json)
+    request_header = request.headers
+    return_value = UserService().send_user_friendship_request(request_json, request_header)
     return return_value
 
 
