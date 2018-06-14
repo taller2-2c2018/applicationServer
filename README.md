@@ -2,7 +2,7 @@
 
 
 [![Build Status](https://travis-ci.org/taller2-2c2018/applicationServer.svg?branch=master)](https://travis-ci.org/taller2-2c2018/applicationServer)
-[![Coverage Status](https://img.shields.io/coveralls/github/taller2-2c2018/applicationServer/master.svg)](https://img.shields.io/coveralls/github/taller2-2c2018/applicationServer/master.svg)
+[![Coverage Status](https://img.shields.io/coveralls/github/taller2-2c2018/applicationServer/master.svg)](https://coveralls.io/github/taller2-2c2018/applicationServer?branch=master)
 ## Descripción
 
 Esta es una aplicación flask conectada a una base de datos mongodb.
