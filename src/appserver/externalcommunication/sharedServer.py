@@ -65,6 +65,13 @@ class SharedServer(object):
         return SharedServer.post_file_shared_server(file=file, path=HOST + FILES_PATH)
 
     @staticmethod
+    def get_file(file_id):
+        LOGGER.info("Sending file to shared server: " + HOST + FILES_PATH + str(file_id))
+        url_of_image = HOST + FILES_PATH + '/' + str(file_id)
+
+        return requests.get(url_of_image, headers={'Authorization': SharedServer.get_token()})
+
+    @staticmethod
     def post_file_shared_server(file, path):
         data_for_shared_server = {
             'id': '',

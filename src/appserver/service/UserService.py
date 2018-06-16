@@ -107,7 +107,7 @@ class UserService(object):
         return ApplicationResponse.bad_request(message='Friendship request couldn\'t be found')
 
     @staticmethod
-    def create_user_profile(request_json, request_header):
+    def modify_user_profile(request_json, request_header):
         validation_response = JsonValidator.validate_header_has_facebook_user_id(request_header)
         if validation_response.hasErrors:
             return ApplicationResponse.bad_request(message=validation_response.message)
@@ -125,10 +125,17 @@ class UserService(object):
         return ApplicationResponse.created(message='Created profile successfully')
 
     @staticmethod
-    def get_user_profile(username):
-        profile = UserRepository.get_profile(username)
+    def get_user_profile(facebook_user_id):
+        profile = UserRepository.get_profile(facebook_user_id)
+        profile_data = {
+            'mFirstName': profile['first_name'],
+            'mLastName': profile['last_name'],
+            'mBirthDate': profile['birth_date'],
+            'mEmail': profile['mail'],
+            'mSex': profile['sex']
+        }
 
-        return ApplicationResponse.success(data=dumps(profile))
+        return ApplicationResponse.success(data=profile_data)
 
     @staticmethod
     def create_user_profile_picture(request):
