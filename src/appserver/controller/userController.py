@@ -54,13 +54,21 @@ def accept_user_friendship(username):
     return return_value
 
 
-@userEndpoint.route("/profile", methods=['POST'])
+@userEndpoint.route("/profile", methods=['POST', 'PUT'])
 @monitor
 def create_user_profile():
     LOGGER.info('Adding new profile to user')
     request_json = request.get_json()
     request_header = request.headers
     return_value = UserService().create_user_profile(request_json, request_header)
+    return return_value
+
+
+@userEndpoint.route("/profilePicture", methods=['POST', 'PUT'])
+@monitor
+def create_user_profile_picture():
+    LOGGER.info('Adding new profile picture to user')
+    return_value = UserService().create_user_profile_picture(request)
     return return_value
 
 

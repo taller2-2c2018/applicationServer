@@ -52,6 +52,26 @@ class Tests(BaseTestCase):
     @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
     @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
     @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
+    def test_create_user_profile(self):
+        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        response_update_profile = UserService.create_user_profile(
+            {'mFirstName': 'name', 'mLastName': 'surname', 'mBirthDate': '01/01/1990', 'mEmail': 'mail@email.com', 'mSex': 'male'},
+            {'facebookUserId': 'facebookUserId'})
+
+        self.assertEqual(response_update_profile.status_code, 201)
+
+        inserted_profile = database.user.find_one({'facebookUserId': 'facebookUserId'})
+
+        self.assertEqual(inserted_profile['first_name'], 'name')
+        self.assertEqual(inserted_profile['last_name'], 'surname')
+        self.assertEqual(inserted_profile['birth_date'], '01/01/1990')
+        self.assertEqual(inserted_profile['mail'], 'mail@email.com')
+        self.assertEqual(inserted_profile['sex'], 'male')
+
+
+    @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
+    @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
     def test_send_friendship_request(self):
         UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
         response_send_friendship_request = UserService.send_user_friendship_request(

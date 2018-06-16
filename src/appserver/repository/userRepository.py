@@ -45,15 +45,15 @@ class UserRepository(object):
         user_collection.update_one({'facebookUserId': user}, {"$set": {"friendshipList": friendship_list}}, upsert=False)
 
     @staticmethod
-    def create_profile(username, profile):
-        LOGGER.info("Creating profile por user: " + username)
-        user_collection.update_one({"username": username}, {"$set": profile}, upsert=False)
+    def modify_profile(facebook_user_id, profile):
+        LOGGER.info("Creating profile por user: " + facebook_user_id)
+        user_collection.update_one({'facebookUserId': facebook_user_id}, {"$set": profile}, upsert=False)
 
     @staticmethod
-    def get_profile(username):
-        return user_collection.find_one({"username": username}, {"_id": 0, "mFirstName": 1, "mLastname": 1, "mBirthDate": 1,
+    def get_profile(facebook_user_id):
+        return user_collection.find_one({'facebookUserId': facebook_user_id}, {"_id": 0, "mFirstName": 1, "mLastname": 1, "mBirthDate": 1,
                                                                  "mFacebookUrl": 1, "mPicture": 1, "mSex": 1})
 
     @staticmethod
-    def get_friendship_list(username):
-        return user_collection.find_one({"username": username}, {"_id": 0, "friendshipList": 1})
+    def get_friendship_list(facebook_user_id):
+        return user_collection.find_one({'facebookUserId': facebook_user_id}, {"_id": 0, "friendshipList": 1})

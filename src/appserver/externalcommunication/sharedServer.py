@@ -6,6 +6,7 @@ LOGGER = LoggerFactory().get_logger('SharedServerClient')
 TOKEN_PATH = '/token'
 USER_PATH = '/users'
 AUTH_PATH = '/authorization'
+FILES_PATH = '/files'
 
 HOST = app.shared_server_host
 SERVER_USER = app.server_user
@@ -20,7 +21,7 @@ class SharedServer(object):
         data = {
             "facebook_id": request_json['facebookUserId'],
         }
-        response = SharedServer.request_shared_server(json=data, path=HOST + AUTH_PATH)
+        response = SharedServer.post_json_shared_server(json=data, path=HOST + AUTH_PATH)
         return response.json()
 
     @staticmethod
@@ -34,7 +35,7 @@ class SharedServer(object):
             "facebook_id": request_json['facebookUserId'],
             "facebookAuthToken": request_json['facebookAuthToken']
         }
-        return SharedServer.request_shared_server(json=data, path=HOST + USER_PATH)
+        return SharedServer.post_json_shared_server(json=data, path=HOST + USER_PATH)
 
     @staticmethod
     def get_token():
@@ -54,5 +55,24 @@ class SharedServer(object):
         return token
 
     @staticmethod
-    def request_shared_server(json, path):
+    def post_json_shared_server(json, path):
         return requests.post(path, json=json, headers={'Authorization': SharedServer.get_token()})
+
+    @staticmethod
+    def upload_file(file):
+        LOGGER.info("Sending file to shared server: " + HOST + FILES_PATH)
+
+        return SharedServer.post_file_shared_server(file=file, path=HOST + FILES_PATH)
+
+    @staticmethod
+    def post_file_shared_server(file, path):
+        data_for_shared_server = {
+            'id': '',
+            '_rev': '',
+            'created_at': '',
+            'updated_at': '',
+            'filename': '',
+            'resource': '',
+            'size': ''
+        }
+        return requests.post(path, files=file, data=data_for_shared_server, headers={'Authorization': SharedServer.get_token()})
