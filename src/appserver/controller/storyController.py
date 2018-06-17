@@ -14,9 +14,7 @@ storiesEndpoint = Blueprint('storiesEndpoint', __name__)
 @secure
 def post():
     LOGGER.info('Creating new story')
-    request_json = request.get_json()
-    request_header = request.headers
-    return_value = StoryService().post_new_story(request_json, request_header)
+    return_value = StoryService().post_new_story(request)
 
     return return_value
 

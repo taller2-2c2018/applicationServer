@@ -144,6 +144,8 @@ class UserService(object):
             return ApplicationResponse.bad_request(message=request_validation.message)
         file = request.files
 
+        LOGGER.info('FILE ' + str(request.files))
+
         LOGGER.info('Sending file to shared server ' + str(file))
         upload_file_response = SharedServer.upload_file(file)
 

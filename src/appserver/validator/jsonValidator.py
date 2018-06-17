@@ -52,13 +52,26 @@ class JsonValidator(object):
         return validation_response
 
     @staticmethod
-    def validate_story_datafields(json):
-        if json is None:
+    def validate_story_request(request):
+        validate_header = JsonValidator.validate_header_has_facebook_user_id(request.headers)
+        if validate_header.hasErrors:
+            return validate_header
+        LOGGER.info('REQUEST ' + str(request))
+        LOGGER.info('FORM ' + str(request.form))
+        LOGGER.info('JSON ' + str(request.get_json()))
+        LOGGER.info('FILE ' + str(request.files))
+
+        form = request.form
+        file = request.files
+        if form is None:
             return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
         validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity_json(json, "mTitle", validation_response)
-        validation_response = JsonValidator.__check_validity_json(json, "mDescription", validation_response)
-        validation_response = JsonValidator.__check_validity_json(json, "mPicture", validation_response)
+        validation_response = JsonValidator.__check_validity_form(file, "file", validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, "mFileType", validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, "mFlash", validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, "mPrivate", validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, "mLatitude", validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, "mLongitude", validation_response)
 
         return validation_response
 
@@ -74,6 +87,10 @@ class JsonValidator(object):
     @staticmethod
     def __check_validity_json(json, field_name, validation_response):
         return JsonValidator.__check_validity(json, field_name, validation_response, 'Json')
+
+    @staticmethod
+    def __check_validity_form(form, field_name, validation_response):
+        return JsonValidator.__check_validity(form, field_name, validation_response, 'Form')
 
     @staticmethod
     def __check_validity_header(header, field_name, validation_response):

@@ -21,7 +21,7 @@ class SharedServer(object):
         data = {
             "facebook_id": request_json['facebookUserId'],
         }
-        response = SharedServer.post_json_shared_server(json=data, path=HOST + AUTH_PATH)
+        response = SharedServer.__post_json_shared_server(json=data, path=HOST + AUTH_PATH)
         return response.json()
 
     @staticmethod
@@ -35,7 +35,7 @@ class SharedServer(object):
             "facebook_id": request_json['facebookUserId'],
             "facebookAuthToken": request_json['facebookAuthToken']
         }
-        return SharedServer.post_json_shared_server(json=data, path=HOST + USER_PATH)
+        return SharedServer.__post_json_shared_server(json=data, path=HOST + USER_PATH)
 
     @staticmethod
     def get_token():
@@ -55,14 +55,14 @@ class SharedServer(object):
         return token
 
     @staticmethod
-    def post_json_shared_server(json, path):
+    def __post_json_shared_server(json, path):
         return requests.post(path, json=json, headers={'Authorization': SharedServer.get_token()})
 
     @staticmethod
     def upload_file(file):
         LOGGER.info("Sending file to shared server: " + HOST + FILES_PATH)
 
-        return SharedServer.post_file_shared_server(file=file, path=HOST + FILES_PATH)
+        return SharedServer.__post_file_shared_server(file=file, path=HOST + FILES_PATH)
 
     @staticmethod
     def get_file(file_id):
@@ -72,7 +72,7 @@ class SharedServer(object):
         return requests.get(url_of_image, headers={'Authorization': SharedServer.get_token()})
 
     @staticmethod
-    def post_file_shared_server(file, path):
+    def __post_file_shared_server(file, path):
         data_for_shared_server = {
             'id': '',
             '_rev': '',
