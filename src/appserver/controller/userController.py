@@ -45,28 +45,36 @@ def get_friendship_requests_for_user():
     return return_value
 
 
-@userEndpoint.route("/friendship/accept/<username>", methods=['POST'])
+@userEndpoint.route("/friendship/accept/<facebook_user_id>", methods=['POST'])
 @monitor
-def accept_user_friendship(username):
+def accept_user_friendship(facebook_user_id):
     LOGGER.info('Accepting friendship request')
     request_header = request.headers
-    return_value = UserService().accept_friendship_request(request_header, username)
+    return_value = UserService().accept_friendship_request(request_header, facebook_user_id)
     return return_value
 
 
-@userEndpoint.route("/profile", methods=['POST'])
+@userEndpoint.route("/profile", methods=['POST', 'PUT'])
 @monitor
-def create_user_profile():
+def modify_user_profile():
     LOGGER.info('Adding new profile to user')
     request_json = request.get_json()
     request_header = request.headers
-    return_value = UserService().create_user_profile(request_json, request_header)
+    return_value = UserService().modify_user_profile(request_json, request_header)
     return return_value
 
 
-@userEndpoint.route("/profile/<username>", methods=['GET'])
+@userEndpoint.route("/profilePicture", methods=['POST', 'PUT'])
 @monitor
-def get_user_profile(username):
-    LOGGER.info('Getting profile of ' + username)
-    return_value = UserService().get_user_profile(username)
+def modify_user_profile_picture():
+    LOGGER.info('Adding new profile picture to user')
+    return_value = UserService().create_user_profile_picture(request)
+    return return_value
+
+
+@userEndpoint.route("/profile/<facebook_user_id>", methods=['GET'])
+@monitor
+def get_user_profile(facebook_user_id):
+    LOGGER.info('Getting profile of ' + facebook_user_id)
+    return_value = UserService().get_user_profile(facebook_user_id)
     return return_value

@@ -46,8 +46,7 @@ class JsonValidator(object):
         validation_response = JsonValidator.__check_validity_json(json, "mFirstName", validation_response)
         validation_response = JsonValidator.__check_validity_json(json, "mLastName", validation_response)
         validation_response = JsonValidator.__check_validity_json(json, "mBirthDate", validation_response)
-        validation_response = JsonValidator.__check_validity_json(json, "mPicture", validation_response)
-        validation_response = JsonValidator.__check_validity_json(json, "mFacebookUrl", validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, "mEmail", validation_response)
         validation_response = JsonValidator.__check_validity_json(json, "mSex", validation_response)
 
         return validation_response
@@ -66,7 +65,7 @@ class JsonValidator(object):
     @staticmethod
     def validate_header_has_facebook_user_id(header):
         if header is None:
-            return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
+            return ValidationResponse(True, "No values present at header.")
         validation_response = ValidationResponse(False, "")
         validation_response = JsonValidator.__check_validity_header(header, "facebookUserId", validation_response)
 
@@ -104,3 +103,12 @@ class JsonValidator(object):
             return ValidationResponse(False)
         return ValidationResponse(True, "Failed the communication with shared server user authentication. "
                                         "Got a status code: " + str(status_code))
+
+    @staticmethod
+    def validate_profile_picture(request):
+        validate_header = JsonValidator.validate_header_has_facebook_user_id(request.headers)
+        if validate_header.hasErrors:
+            return validate_header
+        if 'file' not in request.files:
+            return ValidationResponse(True, 'No file in request')
+        return ValidationResponse(False)

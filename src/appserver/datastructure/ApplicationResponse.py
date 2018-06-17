@@ -21,6 +21,10 @@ class ApplicationResponse:
         return ApplicationResponse.__json_response(BAD_REQUEST, message, None)
 
     @staticmethod
+    def file(file):
+        return Response(file, mimetype='application/octet-stream')
+
+    @staticmethod
     def __create_json(status, message="", data=None):
         response = {'status': status, 'message': message, 'data': data}
         return json.dumps(response)
