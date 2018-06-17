@@ -59,6 +59,6 @@ def monitor_route():
             "day": row["_id"]["day"],
             "hour": row["_id"]["hour"],
             "avg_time_elapsed": row["averageTimeElapsed"],
-            "totalRequests" : row["totalRequests"]
+            "totalRequests": row["totalRequests"]
         })
     return jsonify(data)
