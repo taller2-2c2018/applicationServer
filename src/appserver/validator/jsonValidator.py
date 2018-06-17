@@ -56,10 +56,6 @@ class JsonValidator(object):
         validate_header = JsonValidator.validate_header_has_facebook_user_id(request.headers)
         if validate_header.hasErrors:
             return validate_header
-        LOGGER.info('REQUEST ' + str(request))
-        LOGGER.info('FORM ' + str(request.form))
-        LOGGER.info('JSON ' + str(request.get_json()))
-        LOGGER.info('FILE ' + str(request.files))
 
         form = request.form
         file = request.files
