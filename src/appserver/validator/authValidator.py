@@ -19,11 +19,11 @@ def secure(method):
         if user is None:
             return ApplicationResponse.unauthorized('Missing facebookUserId header')
 
-        if token != user['token']:
+        if (token != user['token']) and (app.skip_auth is False):
             return ApplicationResponse.unauthorized('User token is invalid')
 
         timestamp_now = int(time.time())
-        if timestamp_now > int(user['expires_at']):
+        if (timestamp_now > int(user['expires_at'])) and (app.skip_auth is False):
             return ApplicationResponse.unauthorized('Provided token expired')
 
         return method()

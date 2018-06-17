@@ -20,12 +20,11 @@ redisConnection = Configuration().set_up_redis()
 shared_server_host = Configuration.get_shared_server_host_url()
 LOGGER.info("Shared server host: " + shared_server_host)
 server_user = Configuration.get_server_user()
-LOGGER.info("Server user: " + server_user)
 server_password = Configuration.get_server_password()
-LOGGER.info("Server password: " + server_password)
 android_app_token = Configuration.get_android_app_token()
-LOGGER.info("Android app token: " + android_app_token)
-
+skip_auth = Configuration.get_skip_auth()
+if skip_auth:
+    LOGGER.warn("USER AUTHENTICATION IS DISABLED")
 
 with app.app_context():
     app.database = mongodb.db
@@ -34,3 +33,4 @@ with app.app_context():
     app.server_user = server_user
     app.server_password = server_password
     app.android_app_token = android_app_token
+    app.skip_auth = skip_auth
