@@ -20,7 +20,13 @@ class BaseTestCase(unittest.TestCase):
         except Exception:
             pass
         database.create_collection('user')
+        try:
+            database.story.drop()
+        except Exception:
+            pass
+        database.create_collection('story')
 
     def tearDown(self):
         database.drop_collection('friendship')
         database.drop_collection('user')
+        database.drop_collection('story')

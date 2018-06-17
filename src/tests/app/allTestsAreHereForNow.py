@@ -20,6 +20,14 @@ def mock_register_user(request_json):
     return shared_server_response
 
 
+def mock_upload_file(file):
+    shared_server_response = Mock()
+    shared_server_response.text = '{"data": {"id": 1}}'
+    shared_server_response.status_code = 200
+
+    return shared_server_response
+
+
 class Object(object):
     pass
 
@@ -159,6 +167,22 @@ class Tests(BaseTestCase):
 
         friends_of_target = database.user.find_one({'facebookUserId': 'target'})['friendshipList']
         self.assertTrue('requester' in friends_of_target)
+
+    @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
+    @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', mock_upload_file)
+    def test_modify_profile_picture(self):
+        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        request = Object()
+        request.headers = {'facebookUserId': 'facebookUserId'}
+        request.files = 'file'
+        modify_profile_response = UserService.modify_user_profile_picture(request)
+
+        self.assertEqual(modify_profile_response.status_code, 200)
+
+        updated_user = database.user.find_one({'facebookUserId': 'facebookUserId'})
+        self.assertEqual(updated_user['profile_picture_id'], 1)
 
 
 if __name__ == '__main__':

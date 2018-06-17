@@ -74,7 +74,7 @@ def modify_user_profile():
 @secure
 def modify_user_profile_picture():
     LOGGER.info('Adding new profile picture to user')
-    return_value = UserService().create_user_profile_picture(request)
+    return_value = UserService().modify_user_profile_picture(request)
     return return_value
 
 

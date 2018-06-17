@@ -142,7 +142,7 @@ class UserService(object):
         return ApplicationResponse.success(data=profile_data)
 
     @staticmethod
-    def create_user_profile_picture(request):
+    def modify_user_profile_picture(request):
         request_validation = JsonValidator.validate_profile_picture(request)
         if request_validation.hasErrors:
             return ApplicationResponse.bad_request(message=request_validation.message)
