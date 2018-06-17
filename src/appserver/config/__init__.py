@@ -51,3 +51,7 @@ class Configuration(object):
     @staticmethod
     def get_android_app_token():
         return os.getenv("ANDROID_APP_TOKEN")
+
+    @staticmethod
+    def get_skip_auth():
+        return os.getenv('SKIP_AUTH') == 'True'

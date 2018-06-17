@@ -5,6 +5,7 @@ SUCCESS = 200
 CREATED = 201
 BAD_REQUEST = 400
 NOT_FOUND = 404
+UNAUTHORIZED = 401
 
 
 class ApplicationResponse:
@@ -15,6 +16,10 @@ class ApplicationResponse:
     @staticmethod
     def created(message='', data=None):
         return ApplicationResponse.__json_response(CREATED, message, data)
+
+    @staticmethod
+    def unauthorized(message=''):
+        return ApplicationResponse.__json_response(UNAUTHORIZED, message, None)
 
     @staticmethod
     def bad_request(message=''):
