@@ -5,3 +5,4 @@ omit =
   *Controller.py
   *datastructure/*
   *externalcommunication/*
+  *monitor/*
