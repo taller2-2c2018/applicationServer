@@ -49,17 +49,33 @@ class StoryService(object):
         return ApplicationResponse.created(message='Created story successfully')
 
     @staticmethod
-    def get_friends_stories(request_header):
+    def get_permanent_stories_for_requester(request_header):
         validation_response = JsonValidator.validate_header_has_facebook_user_id(request_header)
         if validation_response.hasErrors:
             return ApplicationResponse.bad_request(message=validation_response.message)
-        username = request_header["mUsername"]
-        friendship_list = UserRepository.get_friendship_list(username)["friendshipList"]
-        LOGGER.info("Got friendshipList" + str(friendship_list))
-        stories_list = []
-        for friend_username in friendship_list:
-            stories = StoryRepository.get_stories_from_user(friend_username)
-            for story in stories:
-                stories_list.append(story)
 
-        return ApplicationResponse.success(data=dumps(stories_list))
+        facebook_user_id = request_header["facebookUserId"]
+        friendship_list = UserRepository.get_friendship_list(facebook_user_id)["friendshipList"]
+        LOGGER.info("Got friendshipList" + str(friendship_list))
+        stories = StoryRepository.get_all_permanent_stories()
+
+        filtered_stories = StoryService.__get_all_public_and_friends_private_stories(stories, friendship_list)
+
+        return ApplicationResponse.success(data=dumps(filtered_stories))
+
+    @staticmethod
+    def __get_all_public_and_friends_private_stories(stories, friendship_list):
+        stories_list = []
+        LOGGER.info('This is the amount of stories that I have ' + str(stories.count()))
+        for story in stories:
+            LOGGER.info('Story to review ' + str(story))
+            if (not story['is_private']) or (story['is_private'] and story['facebook_user_id'] in friendship_list):
+                LOGGER.info('Adding story to list ' + str(story))
+                stories_list.append(story)
+        return stories_list
+
+    @staticmethod
+    def get_permanent_stories_of_given_user(requester_facebook_user_id, target_facebook_user_id):
+        friendship_list = UserRepository.get_friendship_list(requester_facebook_user_id)["friendshipList"]
+        stories = StoryRepository.get_permanent_stories_from_user(target_facebook_user_id)
+        return StoryService.__get_all_public_and_friends_private_stories(stories=stories, friendship_list=friendship_list)

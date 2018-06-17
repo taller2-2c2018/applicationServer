@@ -1,5 +1,5 @@
-import unittest
 import json
+import unittest
 from unittest.mock import *
 
 from appserver.app import database
@@ -18,6 +18,10 @@ def mock_register_user(request_json):
     shared_server_response.status_code = 200
 
     return shared_server_response
+
+
+class Object(object):
+    pass
 
 
 class Tests(BaseTestCase):
@@ -76,7 +80,9 @@ class Tests(BaseTestCase):
         UserService.modify_user_profile(
             {'mFirstName': 'name', 'mLastName': 'surname', 'mBirthDate': '01/01/1990', 'mEmail': 'mail@email.com', 'mSex': 'male'},
             {'facebookUserId': 'facebookUserId'})
-        response_user_profile = UserService.get_user_profile('facebookUserId')
+        request = Object()
+        request.headers = {'facebookUserId': 'facebookUserId'}
+        response_user_profile = UserService.get_user_profile(request, 'facebookUserId')
 
         self.assertEqual(response_user_profile.status_code, 200)
 
@@ -149,10 +155,10 @@ class Tests(BaseTestCase):
         self.assertEqual(len(friendship_list), 0)
 
         friends_of_requester = database.user.find_one({'facebookUserId': 'requester'})['friendshipList']
-        self.assertEqual(friends_of_requester[0], 'target')
+        self.assertTrue('target' in friends_of_requester)
 
         friends_of_target = database.user.find_one({'facebookUserId': 'target'})['friendshipList']
-        self.assertEqual(friends_of_target[0], 'requester')
+        self.assertTrue('requester' in friends_of_target)
 
 
 if __name__ == '__main__':

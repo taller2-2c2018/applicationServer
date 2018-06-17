@@ -25,7 +25,7 @@ class FriendshipRepository(object):
     def friendship_exists(user_that_accepts_friendship, target_user):
         LOGGER.info('Seeing if friendship exists')
         return friendship_collection.find(
-            {"mRequesterUsername": user_that_accepts_friendship, "mTargetUsername": target_user})
+            {"requester": target_user, "target": user_that_accepts_friendship}).count() > 0
 
     @staticmethod
     def accept_friendship(user_that_accepts_friendship, target_user):

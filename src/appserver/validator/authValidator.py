@@ -26,6 +26,6 @@ def secure(method):
         if (timestamp_now > int(user['expires_at'])) and (app.skip_auth is False):
             return ApplicationResponse.unauthorized('Provided token expired')
 
-        return method()
+        return method(*args, **kwargs)
 
     return check_authorization

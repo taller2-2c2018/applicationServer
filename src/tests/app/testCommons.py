@@ -4,7 +4,6 @@ from appserver.app import app, database
 
 
 # TODO now you need a local instance running 'sudo mongod' for this to run
-# TODO and also set this environment variable in the test run 'MONGO_URL', 'mongodb://localhost:27017/'
 class BaseTestCase(unittest.TestCase):
     @staticmethod
     def create_app():

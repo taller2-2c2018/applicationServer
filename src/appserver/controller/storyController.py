@@ -23,8 +23,8 @@ def post():
 @monitor
 @secure
 def get():
-    LOGGER.info('Getting all stories')
+    LOGGER.info('Getting all permanent stories')
     request_header = request.headers
-    return_value = StoryService().get_friends_stories(request_header)
+    return_value = StoryService().get_permanent_stories_for_requester(request_header)
 
     return return_value

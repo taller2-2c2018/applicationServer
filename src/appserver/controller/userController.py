@@ -83,5 +83,5 @@ def modify_user_profile_picture():
 @secure
 def get_user_profile(facebook_user_id):
     LOGGER.info('Getting profile of ' + facebook_user_id)
-    return_value = UserService().get_user_profile(facebook_user_id)
+    return_value = UserService().get_user_profile(request, facebook_user_id)
     return return_value

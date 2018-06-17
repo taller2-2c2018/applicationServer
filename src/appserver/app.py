@@ -14,4 +14,3 @@ app.register_blueprint(filesEndpoint, url_prefix='/file')
 app.register_blueprint(monitor_controller)
 LOGGER = LoggerFactory.get_logger(__name__)
 database = app.database
-
