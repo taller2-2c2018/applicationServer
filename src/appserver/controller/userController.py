@@ -2,6 +2,7 @@ from flask import request, Blueprint
 
 from appserver.logger import LoggerFactory
 from appserver.monitor.monitor import monitor
+from appserver.validator.authValidator import secure
 from appserver.service.UserService import UserService
 
 LOGGER = LoggerFactory().get_logger('userController')
@@ -28,6 +29,7 @@ def authenticate_user():
 
 @userEndpoint.route("/friendship", methods=['POST'])
 @monitor
+@secure
 def send_friendship():
     LOGGER.info('Sending new friendship request')
     request_json = request.get_json()
@@ -38,6 +40,7 @@ def send_friendship():
 
 @userEndpoint.route("/friendship", methods=['GET'])
 @monitor
+@secure
 def get_friendship_requests_for_user():
     LOGGER.info('Getting all requests for given user')
     request_header = request.headers
@@ -47,6 +50,7 @@ def get_friendship_requests_for_user():
 
 @userEndpoint.route("/friendship/accept/<facebook_user_id>", methods=['POST'])
 @monitor
+@secure
 def accept_user_friendship(facebook_user_id):
     LOGGER.info('Accepting friendship request')
     request_header = request.headers
@@ -56,6 +60,7 @@ def accept_user_friendship(facebook_user_id):
 
 @userEndpoint.route("/profile", methods=['POST', 'PUT'])
 @monitor
+@secure
 def modify_user_profile():
     LOGGER.info('Adding new profile to user')
     request_json = request.get_json()
@@ -66,6 +71,7 @@ def modify_user_profile():
 
 @userEndpoint.route("/profilePicture", methods=['POST', 'PUT'])
 @monitor
+@secure
 def modify_user_profile_picture():
     LOGGER.info('Adding new profile picture to user')
     return_value = UserService().create_user_profile_picture(request)
@@ -74,6 +80,7 @@ def modify_user_profile_picture():
 
 @userEndpoint.route("/profile/<facebook_user_id>", methods=['GET'])
 @monitor
+@secure
 def get_user_profile(facebook_user_id):
     LOGGER.info('Getting profile of ' + facebook_user_id)
     return_value = UserService().get_user_profile(facebook_user_id)
