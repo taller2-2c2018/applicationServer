@@ -1,5 +1,5 @@
-import unittest
 import json
+import unittest
 from unittest.mock import *
 
 from appserver.app import database
@@ -18,6 +18,18 @@ def mock_register_user(request_json):
     shared_server_response.status_code = 200
 
     return shared_server_response
+
+
+def mock_upload_file(file):
+    shared_server_response = Mock()
+    shared_server_response.text = '{"data": {"id": 1}}'
+    shared_server_response.status_code = 200
+
+    return shared_server_response
+
+
+class Object(object):
+    pass
 
 
 class Tests(BaseTestCase):
@@ -76,7 +88,9 @@ class Tests(BaseTestCase):
         UserService.modify_user_profile(
             {'mFirstName': 'name', 'mLastName': 'surname', 'mBirthDate': '01/01/1990', 'mEmail': 'mail@email.com', 'mSex': 'male'},
             {'facebookUserId': 'facebookUserId'})
-        response_user_profile = UserService.get_user_profile('facebookUserId')
+        request = Object()
+        request.headers = {'facebookUserId': 'facebookUserId'}
+        response_user_profile = UserService.get_user_profile(request, 'facebookUserId')
 
         self.assertEqual(response_user_profile.status_code, 200)
 
@@ -149,44 +163,26 @@ class Tests(BaseTestCase):
         self.assertEqual(len(friendship_list), 0)
 
         friends_of_requester = database.user.find_one({'facebookUserId': 'requester'})['friendshipList']
-        self.assertEqual(friends_of_requester[0], 'target')
+        self.assertTrue('target' in friends_of_requester)
 
         friends_of_target = database.user.find_one({'facebookUserId': 'target'})['friendshipList']
-        self.assertEqual(friends_of_target[0], 'requester')
+        self.assertTrue('requester' in friends_of_target)
 
+    @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
+    @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', mock_upload_file)
+    def test_modify_profile_picture(self):
+        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        request = Object()
+        request.headers = {'facebookUserId': 'facebookUserId'}
+        request.files = 'file'
+        modify_profile_response = UserService.modify_user_profile_picture(request)
 
-    # def test_authenticate_user(self):
-    #     response = UserService.authenticate_user(
-    #         {"username": "username", "password": "password", "facebookAuthToken": "facebookAuthToken"})
-    #
-    #     self.assertEqual("Functionality authenticate user not finished", response)
-    #
-    # def test_friendship_request_sent(self):
-    #     UserService.register_new_user(
-    #         {"username": "requesterUser", "password": "password", "facebookAuthToken": "facebookAuthToken"})
-    #     UserService.register_new_user(
-    #         {"username": "targetUser", "password": "password", "facebookAuthToken": "facebookAuthToken"})
-    #     UserService.send_user_friendship_request({"requesterUser": "requesterUser", "targetUser": "targetUser"})
-    #     inserted_friendship = database.friendship.find_one({"requesterUser": "requesterUser"})
-    #
-    #     self.assertEqual(inserted_friendship["requesterUser"], "requesterUser")
-    #     self.assertEqual(inserted_friendship["targetUser"], "targetUser")
-    #
-    # def test_friendship_request_accepted(self):
-    #     UserService.register_new_user(
-    #         {"username": "requesterUser", "password": "password", "facebookAuthToken": "facebookAuthToken"})
-    #     UserService.register_new_user(
-    #         {"username": "targetUser", "password": "password", "facebookAuthToken": "facebookAuthToken"})
-    #     UserService.send_user_friendship_request({"requesterUser": "requesterUser", "targetUser": "targetUser"})
-    #     UserService.accept_friendship_request(
-    #         {"userAccepting": "targetUser", "friendshipWith": "requesterUser"})
-    #     friendship_request_after_accepting = database.friendship.find_one({"requesterUser": "requesterUser", "targetUser": "targetUser"})
-    #     requester_user = database.user.find_one({"username": "requesterUser"})
-    #     accepting_user = database.user.find_one({"username": "targetUser"})
-    #
-    #     self.assertIsNone(friendship_request_after_accepting)
-    #     self.assertTrue("targetUser" in requester_user["friends"])
-    #     self.assertTrue("requesterUser" in accepting_user["friends"])
+        self.assertEqual(modify_profile_response.status_code, 200)
+
+        updated_user = database.user.find_one({'facebookUserId': 'facebookUserId'})
+        self.assertEqual(updated_user['profile_picture_id'], 1)
 
 
 if __name__ == '__main__':

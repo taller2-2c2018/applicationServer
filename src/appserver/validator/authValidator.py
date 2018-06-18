@@ -17,7 +17,7 @@ def secure(method):
         user = user_collection.find_one({'facebookUserId': facebook_id})
 
         if user is None:
-            return ApplicationResponse.unauthorized('Missing facebookUserId header')
+            return ApplicationResponse.unauthorized('facebookUserId missing or value not valid')
 
         if (token != user['token']) and (app.skip_auth is False):
             return ApplicationResponse.unauthorized('User token is invalid')
@@ -26,6 +26,6 @@ def secure(method):
         if (timestamp_now > int(user['expires_at'])) and (app.skip_auth is False):
             return ApplicationResponse.unauthorized('Provided token expired')
 
-        return method()
+        return method(*args, **kwargs)
 
     return check_authorization

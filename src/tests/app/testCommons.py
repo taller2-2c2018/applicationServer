@@ -4,7 +4,6 @@ from appserver.app import app, database
 
 
 # TODO now you need a local instance running 'sudo mongod' for this to run
-# TODO and also set this environment variable in the test run 'MONGO_URL', 'mongodb://localhost:27017/'
 class BaseTestCase(unittest.TestCase):
     @staticmethod
     def create_app():
@@ -21,7 +20,13 @@ class BaseTestCase(unittest.TestCase):
         except Exception:
             pass
         database.create_collection('user')
+        try:
+            database.story.drop()
+        except Exception:
+            pass
+        database.create_collection('story')
 
     def tearDown(self):
         database.drop_collection('friendship')
         database.drop_collection('user')
+        database.drop_collection('story')

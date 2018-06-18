@@ -19,8 +19,6 @@ class Configuration(object):
         MONGO_URL = os.environ.get('MONGO_URL')
         if not MONGO_URL:
             MONGO_URL = "mongodb://database:27017/applicationServerDB"
-            # TODO remove this and find a better way to test with db also we need to run 'sudo mongod' before tests
-            # MONGO_URL = "mongodb://localhost:27017/"
         app.config['MONGO_URI'] = MONGO_URL
         return PyMongo(app)
 

@@ -32,7 +32,7 @@ class ApplicationResponse:
     @staticmethod
     def __create_json(status, message="", data=None):
         response = {'status': status, 'message': message, 'data': data}
-        return json.dumps(response)
+        return json.dumps(response, default=str)
 
     @staticmethod
     def __json_response(status, message, data):

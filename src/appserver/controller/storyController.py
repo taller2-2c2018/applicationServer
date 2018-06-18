@@ -14,9 +14,7 @@ storiesEndpoint = Blueprint('storiesEndpoint', __name__)
 @secure
 def post():
     LOGGER.info('Creating new story')
-    request_json = request.get_json()
-    request_header = request.headers
-    return_value = StoryService().post_new_story(request_json, request_header)
+    return_value = StoryService().post_new_story(request)
 
     return return_value
 
@@ -25,8 +23,8 @@ def post():
 @monitor
 @secure
 def get():
-    LOGGER.info('Getting all stories')
+    LOGGER.info('Getting all permanent stories')
     request_header = request.headers
-    return_value = StoryService().get_friends_stories(request_header)
+    return_value = StoryService().get_permanent_stories_for_requester(request_header)
 
     return return_value

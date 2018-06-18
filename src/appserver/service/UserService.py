@@ -1,5 +1,4 @@
 import json
-from bson.json_util import dumps
 
 from appserver.datastructure.ApplicationResponse import ApplicationResponse
 from appserver.externalcommunication.facebook import Facebook
@@ -7,9 +6,9 @@ from appserver.externalcommunication.sharedServer import SharedServer
 from appserver.logger import LoggerFactory
 from appserver.repository.friendshipRepository import FriendshipRepository
 from appserver.repository.userRepository import UserRepository
-from appserver.validator.jsonValidator import JsonValidator
+from appserver.service.StoryService import StoryService
 from appserver.validator.databaseValidator import DatabaseValidator
-
+from appserver.validator.jsonValidator import JsonValidator
 
 LOGGER = LoggerFactory().get_logger('UserService')
 
@@ -39,6 +38,7 @@ class UserService(object):
         if shared_server_response_validation.hasErrors:
             return ApplicationResponse.bad_request(message=shared_server_response_validation.message)
 
+        request_json.update({'friendshipList': [request_json['facebookUserId']]})
         UserRepository.insert(request_json)
         return ApplicationResponse.created(message='Created user successfully')
 
@@ -125,24 +125,30 @@ class UserService(object):
         return ApplicationResponse.created(message='Created profile successfully')
 
     @staticmethod
-    def get_user_profile(facebook_user_id):
+    def get_user_profile(request, facebook_user_id):
+        requester_facebook_user_id = request.headers['facebookUserId']
+        stories = StoryService().get_permanent_stories_of_given_user(requester_facebook_user_id, facebook_user_id)
+
         profile = UserRepository.get_profile(facebook_user_id)
         profile_data = {
             'mFirstName': profile['first_name'],
             'mLastName': profile['last_name'],
             'mBirthDate': profile['birth_date'],
             'mEmail': profile['mail'],
-            'mSex': profile['sex']
+            'mSex': profile['sex'],
+            'mStories': stories
         }
 
         return ApplicationResponse.success(data=profile_data)
 
     @staticmethod
-    def create_user_profile_picture(request):
+    def modify_user_profile_picture(request):
         request_validation = JsonValidator.validate_profile_picture(request)
         if request_validation.hasErrors:
             return ApplicationResponse.bad_request(message=request_validation.message)
         file = request.files
+
+        LOGGER.info('FILE ' + str(request.files))
 
         LOGGER.info('Sending file to shared server ' + str(file))
         upload_file_response = SharedServer.upload_file(file)
