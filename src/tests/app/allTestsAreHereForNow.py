@@ -4,6 +4,7 @@ from unittest.mock import *
 
 from appserver.app import database
 from appserver.service.UserService import UserService
+from appserver.service.StoryService import StoryService
 from tests.app.testCommons import BaseTestCase
 
 
@@ -183,6 +184,29 @@ class Tests(BaseTestCase):
 
         updated_user = database.user.find_one({'facebookUserId': 'facebookUserId'})
         self.assertEqual(updated_user['profile_picture_id'], 1)
+
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', mock_upload_file)
+    def test_post_new_story(self):
+        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        request = Object()
+        request.headers = {'facebookUserId': 'facebookUserId'}
+        request.files = {'file': 'data'}
+        request.form = {'mFileType': 'jpg', 'mFlash': False, 'mPrivate': False, 'mLatitude': 10.5, 'mLongitude': 24.01}
+
+        response_post_new_story = StoryService.post_new_story(request=request)
+        self.assertEqual(response_post_new_story.status_code, 201)
+
+        story = database.story.find_one({'facebook_user_id': 'facebookUserId'})
+
+        self.assertEqual(story['title'], '')
+        self.assertEqual(story['description'], '')
+        self.assertEqual(story['facebook_user_id'], 'facebookUserId')
+        self.assertEqual(story['is_flash'], False)
+        self.assertEqual(story['is_private'], False)
+        self.assertEqual(story['latitude'], 10.5)
+        self.assertEqual(story['longitude'], 24.01)
+        self.assertEqual(story['file_id'], 1)
+        self.assertEqual(story['file_type'], 'jpg')
 
 
 if __name__ == '__main__':

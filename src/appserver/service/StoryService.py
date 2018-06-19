@@ -32,8 +32,8 @@ class StoryService(object):
         date = datetime.now()
         LOGGER.info('Date is ' + str(date))
         story_data = {
-            'title': request_form['mTitle'],
-            'description': request_form['mDescription'],
+            'title': request_form['mTitle'] if 'mTitle' in request_form else '',
+            'description': request_form['mDescription'] if 'mDescription' in request_form else '',
             'facebook_user_id': request.headers['facebookUserId'],
             'is_flash': request_form['mFlash'],
             'is_private': request_form['mPrivate'],
