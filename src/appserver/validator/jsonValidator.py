@@ -60,7 +60,7 @@ class JsonValidator(object):
         form = request.form
         file = request.files
         if form is None:
-            return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
+            return ValidationResponse(True, "Content-Type: is not multipart/form-data. Please make sure you send a multipart/form-data")
         validation_response = ValidationResponse(False, "")
         validation_response = JsonValidator.__check_validity_form(file, "file", validation_response)
         validation_response = JsonValidator.__check_validity_form(form, "mFileType", validation_response)
