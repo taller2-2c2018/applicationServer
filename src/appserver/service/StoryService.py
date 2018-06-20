@@ -4,6 +4,7 @@ from appserver.logger import LoggerFactory
 from appserver.repository.storyRepository import StoryRepository
 from appserver.datastructure.ApplicationResponse import ApplicationResponse
 from appserver.externalcommunication.sharedServer import SharedServer
+from appserver.transformer.MobileTransformer import MobileTransformer
 from bson.json_util import dumps
 from datetime import datetime
 import json
@@ -31,18 +32,8 @@ class StoryService(object):
         request_form = request.form
         date = datetime.now()
         LOGGER.info('Date is ' + str(date))
-        story_data = {
-            'title': request_form['mTitle'] if 'mTitle' in request_form else '',
-            'description': request_form['mDescription'] if 'mDescription' in request_form else '',
-            'facebook_user_id': request.headers['facebookUserId'],
-            'is_flash': request_form['mFlash'],
-            'is_private': request_form['mPrivate'],
-            'latitude': request_form['mLatitude'],
-            'longitude': request_form['mLongitude'],
-            'publication_date': date,
-            'file_id': file_id,
-            'file_type': request_form['mFileType']
-        }
+        story_data = MobileTransformer.mobile_story_to_database(request_form, request.headers['facebookUserId'], file_id, date)
+
         response = StoryRepository.create_story(story_data)
         LOGGER.info('This is what I got from the database ' + str(response))
 
@@ -60,8 +51,9 @@ class StoryService(object):
         stories = StoryRepository.get_all_permanent_stories()
 
         filtered_stories = StoryService.__get_all_public_and_friends_private_stories(stories, friendship_list)
+        filtered_stories_for_mobile = MobileTransformer.database_list_of_stories_to_mobile(filtered_stories)
 
-        return ApplicationResponse.success(data=dumps(filtered_stories))
+        return ApplicationResponse.success(data=dumps(filtered_stories_for_mobile))
 
     @staticmethod
     def __get_all_public_and_friends_private_stories(stories, friendship_list):

@@ -21,7 +21,7 @@ class StoryRepository(object):
     @staticmethod
     def get_all_permanent_stories():
         LOGGER.info('Getting all permanent stories')
-        return story_collection.find({'is_flash': 'False'})
+        return story_collection.find({'is_flash': False})
 
     @staticmethod
     def get_permanent_stories_from_user(target_facebook_user_id):
