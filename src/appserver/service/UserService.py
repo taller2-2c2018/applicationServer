@@ -136,6 +136,8 @@ class UserService(object):
             'mBirthDate': profile['birth_date'],
             'mEmail': profile['mail'],
             'mSex': profile['sex'],
+            'mProfilePictureId': profile['profile_picture_id'] if 'profile_picture_id' in profile else None,
+            'mFileTypeProfilePicture': profile['file_type_profile_picture'] if 'file_type_profile_picture' in profile else None,
             'mStories': stories
         }
 
@@ -159,7 +161,9 @@ class UserService(object):
             return ApplicationResponse.bad_request(message=shared_server_response_validation.message)
 
         response_json = json.loads(upload_file_response.text)
-        profile_update = {'profile_picture_id': response_json['data']['id']}
+        file_type = request.form['mFileType']
+        profile_update = {'profile_picture_id': response_json['data']['id'],
+                          'file_type_profile_picture': file_type}
         UserRepository.modify_profile(request.headers['facebookUserId'], profile_update)
 
         return ApplicationResponse.success(message='Profile picture updated')

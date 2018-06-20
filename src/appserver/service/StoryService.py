@@ -1,13 +1,13 @@
-from appserver.validator.jsonValidator import JsonValidator
-from appserver.repository.userRepository import UserRepository
-from appserver.logger import LoggerFactory
-from appserver.repository.storyRepository import StoryRepository
+import json
+from datetime import datetime
+
 from appserver.datastructure.ApplicationResponse import ApplicationResponse
 from appserver.externalcommunication.sharedServer import SharedServer
+from appserver.logger import LoggerFactory
+from appserver.repository.storyRepository import StoryRepository
+from appserver.repository.userRepository import UserRepository
 from appserver.transformer.MobileTransformer import MobileTransformer
-from bson.json_util import dumps
-from datetime import datetime
-import json
+from appserver.validator.jsonValidator import JsonValidator
 
 LOGGER = LoggerFactory().get_logger(__name__)
 
@@ -53,7 +53,7 @@ class StoryService(object):
         filtered_stories = StoryService.__get_all_public_and_friends_private_stories(stories, friendship_list)
         filtered_stories_for_mobile = MobileTransformer.database_list_of_stories_to_mobile(filtered_stories)
 
-        return ApplicationResponse.success(data=dumps(filtered_stories_for_mobile))
+        return ApplicationResponse.success(data=filtered_stories_for_mobile)
 
     @staticmethod
     def __get_all_public_and_friends_private_stories(stories, friendship_list):
