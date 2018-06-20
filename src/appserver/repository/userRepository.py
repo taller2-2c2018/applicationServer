@@ -16,17 +16,17 @@ class UserRepository(object):
     @staticmethod
     def update_user_token(facebook_id, token, expires_at):
         LOGGER.info('Updating token to existing user')
-        user_id = user_collection.find_one({"facebookUserId": facebook_id})["_id"]
+        user_id = user_collection.find_one({'facebookUserId': facebook_id})['_id']
         user_collection.update_one({'_id': user_id}, {
-            "$set": {
-                       "token": token,
-                       "expires_at": expires_at
+            '$set': {
+                       'token': token,
+                       'expires_at': expires_at
             }
         }, upsert=False)
 
     @staticmethod
     def username_exists(facebook_user_id):
-        LOGGER.info("Trying to see if " + facebook_user_id + " exists in database")
+        LOGGER.info('Trying to see if ' + facebook_user_id + ' exists in database')
         return user_collection.find_one({'facebookUserId': facebook_user_id}) is not None
 
     @staticmethod
@@ -37,23 +37,24 @@ class UserRepository(object):
     @staticmethod
     def add_friend_to_list(user, friend_to_add):
         user_entity = user_collection.find_one({'facebookUserId': user})
-        if "friendshipList" not in user_entity:
+        if 'friendshipList' not in user_entity:
             friendship_list = [friend_to_add]
         else:
-            friendship_list = user_entity["friendshipList"]
+            friendship_list = user_entity['friendshipList']
             friendship_list.append(friend_to_add)
-        user_collection.update_one({'facebookUserId': user}, {"$set": {"friendshipList": friendship_list}}, upsert=False)
+        user_collection.update_one({'facebookUserId': user}, {'$set': {'friendshipList': friendship_list}}, upsert=False)
 
     @staticmethod
     def modify_profile(facebook_user_id, profile):
-        LOGGER.info("Creating profile por user: " + facebook_user_id)
-        user_collection.update_one({'facebookUserId': facebook_user_id}, {"$set": profile}, upsert=False)
+        LOGGER.info('Creating profile por user: ' + facebook_user_id)
+        user_collection.update_one({'facebookUserId': facebook_user_id}, {'$set': profile}, upsert=False)
 
     @staticmethod
     def get_profile(facebook_user_id):
         return user_collection.find_one({'facebookUserId': facebook_user_id},
-                                        {"_id": 0, "first_name": 1, "last_name": 1, "birth_date": 1, "mail": 1, "sex": 1})
+                                        {'_id': 0, 'first_name': 1, 'last_name': 1, 'birth_date': 1, 'mail': 1,
+                                         'sex': 1, 'profile_picture_id': 1, 'file_type_profile_picture': 1})
 
     @staticmethod
     def get_friendship_list(facebook_user_id):
-        return user_collection.find_one({'facebookUserId': facebook_user_id}, {"_id": 0, "friendshipList": 1})
+        return user_collection.find_one({'facebookUserId': facebook_user_id}, {'_id': 0, 'friendshipList': 1})

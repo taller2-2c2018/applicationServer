@@ -33,11 +33,12 @@ class Object(object):
     pass
 
 
+@patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
+@patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
+@patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
+@patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', mock_upload_file)
 class Tests(BaseTestCase):
 
-    @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
-    @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
-    @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
     def test_register_user(self):
         response_register_user = UserService.register_new_user(
             {'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
@@ -51,9 +52,6 @@ class Tests(BaseTestCase):
         self.assertEqual(inserted_user['last_name'], 'last_name')
         self.assertEqual(inserted_user['first_name'], 'first_name')
 
-    @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
-    @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
-    @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
     def test_register_existing_user_doesnt_add_it_again(self):
         UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
         response_register_user = UserService.register_new_user(
@@ -62,9 +60,6 @@ class Tests(BaseTestCase):
         self.assertEqual(response_register_user.status_code, 400)
         self.assertEqual(response_register_user.get_json()['message'], 'User already registered.')
 
-    @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
-    @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
-    @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
     def test_create_user_profile(self):
         UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
         response_update_profile = UserService.modify_user_profile(
@@ -81,9 +76,6 @@ class Tests(BaseTestCase):
         self.assertEqual(inserted_profile['mail'], 'mail@email.com')
         self.assertEqual(inserted_profile['sex'], 'male')
 
-    @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
-    @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
-    @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
     def test_get_user_profile(self):
         UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
         UserService.modify_user_profile(
@@ -103,9 +95,6 @@ class Tests(BaseTestCase):
         self.assertEqual(response_json['mEmail'], 'mail@email.com')
         self.assertEqual(response_json['mSex'], 'male')
 
-    @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
-    @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
-    @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
     def test_send_friendship_request(self):
         UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
         response_send_friendship_request = UserService.send_user_friendship_request(
@@ -120,9 +109,6 @@ class Tests(BaseTestCase):
         self.assertEqual(inserted_friendship['target'], 'target')
         self.assertEqual(inserted_friendship['message'], 'Add me to your friend list')
 
-    @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
-    @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
-    @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
     def test_get_friendship_requests(self):
         UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
         UserService.send_user_friendship_request(
@@ -140,9 +126,6 @@ class Tests(BaseTestCase):
         self.assertEqual(friendship_list[0]['target'], 'target')
         self.assertEqual(friendship_list[0]['message'], 'Add me to your friend list')
 
-    @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
-    @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
-    @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
     def test_accept_friendship_request(self):
         UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
         UserService.register_new_user({'facebookUserId': 'requester', 'facebookAuthToken': 'facebookAuthToken'})
@@ -169,23 +152,47 @@ class Tests(BaseTestCase):
         friends_of_target = database.user.find_one({'facebookUserId': 'target'})['friendshipList']
         self.assertTrue('requester' in friends_of_target)
 
-    @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
-    @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
-    @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
-    @patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', mock_upload_file)
     def test_modify_profile_picture(self):
         UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
         request = Object()
         request.headers = {'facebookUserId': 'facebookUserId'}
-        request.files = 'file'
+        request.files = {'file': 'data'}
+        request.form = {'mFileType': 'jpg'}
         modify_profile_response = UserService.modify_user_profile_picture(request)
 
         self.assertEqual(modify_profile_response.status_code, 200)
 
         updated_user = database.user.find_one({'facebookUserId': 'facebookUserId'})
         self.assertEqual(updated_user['profile_picture_id'], 1)
+        self.assertEqual(updated_user['file_type_profile_picture'], 'jpg')
 
-    @patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', mock_upload_file)
+    def test_get_user_profile_after_adding_profile_picture(self):
+        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        UserService.modify_user_profile(
+            {'mFirstName': 'name', 'mLastName': 'surname', 'mBirthDate': '01/01/1990', 'mEmail': 'mail@email.com',
+             'mSex': 'male'},
+            {'facebookUserId': 'facebookUserId'})
+        request = Object()
+        request.headers = {'facebookUserId': 'facebookUserId'}
+        request.files = {'file': 'data'}
+        request.form = {'mFileType': 'jpg'}
+        UserService.modify_user_profile_picture(request)
+        request = Object()
+        request.headers = {'facebookUserId': 'facebookUserId'}
+        response_user_profile = UserService.get_user_profile(request, 'facebookUserId')
+
+        self.assertEqual(response_user_profile.status_code, 200)
+
+        response_json = response_user_profile.get_json()['data']
+
+        self.assertEqual(response_json['mFirstName'], 'name')
+        self.assertEqual(response_json['mLastName'], 'surname')
+        self.assertEqual(response_json['mBirthDate'], '01/01/1990')
+        self.assertEqual(response_json['mEmail'], 'mail@email.com')
+        self.assertEqual(response_json['mSex'], 'male')
+        self.assertEqual(response_json['mProfilePictureId'], 1)
+        self.assertEqual(response_json['mFileTypeProfilePicture'], 'jpg')
+
     def test_post_new_story(self):
         UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
         request = Object()
@@ -208,10 +215,6 @@ class Tests(BaseTestCase):
         self.assertEqual(story['file_id'], 1)
         self.assertEqual(story['file_type'], 'jpg')
 
-    @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
-    @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
-    @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
-    @patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', mock_upload_file)
     def test_get_permanent_stories_for_requester(self):
         UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
         request = Object()
@@ -225,7 +228,7 @@ class Tests(BaseTestCase):
         response_stories = StoryService.get_permanent_stories_for_requester(request.headers)
         self.assertEqual(response_stories.status_code, 200)
 
-        stories_list = json.loads(response_stories.get_json()['data'])
+        stories_list = response_stories.get_json()['data']
         self.assertEqual(len(stories_list), 1)
 
         story = stories_list[0]

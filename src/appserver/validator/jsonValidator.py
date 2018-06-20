@@ -59,13 +59,15 @@ class JsonValidator(object):
 
         form = request.form
         file = request.files
-        if form is None:
-            return ValidationResponse(True, "Content-Type: is not multipart/form-data. Please make sure you send a multipart/form-data")
+        if form is None or file is None:
+            return ValidationResponse(True, "Content-Type: is not multipart/form-data, or missing file or form data.")
         validation_response = ValidationResponse(False, "")
         validation_response = JsonValidator.__check_validity_form(file, "file", validation_response)
         validation_response = JsonValidator.__check_validity_form(form, "mFileType", validation_response)
         validation_response = JsonValidator.__check_validity_form(form, "mFlash", validation_response)
+        validation_response = JsonValidator.__check_type_boolean(form, 'mFlash', validation_response)
         validation_response = JsonValidator.__check_validity_form(form, "mPrivate", validation_response)
+        validation_response = JsonValidator.__check_type_boolean(form, 'mPrivate', validation_response)
         validation_response = JsonValidator.__check_validity_form(form, "mLatitude", validation_response)
         validation_response = JsonValidator.__check_validity_form(form, "mLongitude", validation_response)
 
@@ -91,6 +93,13 @@ class JsonValidator(object):
     @staticmethod
     def __check_validity_header(header, field_name, validation_response):
         return JsonValidator.__check_validity(header, field_name, validation_response, 'Header')
+
+    @staticmethod
+    def __check_type_boolean(data, field_name, validation_response):
+        if field_name in data and (not isinstance(data[field_name], bool)):
+            validation_response.message += field_name + " must be of boolean type. "
+            validation_response.hasErrors = True
+        return validation_response
 
     @staticmethod
     def __check_validity(request_map, field_name, validation_response, request_type):
@@ -122,6 +131,27 @@ class JsonValidator(object):
         validate_header = JsonValidator.validate_header_has_facebook_user_id(request.headers)
         if validate_header.hasErrors:
             return validate_header
-        if 'file' not in request.files:
-            return ValidationResponse(True, 'No file in request')
-        return ValidationResponse(False)
+
+        form = request.form
+        file = request.files
+        if form is None or file is None:
+            return ValidationResponse(True, "Content-Type: is not multipart/form-data, or missing file or form data.")
+        validation_response = ValidationResponse(False, "")
+        validation_response = JsonValidator.__check_validity_form(file, "file", validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, "mFileType", validation_response)
+        validation_response = JsonValidator.__check_valid_profile_picture_filetype(form, "mFileType", validation_response)
+
+        return validation_response
+
+    @staticmethod
+    def __check_valid_profile_picture_filetype(data, field_name, validation_response):
+        valid_types = JsonValidator.__valid_profile_picture_types()
+        if field_name in data and (data[field_name].lower() not in valid_types):
+            validation_response.message += field_name + ' must be of one of these types: ' +\
+                                           ' '.join(JsonValidator.__valid_profile_picture_types())
+            validation_response.hasErrors = True
+        return validation_response
+
+    @staticmethod
+    def __valid_profile_picture_types():
+        return ['jpg', 'png', 'jpeg', 'bmp']

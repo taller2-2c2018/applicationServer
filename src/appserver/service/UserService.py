@@ -9,6 +9,7 @@ from appserver.repository.userRepository import UserRepository
 from appserver.service.StoryService import StoryService
 from appserver.validator.databaseValidator import DatabaseValidator
 from appserver.validator.jsonValidator import JsonValidator
+from appserver.transformer.MobileTransformer import MobileTransformer
 
 LOGGER = LoggerFactory().get_logger('UserService')
 
@@ -115,11 +116,8 @@ class UserService(object):
         if validation_response.hasErrors:
             return ApplicationResponse.bad_request(message=validation_response.message)
         facebook_user_id = request_header['facebookUserId']
-        profile_to_create = {'first_name': request_json['mFirstName'],
-                             'last_name': request_json['mLastName'],
-                             'birth_date': request_json['mBirthDate'],
-                             'mail': request_json['mEmail'],
-                             'sex': request_json['mSex']}
+        profile_to_create = MobileTransformer.mobile_profile_to_database(request_json)
+
         UserRepository.modify_profile(facebook_user_id, profile_to_create)
 
         return ApplicationResponse.created(message='Created profile successfully')
@@ -130,14 +128,7 @@ class UserService(object):
         stories = StoryService().get_permanent_stories_of_given_user(requester_facebook_user_id, facebook_user_id)
 
         profile = UserRepository.get_profile(facebook_user_id)
-        profile_data = {
-            'mFirstName': profile['first_name'],
-            'mLastName': profile['last_name'],
-            'mBirthDate': profile['birth_date'],
-            'mEmail': profile['mail'],
-            'mSex': profile['sex'],
-            'mStories': stories
-        }
+        profile_data = MobileTransformer.database_profile_to_mobile(profile, stories)
 
         return ApplicationResponse.success(data=profile_data)
 
@@ -159,7 +150,9 @@ class UserService(object):
             return ApplicationResponse.bad_request(message=shared_server_response_validation.message)
 
         response_json = json.loads(upload_file_response.text)
-        profile_update = {'profile_picture_id': response_json['data']['id']}
+        file_type = request.form['mFileType']
+        profile_update = {'profile_picture_id': response_json['data']['id'],
+                          'file_type_profile_picture': file_type}
         UserRepository.modify_profile(request.headers['facebookUserId'], profile_update)
 
         return ApplicationResponse.success(message='Profile picture updated')

@@ -4,7 +4,7 @@ from redis import Redis
 from dotenv import load_dotenv, find_dotenv
 from appserver.logger import LoggerFactory
 
-LOGGER = LoggerFactory().get_logger('ConfigurationInit')
+LOGGER = LoggerFactory().get_logger(__name__)
 
 
 class Configuration(object):
@@ -20,6 +20,7 @@ class Configuration(object):
         if not MONGO_URL:
             MONGO_URL = "mongodb://database:27017/applicationServerDB"
         app.config['MONGO_URI'] = MONGO_URL
+        LOGGER.info('Setting up database: ' + str(MONGO_URL))
         return PyMongo(app)
 
     @staticmethod
