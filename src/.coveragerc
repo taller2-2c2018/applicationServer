@@ -6,3 +6,5 @@ omit =
   *datastructure/*
   *externalcommunication/*
   *monitor/*
+  *config/*
+  *logger/*
