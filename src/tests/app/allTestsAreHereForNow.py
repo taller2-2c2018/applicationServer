@@ -208,6 +208,35 @@ class Tests(BaseTestCase):
         self.assertEqual(story['file_id'], 1)
         self.assertEqual(story['file_type'], 'jpg')
 
+    @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
+    @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', mock_upload_file)
+    def test_get_permanent_stories_for_requester(self):
+        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        request = Object()
+        request.headers = {'facebookUserId': 'facebookUserId'}
+        request.files = {'file': 'data'}
+        request.form = {'mDescription': 'description', 'mFileType': 'jpg', 'mFlash': False,
+                        'mPrivate': False, 'mLatitude': 10.5, 'mLongitude': 24.01}
+
+        StoryService.post_new_story(request=request)
+
+        response_stories = StoryService.get_permanent_stories_for_requester(request.headers)
+        self.assertEqual(response_stories.status_code, 200)
+
+        stories_list = json.loads(response_stories.get_json()['data'])
+        self.assertEqual(len(stories_list), 1)
+
+        story = stories_list[0]
+        self.assertEqual(story['mTitle'], '')
+        self.assertEqual(story['mDescription'], 'description')
+        self.assertEqual(story['mFacebookUserId'], 'facebookUserId')
+        self.assertEqual(story['mLatitude'], 10.5)
+        self.assertEqual(story['mLongitude'], 24.01)
+        self.assertEqual(story['mFileId'], 1)
+        self.assertEqual(story['mFileType'], 'jpg')
+
 
 if __name__ == '__main__':
     unittest.main()
