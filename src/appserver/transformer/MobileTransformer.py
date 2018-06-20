@@ -19,7 +19,6 @@ class MobileTransformer(object):
 
     @staticmethod
     def mobile_story_to_database(request_form, facebook_user_id, file_id, date):
-
         story_data = {
             'title': MobileTransformer.__optional_value(request_form, 'mTitle'),
             'description': MobileTransformer.__optional_value(request_form, 'mDescription'),
@@ -35,7 +34,26 @@ class MobileTransformer(object):
 
         return story_data
 
-
     @staticmethod
     def __optional_value(dictionary, key, optional_value=''):
         return dictionary[key] if key in dictionary else optional_value
+
+    @staticmethod
+    def database_profile_to_mobile(database_profile, stories):
+        profile_data = {
+            'mFirstName': database_profile['first_name'],
+            'mLastName': database_profile['last_name'],
+            'mBirthDate': database_profile['birth_date'],
+            'mEmail': database_profile['mail'],
+            'mSex': database_profile['sex'],
+            'mProfilePictureId': MobileTransformer.__optional_value(database_profile, 'profile_picture_id', None),
+            'mFileTypeProfilePicture': MobileTransformer.__optional_value(database_profile, 'file_type_profile_picture', None),
+            'mStories': stories
+        }
+
+        return profile_data
+
+    @staticmethod
+    def mobile_profile_to_database(request_json):
+        return {'first_name': request_json['mFirstName'], 'last_name': request_json['mLastName'],
+                'birth_date': request_json['mBirthDate'], 'mail': request_json['mEmail'], 'sex': request_json['mSex']}

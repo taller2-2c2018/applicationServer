@@ -95,7 +95,7 @@ class JsonValidator(object):
         return JsonValidator.__check_validity(header, field_name, validation_response, 'Header')
 
     @staticmethod
-    def __check_type_boolean (data, field_name, validation_response):
+    def __check_type_boolean(data, field_name, validation_response):
         if field_name in data and (not isinstance(data[field_name], bool)):
             validation_response.message += field_name + " must be of boolean type. "
             validation_response.hasErrors = True
@@ -139,5 +139,19 @@ class JsonValidator(object):
         validation_response = ValidationResponse(False, "")
         validation_response = JsonValidator.__check_validity_form(file, "file", validation_response)
         validation_response = JsonValidator.__check_validity_form(form, "mFileType", validation_response)
+        validation_response = JsonValidator.__check_valid_profile_picture_filetype(form, "mFileType", validation_response)
 
         return validation_response
+
+    @staticmethod
+    def __check_valid_profile_picture_filetype(data, field_name, validation_response):
+        valid_types = JsonValidator.__valid_profile_picture_types()
+        if field_name in data and (data[field_name].lower() not in valid_types):
+            validation_response.message += field_name + ' must be of one of these types: ' +\
+                                           ' '.join(JsonValidator.__valid_profile_picture_types())
+            validation_response.hasErrors = True
+        return validation_response
+
+    @staticmethod
+    def __valid_profile_picture_types():
+        return ['jpg', 'png', 'jpeg', 'bmp']
