@@ -2,7 +2,7 @@ import requests
 from appserver import app
 from appserver.logger import LoggerFactory
 
-LOGGER = LoggerFactory().get_logger('SharedServerClient')
+LOGGER = LoggerFactory().get_logger(__name__)
 ANDROID_APP_TOKEN = app.android_app_token
 
 # Facebook host root

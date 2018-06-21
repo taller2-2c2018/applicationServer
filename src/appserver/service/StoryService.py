@@ -2,6 +2,7 @@ import json
 
 from appserver.datastructure.ApplicationResponse import ApplicationResponse
 from appserver.externalcommunication.sharedServer import SharedServer
+from appserver.externalcommunication.GoogleMapsApi import GoogleMapsApi
 from appserver.logger import LoggerFactory
 from appserver.repository.storyRepository import StoryRepository
 from appserver.repository.userRepository import UserRepository
@@ -32,7 +33,9 @@ class StoryService(object):
         request_form = request.form
         date = Time.now()
         LOGGER.info('Date is ' + str(date))
-        story_data = MobileTransformer.mobile_story_to_database(request_form, request.headers['facebookUserId'], file_id, date)
+        location = GoogleMapsApi.get_location(request_form['mLatitude'], request_form['mLongitude'])
+        story_data = MobileTransformer.mobile_story_to_database(request_form, request.headers['facebookUserId'],
+                                                                file_id, date, location)
 
         response = StoryRepository.create_story(story_data)
         LOGGER.info('This is what I got from the database ' + str(response))

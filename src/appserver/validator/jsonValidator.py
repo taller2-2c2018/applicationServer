@@ -98,10 +98,10 @@ class JsonValidator(object):
     def __check_type_boolean(data, field_name, validation_response):
         if field_name in data and (not isinstance(data[field_name], bool)):
             if 'false' == data[field_name].lower():
-                data[field_name] = False
+                data.to_dict()[field_name] = False
                 return validation_response
             elif 'true' == data[field_name].lower():
-                data[field_name] = True
+                data.to_dict()[field_name] = True
                 return validation_response
             validation_response.message += field_name + " must be of boolean type. "
             validation_response.hasErrors = True
