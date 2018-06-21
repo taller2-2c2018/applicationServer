@@ -5,7 +5,7 @@ from appserver.monitor.monitor import monitor
 from appserver.service.StoryService import StoryService
 from appserver.validator.authValidator import secure
 
-LOGGER = LoggerFactory().get_logger('StoryController')
+LOGGER = LoggerFactory().get_logger(__name__)
 storiesEndpoint = Blueprint('storiesEndpoint', __name__)
 
 
@@ -25,6 +25,6 @@ def post():
 def get():
     LOGGER.info('Getting all permanent stories')
     request_header = request.headers
-    return_value = StoryService().get_permanent_stories_for_requester(request_header)
+    return_value = StoryService().get_all_stories_for_requester(request_header)
 
     return return_value

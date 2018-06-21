@@ -1,13 +1,14 @@
 import json
-from datetime import datetime
 
 from appserver.datastructure.ApplicationResponse import ApplicationResponse
 from appserver.externalcommunication.sharedServer import SharedServer
+from appserver.externalcommunication.GoogleMapsApi import GoogleMapsApi
 from appserver.logger import LoggerFactory
 from appserver.repository.storyRepository import StoryRepository
 from appserver.repository.userRepository import UserRepository
 from appserver.transformer.MobileTransformer import MobileTransformer
 from appserver.validator.jsonValidator import JsonValidator
+from appserver.time.Time import Time
 
 LOGGER = LoggerFactory().get_logger(__name__)
 
@@ -30,9 +31,11 @@ class StoryService(object):
         file_id = json.loads(upload_file_response.text)['data']['id']
 
         request_form = request.form
-        date = datetime.now()
+        date = Time.now()
         LOGGER.info('Date is ' + str(date))
-        story_data = MobileTransformer.mobile_story_to_database(request_form, request.headers['facebookUserId'], file_id, date)
+        location = GoogleMapsApi.get_location(request_form['mLatitude'], request_form['mLongitude'])
+        story_data = MobileTransformer.mobile_story_to_database(request_form, request.headers['facebookUserId'],
+                                                                file_id, date, location)
 
         response = StoryRepository.create_story(story_data)
         LOGGER.info('This is what I got from the database ' + str(response))
@@ -40,7 +43,7 @@ class StoryService(object):
         return ApplicationResponse.created(message='Created story successfully')
 
     @staticmethod
-    def get_permanent_stories_for_requester(request_header):
+    def get_all_stories_for_requester(request_header):
         validation_response = JsonValidator.validate_header_has_facebook_user_id(request_header)
         if validation_response.hasErrors:
             return ApplicationResponse.bad_request(message=validation_response.message)
@@ -48,9 +51,11 @@ class StoryService(object):
         facebook_user_id = request_header["facebookUserId"]
         friendship_list = UserRepository.get_friendship_list(facebook_user_id)["friendshipList"]
         LOGGER.info("Got friendshipList" + str(friendship_list))
-        stories = StoryRepository.get_all_permanent_stories()
+        permanent_stories = StoryRepository.get_all_permanent_stories()
+        flash_stories = StoryRepository.get_all_valid_flash_stories()
 
-        filtered_stories = StoryService.__get_all_public_and_friends_private_stories(stories, friendship_list)
+        filtered_stories = StoryService.__get_all_public_and_friends_private_stories(permanent_stories, friendship_list)
+        filtered_stories.extend(list(flash_stories))
         filtered_stories_for_mobile = MobileTransformer.database_list_of_stories_to_mobile(filtered_stories)
 
         return ApplicationResponse.success(data=filtered_stories_for_mobile)

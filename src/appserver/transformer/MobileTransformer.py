@@ -11,14 +11,16 @@ class MobileTransformer(object):
                 'mLatitude': story['latitude'],
                 'mLongitude': story['longitude'],
                 'mFileId': story['file_id'],
-                'mFileType': story['file_type']
+                'mFileType': story['file_type'],
+                'mFlash': story['is_flash'],
+                'mLocation': story['location']
             }
             list_of_stories.append(story_for_mobile)
 
         return list_of_stories
 
     @staticmethod
-    def mobile_story_to_database(request_form, facebook_user_id, file_id, date):
+    def mobile_story_to_database(request_form, facebook_user_id, file_id, date, location):
         story_data = {
             'title': MobileTransformer.__optional_value(request_form, 'mTitle'),
             'description': MobileTransformer.__optional_value(request_form, 'mDescription'),
@@ -29,7 +31,8 @@ class MobileTransformer(object):
             'longitude': request_form['mLongitude'],
             'publication_date': date,
             'file_id': file_id,
-            'file_type': request_form['mFileType']
+            'file_type': request_form['mFileType'],
+            'location': location
         }
 
         return story_data

@@ -1,9 +1,12 @@
 import logging
+import os
 
 
 class LoggerFactory(object):
-
-    logging.basicConfig(level='DEBUG')
+    LOGGING_LEVEL = os.environ.get('LOGGING_LEVEL')
+    if not LOGGING_LEVEL:
+        LOGGING_LEVEL = 'DEBUG'
+    logging.basicConfig(level=LOGGING_LEVEL)
 
     @staticmethod
     def get_logger(name):
