@@ -1,11 +1,13 @@
+import sys
 import time
-import datetime
+
 import pytz
 from bson.codec_options import CodecOptions
-from functools import wraps
 from flask import Blueprint, request, jsonify
+from functools import wraps
+
 from appserver import app
-import sys
+from appserver.time.Time import Time
 
 monitor_controller = Blueprint('monitor', __name__)
 monitor_collection = app.database.monitor
@@ -21,7 +23,7 @@ def monitor(method):
         request_data = {
             "route": request.path,
             "method": request.method,
-            "date_time": datetime.datetime.utcnow(),
+            "date_time": Time.now(),
             "day": time.strftime('%Y-%m-%d'),
             "hour": time.strftime('%H'),
             "time_elapsed_ms": int((te - ts) * 1000)

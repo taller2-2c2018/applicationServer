@@ -1,5 +1,6 @@
 import json
 import unittest
+import datetime
 from unittest.mock import *
 
 from appserver.app import database
@@ -27,6 +28,14 @@ def mock_upload_file(file):
     shared_server_response.status_code = 200
 
     return shared_server_response
+
+
+def mock_time_now():
+    return datetime.datetime(year=2018, month=12, day=25, hour=17, minute=5, second=55)
+
+
+def mock_time_timedelta(hours):
+    return -datetime.timedelta(hours=1)
 
 
 class Object(object):
@@ -215,7 +224,7 @@ class Tests(BaseTestCase):
         self.assertEqual(story['file_id'], 1)
         self.assertEqual(story['file_type'], 'jpg')
 
-    def test_get_permanent_stories_for_requester(self):
+    def test_get_all_stories_for_requester_gets_permanent_story(self):
         UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
         request = Object()
         request.headers = {'facebookUserId': 'facebookUserId'}
@@ -225,7 +234,7 @@ class Tests(BaseTestCase):
 
         StoryService.post_new_story(request=request)
 
-        response_stories = StoryService.get_permanent_stories_for_requester(request.headers)
+        response_stories = StoryService.get_all_stories_for_requester(request.headers)
         self.assertEqual(response_stories.status_code, 200)
 
         stories_list = response_stories.get_json()['data']
@@ -239,6 +248,51 @@ class Tests(BaseTestCase):
         self.assertEqual(story['mLongitude'], 24.01)
         self.assertEqual(story['mFileId'], 1)
         self.assertEqual(story['mFileType'], 'jpg')
+        self.assertEqual(story['mFlash'], False)
+
+    def test_get_all_stories_for_requester_gets_flash_story(self):
+        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        request = Object()
+        request.headers = {'facebookUserId': 'facebookUserId'}
+        request.files = {'file': 'data'}
+        request.form = {'mDescription': 'description', 'mFileType': 'jpg', 'mFlash': True,
+                        'mPrivate': False, 'mLatitude': 10.5, 'mLongitude': 24.01}
+
+        StoryService.post_new_story(request=request)
+
+        response_stories = StoryService.get_all_stories_for_requester(request.headers)
+        self.assertEqual(response_stories.status_code, 200)
+
+        stories_list = response_stories.get_json()['data']
+        self.assertEqual(len(stories_list), 1)
+
+        story = stories_list[0]
+        self.assertEqual(story['mTitle'], '')
+        self.assertEqual(story['mDescription'], 'description')
+        self.assertEqual(story['mFacebookUserId'], 'facebookUserId')
+        self.assertEqual(story['mLatitude'], 10.5)
+        self.assertEqual(story['mLongitude'], 24.01)
+        self.assertEqual(story['mFileId'], 1)
+        self.assertEqual(story['mFileType'], 'jpg')
+        self.assertEqual(story['mFlash'], True)
+
+    @patch('appserver.time.Time.Time.now', mock_time_now)
+    @patch('appserver.time.Time.Time.timedelta', mock_time_timedelta)
+    def test_get_all_stories_for_requester_doesnt_get_caducated_flash_story(self):
+        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        request = Object()
+        request.headers = {'facebookUserId': 'facebookUserId'}
+        request.files = {'file': 'data'}
+        request.form = {'mDescription': 'description', 'mFileType': 'jpg', 'mFlash': True,
+                        'mPrivate': False, 'mLatitude': 10.5, 'mLongitude': 24.01}
+
+        StoryService.post_new_story(request=request)
+
+        response_stories = StoryService.get_all_stories_for_requester(request.headers)
+        self.assertEqual(response_stories.status_code, 200)
+
+        stories_list = response_stories.get_json()['data']
+        self.assertEqual(len(stories_list), 0)
 
 
 if __name__ == '__main__':

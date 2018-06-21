@@ -11,7 +11,8 @@ class MobileTransformer(object):
                 'mLatitude': story['latitude'],
                 'mLongitude': story['longitude'],
                 'mFileId': story['file_id'],
-                'mFileType': story['file_type']
+                'mFileType': story['file_type'],
+                'mFlash': story['is_flash']
             }
             list_of_stories.append(story_for_mobile)
 
