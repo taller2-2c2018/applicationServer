@@ -1,4 +1,4 @@
-from flask import request, Blueprint
+from flask import Blueprint
 
 from appserver.logger import LoggerFactory
 from appserver.monitor.monitor import monitor
