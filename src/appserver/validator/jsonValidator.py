@@ -174,3 +174,30 @@ class JsonValidator(object):
         validation_response = JsonValidator.__check_validity_json(json, "mComment", validation_response)
 
         return validation_response
+
+    @staticmethod
+    def validate_reaction_request(header, json_reaction):
+        validate_header = JsonValidator.validate_header_has_facebook_user_id(header)
+        if validate_header.hasErrors:
+            return validate_header
+
+        if json_reaction is None:
+            return ValidationResponse(True, "Content-Type: is not application/json, or missing json data.")
+        validation_response = ValidationResponse(False, "")
+        validation_response = JsonValidator.__check_validity_json(json_reaction, "mReaction", validation_response)
+        validation_response = JsonValidator.__check_valid_reaction(json_reaction, "mReaction", validation_response)
+
+        return validation_response
+
+    @staticmethod
+    def __check_valid_reaction(data, field_name, validation_response):
+        valid_types = JsonValidator.__valid_reactions()
+        if field_name in data and (data[field_name].lower() not in valid_types):
+            validation_response.message += field_name + ' must be of one of these: ' +\
+                                           ' '.join(JsonValidator.__valid_reactions())
+            validation_response.hasErrors = True
+        return validation_response
+
+    @staticmethod
+    def __valid_reactions():
+        return ['me gusta', 'no me gusta', 'me divierte', 'me aburre']

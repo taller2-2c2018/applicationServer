@@ -34,7 +34,8 @@ class MobileTransformer(object):
             'file_id': file_id,
             'file_type': request_form['mFileType'],
             'location': location,
-            'comments': []
+            'comments': [],
+            'reactions': []
         }
 
         return story_data
@@ -66,3 +67,7 @@ class MobileTransformer(object):
     @staticmethod
     def mobile_comment_to_database(comment, facebook_user_id, date):
         return {'text': comment, 'facebook_user_id': facebook_user_id, 'date': date}
+
+    @staticmethod
+    def mobile_reaction_to_database(reaction, facebook_user_id, date):
+        return {'reaction': reaction, 'facebook_user_id': facebook_user_id, 'date': date}

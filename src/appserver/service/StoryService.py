@@ -97,3 +97,24 @@ class StoryService(object):
         StoryRepository.update_story_by_id(story_id, story)
 
         return ApplicationResponse.created('Comment created successfully')
+
+    @staticmethod
+    def post_reaction(header, json_reaction, story_id):
+        validation_response = JsonValidator.validate_reaction_request(header, json_reaction)
+        if validation_response.hasErrors:
+            return ApplicationResponse.bad_request(message=validation_response.message)
+
+        story = StoryRepository.get_story_by_id(story_id)
+
+        if story is None:
+            return ApplicationResponse.bad_request(message='No such story was found')
+
+        reaction = json_reaction['mReaction']
+        facebook_user_id = header['facebookUserId']
+        date = Time.now()
+        comment_database = MobileTransformer.mobile_reaction_to_database(reaction, facebook_user_id, date)
+        story['reactions'].append(comment_database)
+
+        StoryRepository.update_story_by_id(story_id, story)
+
+        return ApplicationResponse.created('Reaction created successfully')

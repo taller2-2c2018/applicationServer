@@ -40,3 +40,15 @@ def post_comment(story_id):
     return_value = StoryService.post_comment(header, json, story_id)
 
     return return_value
+
+
+@storiesEndpoint.route("/<story_id>/reaction", methods=['POST'])
+@monitor
+@secure
+def post_reaction(story_id):
+    LOGGER.info('Reacting to story')
+    header = request.headers
+    json = request.get_json()
+    return_value = StoryService.post_reaction(header, json, story_id)
+
+    return return_value

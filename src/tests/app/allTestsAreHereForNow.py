@@ -330,6 +330,34 @@ class Tests(BaseTestCase):
         self.assertEqual(comment['facebook_user_id'], 'facebookUserId')
         self.assertTrue(comment['date'] is not None)
 
+    def test_post_new_reaction_in_story(self):
+        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        request = Object()
+        request.headers = {'facebookUserId': 'facebookUserId'}
+        request.files = {'file': 'data'}
+        request.form = {'mDescription': 'description', 'mFileType': 'jpg', 'mFlash': False,
+                        'mPrivate': False, 'mLatitude': 40.714224, 'mLongitude': -73.961452}
+
+        StoryService.post_new_story(request=request)
+        response_stories = StoryService.get_all_stories_for_requester(request.headers)
+        story_id = response_stories.get_json()['data'][0]['mStoryId']
+
+        header = {'facebookUserId': 'facebookUserId'}
+        reaction_json = {'mReaction': 'me gusta'}
+        response_comment = StoryService.post_reaction(header, reaction_json, story_id)
+
+        self.assertEqual(response_comment.status_code, 201)
+
+        modified_story = database.story.find_one({'_id': ObjectId(story_id)})
+        list_of_reactions = modified_story['reactions']
+        self.assertEqual(len(list_of_reactions), 1)
+
+        reaction = list_of_reactions[0]
+
+        self.assertEqual(reaction['reaction'], 'me gusta')
+        self.assertEqual(reaction['facebook_user_id'], 'facebookUserId')
+        self.assertTrue(reaction['date'] is not None)
+
 
 if __name__ == '__main__':
     unittest.main()
