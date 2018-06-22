@@ -89,8 +89,9 @@ class StoryService(object):
             return ApplicationResponse.bad_request(message='No such story was found')
 
         comment = json_comment['mComment']
+        facebook_user_id = header['facebookUserId']
         date = Time.now()
-        comment_database = MobileTransformer.mobile_comment_to_database(comment, date)
+        comment_database = MobileTransformer.mobile_comment_to_database(comment, facebook_user_id, date)
         story['comments'].append(comment_database)
 
         StoryRepository.update_story_by_id(story_id, story)

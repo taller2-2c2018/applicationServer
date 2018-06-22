@@ -327,6 +327,7 @@ class Tests(BaseTestCase):
         comment = list_of_comments[0]
 
         self.assertEqual(comment['text'], 'comment')
+        self.assertEqual(comment['facebook_user_id'], 'facebookUserId')
         self.assertTrue(comment['date'] is not None)
 
 

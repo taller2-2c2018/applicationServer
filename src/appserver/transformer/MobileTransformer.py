@@ -64,5 +64,5 @@ class MobileTransformer(object):
                 'birth_date': request_json['mBirthDate'], 'mail': request_json['mEmail'], 'sex': request_json['mSex']}
 
     @staticmethod
-    def mobile_comment_to_database(comment, date):
-        return {'text': comment, 'date': date}
+    def mobile_comment_to_database(comment, facebook_user_id, date):
+        return {'text': comment, 'facebook_user_id': facebook_user_id, 'date': date}
