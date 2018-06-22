@@ -5,6 +5,7 @@ class MobileTransformer(object):
         list_of_stories = []
         for story in stories:
             story_for_mobile = {
+                'mStoryId': story['_id'],
                 'mTitle': MobileTransformer.__optional_value(story, 'title'),
                 'mDescription': MobileTransformer.__optional_value(story, 'description'),
                 'mFacebookUserId': story['facebook_user_id'],
@@ -32,7 +33,9 @@ class MobileTransformer(object):
             'publication_date': date,
             'file_id': file_id,
             'file_type': request_form['mFileType'],
-            'location': location
+            'location': location,
+            'comments': [],
+            'reactions': []
         }
 
         return story_data
@@ -60,3 +63,11 @@ class MobileTransformer(object):
     def mobile_profile_to_database(request_json):
         return {'first_name': request_json['mFirstName'], 'last_name': request_json['mLastName'],
                 'birth_date': request_json['mBirthDate'], 'mail': request_json['mEmail'], 'sex': request_json['mSex']}
+
+    @staticmethod
+    def mobile_comment_to_database(comment, facebook_user_id, date):
+        return {'text': comment, 'facebook_user_id': facebook_user_id, 'date': date}
+
+    @staticmethod
+    def mobile_reaction_to_database(reaction, facebook_user_id, date):
+        return {'reaction': reaction, 'facebook_user_id': facebook_user_id, 'date': date}

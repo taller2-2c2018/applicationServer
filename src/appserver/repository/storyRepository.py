@@ -1,7 +1,8 @@
-from appserver.logger import LoggerFactory
+from bson import ObjectId
+
 from appserver import app
+from appserver.logger import LoggerFactory
 from appserver.time.Time import Time
-import datetime
 
 LOGGER = LoggerFactory.get_logger(__name__)
 
@@ -35,3 +36,17 @@ class StoryRepository(object):
         LOGGER.info('Getting all flash stories')
         valid_time_for_stories = Time.now() - Time.timedelta(hours=4)
         return story_collection.find({'is_flash': True, 'publication_date': {'$gte': valid_time_for_stories}})
+
+    @staticmethod
+    def get_story_by_id(story_id):
+        try:
+            LOGGER.info('Getting story with id: ' + story_id)
+            return story_collection.find_one({'_id': ObjectId(story_id)})
+        except:
+            LOGGER.error('No story found with given id')
+            return None
+
+    @staticmethod
+    def update_story_by_id(story_id, story):
+        LOGGER.info('Updating story')
+        return story_collection.update_one({'_id': ObjectId(story_id)}, {'$set': story}, upsert=False)
