@@ -161,3 +161,16 @@ class JsonValidator(object):
     @staticmethod
     def __valid_profile_picture_types():
         return ['jpg', 'png', 'jpeg', 'bmp']
+
+    @staticmethod
+    def validate_comment_request(header, json):
+        validate_header = JsonValidator.validate_header_has_facebook_user_id(header)
+        if validate_header.hasErrors:
+            return validate_header
+
+        if json is None:
+            return ValidationResponse(True, "Content-Type: is not application/json, or missing json data.")
+        validation_response = ValidationResponse(False, "")
+        validation_response = JsonValidator.__check_validity_json(json, "mComment", validation_response)
+
+        return validation_response

@@ -7,6 +7,7 @@ from appserver.app import database
 from appserver.service.UserService import UserService
 from appserver.service.StoryService import StoryService
 from tests.app.testCommons import BaseTestCase
+from bson import ObjectId
 
 
 def mock_user_identification(request_json):
@@ -244,6 +245,7 @@ class Tests(BaseTestCase):
         self.assertEqual(len(stories_list), 1)
 
         story = stories_list[0]
+        self.assertTrue(story['mStoryId'] is not None)
         self.assertEqual(story['mTitle'], '')
         self.assertEqual(story['mDescription'], 'description')
         self.assertEqual(story['mFacebookUserId'], 'facebookUserId')
@@ -271,6 +273,7 @@ class Tests(BaseTestCase):
         self.assertEqual(len(stories_list), 1)
 
         story = stories_list[0]
+        self.assertTrue(story['mStoryId'] is not None)
         self.assertEqual(story['mTitle'], '')
         self.assertEqual(story['mDescription'], 'description')
         self.assertEqual(story['mFacebookUserId'], 'facebookUserId')
@@ -298,6 +301,33 @@ class Tests(BaseTestCase):
 
         stories_list = response_stories.get_json()['data']
         self.assertEqual(len(stories_list), 0)
+
+    def test_post_new_comment_in_story(self):
+        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        request = Object()
+        request.headers = {'facebookUserId': 'facebookUserId'}
+        request.files = {'file': 'data'}
+        request.form = {'mDescription': 'description', 'mFileType': 'jpg', 'mFlash': False,
+                        'mPrivate': False, 'mLatitude': 40.714224, 'mLongitude': -73.961452}
+
+        StoryService.post_new_story(request=request)
+        response_stories = StoryService.get_all_stories_for_requester(request.headers)
+        story_id = response_stories.get_json()['data'][0]['mStoryId']
+
+        header = {'facebookUserId': 'facebookUserId'}
+        comment_json = {'mComment': 'comment'}
+        response_comment = StoryService.post_comment(header, comment_json, story_id)
+
+        self.assertEqual(response_comment.status_code, 201)
+
+        modified_story = database.story.find_one({'_id': ObjectId(story_id)})
+        list_of_comments = modified_story['comments']
+        self.assertEqual(len(list_of_comments), 1)
+
+        comment = list_of_comments[0]
+
+        self.assertEqual(comment['text'], 'comment')
+        self.assertTrue(comment['date'] is not None)
 
 
 if __name__ == '__main__':

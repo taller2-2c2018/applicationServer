@@ -12,7 +12,7 @@ storiesEndpoint = Blueprint('storiesEndpoint', __name__)
 @storiesEndpoint.route("", methods=['POST'])
 @monitor
 @secure
-def post():
+def post_story():
     LOGGER.info('Creating new story')
     return_value = StoryService().post_new_story(request)
 
@@ -22,9 +22,21 @@ def post():
 @storiesEndpoint.route("", methods=['GET'])
 @monitor
 @secure
-def get():
+def get_stories():
     LOGGER.info('Getting all permanent stories')
     request_header = request.headers
     return_value = StoryService().get_all_stories_for_requester(request_header)
+
+    return return_value
+
+
+@storiesEndpoint.route("/<story_id>/comment", methods=['POST'])
+@monitor
+@secure
+def post_comment(story_id):
+    LOGGER.info('Commenting story')
+    header = request.headers
+    json = request.get_json()
+    return_value = StoryService.post_comment(header, json, story_id)
 
     return return_value

@@ -76,3 +76,23 @@ class StoryService(object):
         friendship_list = UserRepository.get_friendship_list(requester_facebook_user_id)["friendshipList"]
         stories = StoryRepository.get_permanent_stories_from_user(target_facebook_user_id)
         return StoryService.__get_all_public_and_friends_private_stories(stories=stories, friendship_list=friendship_list)
+
+    @staticmethod
+    def post_comment(header, json_comment, story_id):
+        validation_response = JsonValidator.validate_comment_request(header, json_comment)
+        if validation_response.hasErrors:
+            return ApplicationResponse.bad_request(message=validation_response.message)
+
+        story = StoryRepository.get_story_by_id(story_id)
+
+        if story is None:
+            return ApplicationResponse.bad_request(message='No such story was found')
+
+        comment = json_comment['mComment']
+        date = Time.now()
+        comment_database = MobileTransformer.mobile_comment_to_database(comment, date)
+        story['comments'].append(comment_database)
+
+        StoryRepository.update_story_by_id(story_id, story)
+
+        return ApplicationResponse.created('Comment created successfully')
