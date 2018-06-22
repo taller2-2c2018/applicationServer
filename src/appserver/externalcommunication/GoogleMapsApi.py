@@ -16,6 +16,6 @@ class GoogleMapsApi(object):
             location = response.json()['results'][2]['formatted_address']
 
             return location
-        except:
-            LOGGER.warn('There was an error while getting location from google maps. Error: ' + str(Exception))
+        except Exception as e:
+            LOGGER.warn('There was an error while getting location from google maps. Reason: ' + str(e))
             return 'Unknown'

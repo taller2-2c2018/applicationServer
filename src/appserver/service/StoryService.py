@@ -20,10 +20,14 @@ class StoryService(object):
         if validation_response.hasErrors:
             return ApplicationResponse.bad_request(message=validation_response.message)
 
-        file = request.files
-        upload_file_response = SharedServer.upload_file(file)
+        try:
+            file = request.files
+            upload_file_response = SharedServer.upload_file(file)
+            LOGGER.info("Response from shared server: " + str(upload_file_response))
+        except Exception as e:
+            LOGGER.error('There was error while getting file from shared server. Reason:' + str(e))
+            return ApplicationResponse.service_unavailable(message='Could not upload file to Shared Server')
 
-        LOGGER.info("Response from shared server: " + str(upload_file_response))
         shared_server_response_validation = JsonValidator.validate_shared_server_register_user(upload_file_response)
         if shared_server_response_validation.hasErrors:
             return ApplicationResponse.bad_request(message=shared_server_response_validation.message)

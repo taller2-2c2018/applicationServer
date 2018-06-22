@@ -12,15 +12,21 @@ user_collection = app.database.user
 def secure(method):
     @wraps(method)
     def check_authorization(*args, **kwargs):
-        token = request.headers.get('Authorization')
-        facebook_id = request.headers.get('facebookUserId')
-        user = user_collection.find_one({'facebookUserId': facebook_id})
+        try:
+            facebook_id = request.headers.get('facebookUserId')
+            user = user_collection.find_one({'facebookUserId': facebook_id})
 
-        if user is None:
-            return ApplicationResponse.unauthorized('facebookUserId missing or value not valid')
+            if user is None:
+                return ApplicationResponse.unauthorized('facebookUserId missing or value not valid')
+        except:
+            return ApplicationResponse.bad_request('Missing request header with facebookUserId')
 
-        if (token != user['token']) and (app.skip_auth is False):
-            return ApplicationResponse.unauthorized('User token is invalid')
+        try:
+            token = request.headers.get('Authorization')
+            if (token != user['token']) and (app.skip_auth is False):
+                return ApplicationResponse.unauthorized('User token is invalid')
+        except:
+            return ApplicationResponse.bad_request('Missing request header Authorization')
 
         timestamp_now = int(time.time())
         if (timestamp_now > int(user['expires_at'])) and (app.skip_auth is False):
