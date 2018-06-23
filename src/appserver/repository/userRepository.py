@@ -51,9 +51,7 @@ class UserRepository(object):
 
     @staticmethod
     def get_profile(facebook_user_id):
-        return user_collection.find_one({'facebookUserId': facebook_user_id},
-                                        {'_id': 0, 'first_name': 1, 'last_name': 1, 'birth_date': 1, 'mail': 1,
-                                         'sex': 1, 'profile_picture_id': 1, 'file_type_profile_picture': 1})
+        return user_collection.find_one({'facebookUserId': facebook_user_id}, {'_id': 0})
 
     @staticmethod
     def get_friendship_list(facebook_user_id):

@@ -9,45 +9,46 @@ class JsonValidator(object):
 
     @staticmethod
     def validate_user_register(json):
-        LOGGER.info("Validating user authentication json.")
+        LOGGER.info('Validating user authentication json.')
         if json is None:
-            return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
-        validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity_json(json, "facebookUserId", validation_response)
-        validation_response = JsonValidator.__check_validity_json(json, "facebookAuthToken", validation_response)
+            return ValidationResponse(True, 'Content-Type: is not application/json. Please make sure you send a json')
+        validation_response = ValidationResponse(False, '')
+        validation_response = JsonValidator.__check_validity_json(json, 'facebookUserId', validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, 'facebookAuthToken', validation_response)
         return validation_response
 
     @staticmethod
     def validate_user_authenticate(json):
-        LOGGER.info("Validating user authentication json.")
+        LOGGER.info('Validating user authentication json.')
         if json is None:
-            return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
-        validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity_json(json, "facebookUserId", validation_response)
-        validation_response = JsonValidator.__check_validity_json(json, "facebookAuthToken", validation_response)
+            return ValidationResponse(True, 'Content-Type: is not application/json. Please make sure you send a json')
+        validation_response = ValidationResponse(False, '')
+        validation_response = JsonValidator.__check_validity_json(json, 'facebookUserId', validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, 'facebookAuthToken', validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, 'firebaseId', validation_response)
 
         return validation_response
 
     @staticmethod
     def validate_user_friendship_post(json):
         if json is None:
-            return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
-        validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity_json(json, "mTargetUsername", validation_response)
-        validation_response = JsonValidator.__check_validity_json(json, "mDescription", validation_response)
+            return ValidationResponse(True, 'Content-Type: is not application/json. Please make sure you send a json')
+        validation_response = ValidationResponse(False, '')
+        validation_response = JsonValidator.__check_validity_json(json, 'mTargetUsername', validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, 'mDescription', validation_response)
 
         return validation_response
 
     @staticmethod
     def validate_profile_datafields(json):
         if json is None:
-            return ValidationResponse(True, "Content-Type: is not application/json. Please make sure you send a json")
-        validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity_json(json, "mFirstName", validation_response)
-        validation_response = JsonValidator.__check_validity_json(json, "mLastName", validation_response)
-        validation_response = JsonValidator.__check_validity_json(json, "mBirthDate", validation_response)
-        validation_response = JsonValidator.__check_validity_json(json, "mEmail", validation_response)
-        validation_response = JsonValidator.__check_validity_json(json, "mSex", validation_response)
+            return ValidationResponse(True, 'Content-Type: is not application/json. Please make sure you send a json')
+        validation_response = ValidationResponse(False, '')
+        validation_response = JsonValidator.__check_validity_json(json, 'mFirstName', validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, 'mLastName', validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, 'mBirthDate', validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, 'mEmail', validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, 'mSex', validation_response)
 
         return validation_response
 
@@ -60,25 +61,25 @@ class JsonValidator(object):
         form = request.form
         file = request.files
         if form is None or file is None:
-            return ValidationResponse(True, "Content-Type: is not multipart/form-data, or missing file or form data.")
-        validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity_form(file, "file", validation_response)
-        validation_response = JsonValidator.__check_validity_form(form, "mFileType", validation_response)
-        validation_response = JsonValidator.__check_validity_form(form, "mFlash", validation_response)
+            return ValidationResponse(True, 'Content-Type: is not multipart/form-data, or missing file or form data.')
+        validation_response = ValidationResponse(False, '')
+        validation_response = JsonValidator.__check_validity_form(file, 'file', validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, 'mFileType', validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, 'mFlash', validation_response)
         validation_response = JsonValidator.__check_type_boolean(form, 'mFlash', validation_response)
-        validation_response = JsonValidator.__check_validity_form(form, "mPrivate", validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, 'mPrivate', validation_response)
         validation_response = JsonValidator.__check_type_boolean(form, 'mPrivate', validation_response)
-        validation_response = JsonValidator.__check_validity_form(form, "mLatitude", validation_response)
-        validation_response = JsonValidator.__check_validity_form(form, "mLongitude", validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, 'mLatitude', validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, 'mLongitude', validation_response)
 
         return validation_response
 
     @staticmethod
     def validate_header_has_facebook_user_id(header):
         if header is None:
-            return ValidationResponse(True, "No values present at header.")
-        validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity_header(header, "facebookUserId", validation_response)
+            return ValidationResponse(True, 'No values present at header.')
+        validation_response = ValidationResponse(False, '')
+        validation_response = JsonValidator.__check_validity_header(header, 'facebookUserId', validation_response)
 
         return validation_response
 
@@ -97,40 +98,36 @@ class JsonValidator(object):
     @staticmethod
     def __check_type_boolean(data, field_name, validation_response):
         if field_name in data and (not isinstance(data[field_name], bool)):
-            if 'false' == data[field_name].lower():
-                data.to_dict()[field_name] = False
+            if 'false' == data[field_name].lower() or 'true' == data[field_name].lower():
                 return validation_response
-            elif 'true' == data[field_name].lower():
-                data.to_dict()[field_name] = True
-                return validation_response
-            validation_response.message += field_name + " must be of boolean type. "
+            validation_response.message += field_name + ' must be of boolean type. '
             validation_response.hasErrors = True
         return validation_response
 
     @staticmethod
     def __check_validity(request_map, field_name, validation_response, request_type):
         if field_name not in request_map or request_map[field_name] is '':
-            validation_response.message += request_type + " must have " + field_name + " field and must not be empty. "
+            validation_response.message += request_type + ' must have ' + field_name + ' field and must not be empty. '
             validation_response.hasErrors = True
         return validation_response
 
     @staticmethod
     def validate_shared_server_register_user(shared_server_response):
-        LOGGER.info("Validating shared server response:" + shared_server_response.text)
+        LOGGER.info('Validating shared server response:' + shared_server_response.text)
         status_code = shared_server_response.status_code
         if status_code == 200 or status_code == 201:
             return ValidationResponse(False)
-        return ValidationResponse(True, "Failed the communication with shared server user registration. "
-                                        "Got a status code: " + str(status_code))
+        return ValidationResponse(True, 'Failed the communication with shared server user registration. '
+                                        'Got a status code: ' + str(status_code))
 
     @staticmethod
     def validate_shared_server_authorization(shared_server_response):
-        LOGGER.info("Validating shared server response:" + str(shared_server_response))
-        status_code = shared_server_response["code"]
+        LOGGER.info('Validating shared server response:' + str(shared_server_response))
+        status_code = shared_server_response['code']
         if status_code == 200 or status_code == 201:
             return ValidationResponse(False)
-        return ValidationResponse(True, "Failed the communication with shared server user authentication. "
-                                        "Got a status code: " + str(status_code))
+        return ValidationResponse(True, 'Failed the communication with shared server user authentication. '
+                                        'Got a status code: ' + str(status_code))
 
     @staticmethod
     def validate_profile_picture(request):
@@ -141,11 +138,11 @@ class JsonValidator(object):
         form = request.form
         file = request.files
         if form is None or file is None:
-            return ValidationResponse(True, "Content-Type: is not multipart/form-data, or missing file or form data.")
-        validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity_form(file, "file", validation_response)
-        validation_response = JsonValidator.__check_validity_form(form, "mFileType", validation_response)
-        validation_response = JsonValidator.__check_valid_profile_picture_filetype(form, "mFileType", validation_response)
+            return ValidationResponse(True, 'Content-Type: is not multipart/form-data, or missing file or form data.')
+        validation_response = ValidationResponse(False, '')
+        validation_response = JsonValidator.__check_validity_form(file, 'file', validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, 'mFileType', validation_response)
+        validation_response = JsonValidator.__check_valid_profile_picture_filetype(form, 'mFileType', validation_response)
 
         return validation_response
 
@@ -169,9 +166,9 @@ class JsonValidator(object):
             return validate_header
 
         if json is None:
-            return ValidationResponse(True, "Content-Type: is not application/json, or missing json data.")
-        validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity_json(json, "mComment", validation_response)
+            return ValidationResponse(True, 'Content-Type: is not application/json, or missing json data.')
+        validation_response = ValidationResponse(False, '')
+        validation_response = JsonValidator.__check_validity_json(json, 'mComment', validation_response)
 
         return validation_response
 
@@ -182,10 +179,10 @@ class JsonValidator(object):
             return validate_header
 
         if json_reaction is None:
-            return ValidationResponse(True, "Content-Type: is not application/json, or missing json data.")
-        validation_response = ValidationResponse(False, "")
-        validation_response = JsonValidator.__check_validity_json(json_reaction, "mReaction", validation_response)
-        validation_response = JsonValidator.__check_valid_reaction(json_reaction, "mReaction", validation_response)
+            return ValidationResponse(True, 'Content-Type: is not application/json, or missing json data.')
+        validation_response = ValidationResponse(False, '')
+        validation_response = JsonValidator.__check_validity_json(json_reaction, 'mReaction', validation_response)
+        validation_response = JsonValidator.__check_valid_reaction(json_reaction, 'mReaction', validation_response)
 
         return validation_response
 
