@@ -119,7 +119,7 @@ class UserService(object):
         title = requester_name + ' quiere ser tu amigo'
         body = {'mMessage': requester_message}
 
-        FirebaseCloudMessaging.send_notification(title=title, body=body, to=target['firebase_id'])
+        FirebaseCloudMessaging.send_notification(title=title, body=body, list_of_firebase_ids=target['firebase_id'])
 
     @staticmethod
     def get_friendship_requests(request_header):
@@ -157,7 +157,7 @@ class UserService(object):
         title = acceptor_name + ' ha aceptado tu solicitud de amistad'
         body = {'mMessage': 'Tú y ' + acceptor_name + ' ahora son amigos'}
 
-        FirebaseCloudMessaging.send_notification(title=title, body=body, to=target['firebase_id'])
+        FirebaseCloudMessaging.send_notification(title=title, body=body, list_of_firebase_ids=target['firebase_id'])
 
     @staticmethod
     def modify_user_profile(request_json, request_header):

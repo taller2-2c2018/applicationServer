@@ -14,10 +14,10 @@ else:
 class FirebaseCloudMessaging(object):
 
     @staticmethod
-    def send_notification(title, body, to):
+    def send_notification(title, body, list_of_firebase_ids):
         try:
             json = {
-                "to": to,
+                "registration_ids": list_of_firebase_ids,
                 "notification": {
                     "title": title,
                     "body": body}
