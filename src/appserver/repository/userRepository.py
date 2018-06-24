@@ -9,15 +9,14 @@ user_collection = app.database.user
 class UserRepository(object):
     @staticmethod
     def insert(user):
-        LOGGER.info('Inserting new vale into user_table')
+        LOGGER.info('Inserting new value into user_table')
         user_id = user_collection.insert_one(user)
         return user_id
 
     @staticmethod
     def update_user_token(facebook_id, token, expires_at):
         LOGGER.info('Updating token to existing user')
-        user_id = user_collection.find_one({'facebookUserId': facebook_id})['_id']
-        user_collection.update_one({'_id': user_id}, {
+        user_collection.update_one({'facebookUserId': facebook_id}, {
             '$set': {
                        'token': token,
                        'expires_at': expires_at
@@ -27,8 +26,7 @@ class UserRepository(object):
     @staticmethod
     def update_firebase_id(facebook_id, firebase_id):
         LOGGER.info('Updating firebase_id to existing user')
-        user_id = user_collection.find_one({'facebookUserId': facebook_id})['_id']
-        user_collection.update_one({'_id': user_id}, {
+        user_collection.update_one({'facebookUserId': facebook_id}, {
             '$set': {
                        'firebase_id': firebase_id
             }
