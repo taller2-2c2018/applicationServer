@@ -63,14 +63,12 @@ class Tests(BaseTestCase):
         self.assertEqual(inserted_user['facebookAuthToken'], 'facebookAuthToken')
         self.assertEqual(inserted_user['last_name'], 'last_name')
         self.assertEqual(inserted_user['first_name'], 'first_name')
-        self.assertEqual(inserted_user['firebase_id'], 'firebaseId')
 
     def test_register_existing_user_doesnt_add_it_again(self):
         Tests.__create_default_user()
         response_register_user = UserService.register_new_user(
             {'facebookUserId': 'facebookUserId',
-             'facebookAuthToken': 'facebookAuthToken',
-             'firebaseId': 'firebaseId'})
+             'facebookAuthToken': 'facebookAuthToken'})
 
         self.assertEqual(response_register_user.status_code, 400)
         self.assertEqual(response_register_user.get_json()['message'], 'User already registered.')
@@ -112,8 +110,7 @@ class Tests(BaseTestCase):
 
     def test_send_friendship_request(self):
         Tests.__create_default_user()
-        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken',
-                                       'firebaseId': 'firebaseId'})
+        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
         response_send_friendship_request = UserService.send_user_friendship_request(
             {'mTargetUsername': 'target', 'mDescription': 'Add me to your friend list'},
             {'facebookUserId': 'facebookUserId'})
@@ -128,8 +125,7 @@ class Tests(BaseTestCase):
 
     def test_get_friendship_requests(self):
         Tests.__create_default_user()
-        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken',
-                                       'firebaseId': 'firebaseIdTarget'})
+        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
         UserService.send_user_friendship_request(
             {'mTargetUsername': 'target', 'mDescription': 'Add me to your friend list'},
             {'facebookUserId': 'facebookUserId'})
@@ -146,10 +142,8 @@ class Tests(BaseTestCase):
         self.assertEqual(friendship_list[0]['message'], 'Add me to your friend list')
 
     def test_accept_friendship_request(self):
-        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken',
-                                       'firebaseId': 'firebaseIdTarget'})
-        UserService.register_new_user({'facebookUserId': 'requester', 'facebookAuthToken': 'facebookAuthToken',
-                                       'firebaseId': 'firebaseIdRequester'})
+        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
+        UserService.register_new_user({'facebookUserId': 'requester', 'facebookAuthToken': 'facebookAuthToken'})
         UserService.send_user_friendship_request(
             {'mTargetUsername': 'target', 'mDescription': 'Add me to your friend list'},
             {'facebookUserId': 'requester'})
@@ -371,8 +365,7 @@ class Tests(BaseTestCase):
     @staticmethod
     def __create_default_user():
         return UserService.register_new_user({'facebookUserId': 'facebookUserId',
-                                              'facebookAuthToken': 'facebookAuthToken',
-                                              'firebaseId': 'firebaseId'})
+                                              'facebookAuthToken': 'facebookAuthToken'})
 
 
 if __name__ == '__main__':

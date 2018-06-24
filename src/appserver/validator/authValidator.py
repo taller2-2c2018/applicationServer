@@ -3,6 +3,7 @@ from flask import request
 from appserver.logger import LoggerFactory
 from appserver import app
 from appserver.datastructure.ApplicationResponse import ApplicationResponse
+from appserver.repository.userRepository import UserRepository
 import time
 
 LOGGER = LoggerFactory.get_logger(__name__)
@@ -31,6 +32,10 @@ def secure(method):
         timestamp_now = int(time.time())
         if (timestamp_now > int(user['expires_at'])) and (app.skip_auth is False):
             return ApplicationResponse.unauthorized('Provided token expired')
+
+        firebase_id = request.headers.get('firebaseId')
+        if firebase_id is not None:
+            UserRepository.update_firebase_id(facebook_id, firebase_id)
 
         return method(*args, **kwargs)
 
