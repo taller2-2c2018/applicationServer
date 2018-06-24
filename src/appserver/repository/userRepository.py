@@ -25,6 +25,16 @@ class UserRepository(object):
         }, upsert=False)
 
     @staticmethod
+    def update_firebase_id(facebook_id, firebase_id):
+        LOGGER.info('Updating firebase_id to existing user')
+        user_id = user_collection.find_one({'facebookUserId': facebook_id})['_id']
+        user_collection.update_one({'_id': user_id}, {
+            '$set': {
+                       'firebase_id': firebase_id
+            }
+        }, upsert=False)
+
+    @staticmethod
     def username_exists(facebook_user_id):
         LOGGER.info('Trying to see if ' + facebook_user_id + ' exists in database')
         return user_collection.find_one({'facebookUserId': facebook_user_id}) is not None

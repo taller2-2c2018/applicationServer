@@ -18,7 +18,7 @@ LOGGER = LoggerFactory().get_logger('UserService')
 class UserService(object):
     @staticmethod
     def register_new_user(request_json):
-        validation_response = JsonValidator.validate_user_authenticate(request_json)
+        validation_response = JsonValidator.validate_user_register(request_json)
         if validation_response.hasErrors:
             return ApplicationResponse.bad_request(message=validation_response.message)
         LOGGER.info("Register user Json is valid")
@@ -48,8 +48,7 @@ class UserService(object):
             LOGGER.error('There was error while getting registering user into shared server. Reason:' + str(e))
             return ApplicationResponse.service_unavailable(message='Could not register user to Shared Server')
 
-        request_json.update({'friendshipList': [request_json['facebookUserId']],
-                             'firebase_id': request_json['firebaseId']})
+        request_json.update({'friendshipList': [request_json['facebookUserId']]})
         UserRepository.insert(request_json)
 
         return ApplicationResponse.created(message='Created user successfully')
@@ -84,6 +83,8 @@ class UserService(object):
         token = data["token"]
         expires_at = data["expires_at"]
         UserRepository.update_user_token(facebook_id, token, expires_at)
+        firebase_id = request_json['firebaseId']
+        UserRepository.update_firebase_id(facebook_id, firebase_id)
         response = {'message': 'Logged in successfully.', 'token': token}
         return ApplicationResponse.success(data=response)
 

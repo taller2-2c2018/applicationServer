@@ -26,7 +26,6 @@ class JsonValidator(object):
         validation_response = JsonValidator.__check_validity_json(json, 'facebookUserId', validation_response)
         validation_response = JsonValidator.__check_validity_json(json, 'facebookAuthToken', validation_response)
         validation_response = JsonValidator.__check_validity_json(json, 'firebaseId', validation_response)
-
         return validation_response
 
     @staticmethod
