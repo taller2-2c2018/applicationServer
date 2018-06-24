@@ -22,12 +22,16 @@ class MobileTransformer(object):
 
     @staticmethod
     def mobile_story_to_database(request_form, facebook_user_id, file_id, date, location):
+        flash = MobileTransformer.__string_to_boolean_value(dictionary=request_form, attribute='mFlash')
+        private = MobileTransformer.__string_to_boolean_value(dictionary=request_form, attribute='mPrivate')
+
+
         story_data = {
             'title': MobileTransformer.__optional_value(request_form, 'mTitle'),
             'description': MobileTransformer.__optional_value(request_form, 'mDescription'),
             'facebook_user_id': facebook_user_id,
-            'is_flash': request_form['mFlash'],
-            'is_private': request_form['mPrivate'],
+            'is_flash': flash,
+            'is_private': private,
             'latitude': request_form['mLatitude'],
             'longitude': request_form['mLongitude'],
             'publication_date': date,
@@ -39,6 +43,13 @@ class MobileTransformer(object):
         }
 
         return story_data
+
+    @staticmethod
+    def __string_to_boolean_value(dictionary, attribute):
+        if not isinstance(dictionary[attribute], bool):
+            return 'true' == dictionary[attribute].lower()
+        else:
+            return dictionary[attribute]
 
     @staticmethod
     def __optional_value(dictionary, key, optional_value=''):

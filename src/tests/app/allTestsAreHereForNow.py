@@ -47,12 +47,13 @@ class Object(object):
 @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
 @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
 @patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', mock_upload_file)
-@patch('appserver.externalcommunication.GoogleMapsApi.GoogleMapsApi.get_location', MagicMock(return_value='San Telmo, Buenos Aires'))
+@patch('appserver.externalcommunication.GoogleMapsApi.GoogleMapsApi.get_location',
+       MagicMock(return_value='San Telmo, Buenos Aires'))
+@patch('appserver.externalcommunication.FirebaseCloudMessaging.FirebaseCloudMessaging.send_notification', MagicMock())
 class Tests(BaseTestCase):
 
     def test_register_user(self):
-        response_register_user = UserService.register_new_user(
-            {'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        response_register_user = Tests.__create_default_user()
 
         self.assertEqual(response_register_user.status_code, 201)
 
@@ -62,17 +63,20 @@ class Tests(BaseTestCase):
         self.assertEqual(inserted_user['facebookAuthToken'], 'facebookAuthToken')
         self.assertEqual(inserted_user['last_name'], 'last_name')
         self.assertEqual(inserted_user['first_name'], 'first_name')
+        self.assertEqual(inserted_user['firebase_id'], 'firebaseId')
 
     def test_register_existing_user_doesnt_add_it_again(self):
-        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        Tests.__create_default_user()
         response_register_user = UserService.register_new_user(
-            {'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+            {'facebookUserId': 'facebookUserId',
+             'facebookAuthToken': 'facebookAuthToken',
+             'firebaseId': 'firebaseId'})
 
         self.assertEqual(response_register_user.status_code, 400)
         self.assertEqual(response_register_user.get_json()['message'], 'User already registered.')
 
     def test_create_user_profile(self):
-        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        Tests.__create_default_user()
         response_update_profile = UserService.modify_user_profile(
             {'mFirstName': 'name', 'mLastName': 'surname', 'mBirthDate': '01/01/1990', 'mEmail': 'mail@email.com', 'mSex': 'male'},
             {'facebookUserId': 'facebookUserId'})
@@ -88,7 +92,7 @@ class Tests(BaseTestCase):
         self.assertEqual(inserted_profile['sex'], 'male')
 
     def test_get_user_profile(self):
-        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        Tests.__create_default_user()
         UserService.modify_user_profile(
             {'mFirstName': 'name', 'mLastName': 'surname', 'mBirthDate': '01/01/1990', 'mEmail': 'mail@email.com', 'mSex': 'male'},
             {'facebookUserId': 'facebookUserId'})
@@ -107,7 +111,9 @@ class Tests(BaseTestCase):
         self.assertEqual(response_json['mSex'], 'male')
 
     def test_send_friendship_request(self):
-        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
+        Tests.__create_default_user()
+        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken',
+                                       'firebaseId': 'firebaseId'})
         response_send_friendship_request = UserService.send_user_friendship_request(
             {'mTargetUsername': 'target', 'mDescription': 'Add me to your friend list'},
             {'facebookUserId': 'facebookUserId'})
@@ -121,7 +127,9 @@ class Tests(BaseTestCase):
         self.assertEqual(inserted_friendship['message'], 'Add me to your friend list')
 
     def test_get_friendship_requests(self):
-        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
+        Tests.__create_default_user()
+        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken',
+                                       'firebaseId': 'firebaseIdTarget'})
         UserService.send_user_friendship_request(
             {'mTargetUsername': 'target', 'mDescription': 'Add me to your friend list'},
             {'facebookUserId': 'facebookUserId'})
@@ -138,8 +146,10 @@ class Tests(BaseTestCase):
         self.assertEqual(friendship_list[0]['message'], 'Add me to your friend list')
 
     def test_accept_friendship_request(self):
-        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
-        UserService.register_new_user({'facebookUserId': 'requester', 'facebookAuthToken': 'facebookAuthToken'})
+        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken',
+                                       'firebaseId': 'firebaseIdTarget'})
+        UserService.register_new_user({'facebookUserId': 'requester', 'facebookAuthToken': 'facebookAuthToken',
+                                       'firebaseId': 'firebaseIdRequester'})
         UserService.send_user_friendship_request(
             {'mTargetUsername': 'target', 'mDescription': 'Add me to your friend list'},
             {'facebookUserId': 'requester'})
@@ -164,7 +174,7 @@ class Tests(BaseTestCase):
         self.assertTrue('requester' in friends_of_target)
 
     def test_modify_profile_picture(self):
-        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        Tests.__create_default_user()
         request = Object()
         request.headers = {'facebookUserId': 'facebookUserId'}
         request.files = {'file': 'data'}
@@ -178,7 +188,7 @@ class Tests(BaseTestCase):
         self.assertEqual(updated_user['file_type_profile_picture'], 'jpg')
 
     def test_get_user_profile_after_adding_profile_picture(self):
-        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        Tests.__create_default_user()
         UserService.modify_user_profile(
             {'mFirstName': 'name', 'mLastName': 'surname', 'mBirthDate': '01/01/1990', 'mEmail': 'mail@email.com',
              'mSex': 'male'},
@@ -205,11 +215,11 @@ class Tests(BaseTestCase):
         self.assertEqual(response_json['mFileTypeProfilePicture'], 'jpg')
 
     def test_post_new_story(self):
-        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        Tests.__create_default_user()
         request = Object()
         request.headers = {'facebookUserId': 'facebookUserId'}
         request.files = {'file': 'data'}
-        request.form = {'mFileType': 'jpg', 'mFlash': False, 'mPrivate': False, 'mLatitude': 40.714224,
+        request.form = {'mFileType': 'jpg', 'mFlash': 'FaLsE', 'mPrivate': 'FALse', 'mLatitude': 40.714224,
                         'mLongitude': -73.961452}
 
         response_post_new_story = StoryService.post_new_story(request=request)
@@ -229,7 +239,7 @@ class Tests(BaseTestCase):
         self.assertEqual(story['location'], 'San Telmo, Buenos Aires')
 
     def test_get_all_stories_for_requester_gets_permanent_story(self):
-        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        Tests.__create_default_user()
         request = Object()
         request.headers = {'facebookUserId': 'facebookUserId'}
         request.files = {'file': 'data'}
@@ -257,7 +267,7 @@ class Tests(BaseTestCase):
         self.assertEqual(story['mLocation'], 'San Telmo, Buenos Aires')
 
     def test_get_all_stories_for_requester_gets_flash_story(self):
-        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        Tests.__create_default_user()
         request = Object()
         request.headers = {'facebookUserId': 'facebookUserId'}
         request.files = {'file': 'data'}
@@ -287,7 +297,7 @@ class Tests(BaseTestCase):
     @patch('appserver.time.Time.Time.now', mock_time_now)
     @patch('appserver.time.Time.Time.timedelta', mock_time_timedelta)
     def test_get_all_stories_for_requester_doesnt_get_caducated_flash_story(self):
-        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        Tests.__create_default_user()
         request = Object()
         request.headers = {'facebookUserId': 'facebookUserId'}
         request.files = {'file': 'data'}
@@ -303,7 +313,7 @@ class Tests(BaseTestCase):
         self.assertEqual(len(stories_list), 0)
 
     def test_post_new_comment_in_story(self):
-        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        Tests.__create_default_user()
         request = Object()
         request.headers = {'facebookUserId': 'facebookUserId'}
         request.files = {'file': 'data'}
@@ -331,7 +341,7 @@ class Tests(BaseTestCase):
         self.assertTrue(comment['date'] is not None)
 
     def test_post_new_reaction_in_story(self):
-        UserService.register_new_user({'facebookUserId': 'facebookUserId', 'facebookAuthToken': 'facebookAuthToken'})
+        Tests.__create_default_user()
         request = Object()
         request.headers = {'facebookUserId': 'facebookUserId'}
         request.files = {'file': 'data'}
@@ -357,6 +367,12 @@ class Tests(BaseTestCase):
         self.assertEqual(reaction['reaction'], 'me gusta')
         self.assertEqual(reaction['facebook_user_id'], 'facebookUserId')
         self.assertTrue(reaction['date'] is not None)
+
+    @staticmethod
+    def __create_default_user():
+        return UserService.register_new_user({'facebookUserId': 'facebookUserId',
+                                              'facebookAuthToken': 'facebookAuthToken',
+                                              'firebaseId': 'firebaseId'})
 
 
 if __name__ == '__main__':

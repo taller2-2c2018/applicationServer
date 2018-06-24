@@ -3,6 +3,7 @@ import json
 from appserver.datastructure.ApplicationResponse import ApplicationResponse
 from appserver.externalcommunication.facebook import Facebook
 from appserver.externalcommunication.sharedServer import SharedServer
+from appserver.externalcommunication.FirebaseCloudMessaging import FirebaseCloudMessaging
 from appserver.logger import LoggerFactory
 from appserver.repository.friendshipRepository import FriendshipRepository
 from appserver.repository.userRepository import UserRepository
@@ -47,8 +48,10 @@ class UserService(object):
             LOGGER.error('There was error while getting registering user into shared server. Reason:' + str(e))
             return ApplicationResponse.service_unavailable(message='Could not register user to Shared Server')
 
-        request_json.update({'friendshipList': [request_json['facebookUserId']]})
+        request_json.update({'friendshipList': [request_json['facebookUserId']],
+                             'firebase_id': request_json['firebaseId']})
         UserRepository.insert(request_json)
+
         return ApplicationResponse.created(message='Created user successfully')
 
     @staticmethod
@@ -94,15 +97,29 @@ class UserService(object):
         if validation_response.hasErrors:
             return ApplicationResponse.bad_request(message=validation_response.message)
 
-        target_username = request_json["mTargetUsername"]
-        if UserRepository.username_exists(target_username):
+        target = request_json["mTargetUsername"]
+        if UserRepository.username_exists(target):
             requester = request_header['facebookUserId']
             message = request_json['mDescription']
-            friendship_to_insert = {'requester': requester, 'target': target_username, 'message': message}
+            friendship_to_insert = {'requester': requester, 'target': target, 'message': message}
             FriendshipRepository.insert(friendship_to_insert)
+            UserService.__send_notification_of_friendship_request(facebook_id_requester=requester,
+                                                                  facebook_id_target=target,
+                                                                  requester_message=message)
+
             return ApplicationResponse.success(message='Friendship request sent successfully')
 
         return ApplicationResponse.bad_request(message='Target username doesn\'t exist')
+
+    @staticmethod
+    def __send_notification_of_friendship_request(facebook_id_requester, facebook_id_target, requester_message):
+        requester = UserRepository.get_profile(facebook_id_requester)
+        requester_name = requester['first_name'] + ' ' + requester['last_name']
+        target = UserRepository.get_profile(facebook_id_target)
+        title = requester_name + ' quiere ser tu amigo'
+        body = {'mMessage': requester_message}
+
+        FirebaseCloudMessaging.send_notification(title=title, body=body, list_of_firebase_ids=target['firebase_id'])
 
     @staticmethod
     def get_friendship_requests(request_header):
@@ -125,9 +142,22 @@ class UserService(object):
         if FriendshipRepository.friendship_exists(user_that_accepts_friendship, target_user):
             FriendshipRepository.accept_friendship(user_that_accepts_friendship, target_user)
             UserRepository.add_friendship(user_that_accepts_friendship, target_user)
+            UserService.__send_notification_of_friendship_accepted(facebook_id_acceptor=user_that_accepts_friendship,
+                                                                   facebook_id_target=target_user)
+
             return ApplicationResponse.success(message='Friendship was accepted successfully')
 
         return ApplicationResponse.bad_request(message='Friendship request couldn\'t be found')
+
+    @staticmethod
+    def __send_notification_of_friendship_accepted(facebook_id_acceptor, facebook_id_target):
+        acceptor = UserRepository.get_profile(facebook_id_acceptor)
+        acceptor_name = acceptor['first_name'] + ' ' + acceptor['last_name']
+        target = UserRepository.get_profile(facebook_id_target)
+        title = acceptor_name + ' ha aceptado tu solicitud de amistad'
+        body = {'mMessage': 'Tú y ' + acceptor_name + ' ahora son amigos'}
+
+        FirebaseCloudMessaging.send_notification(title=title, body=body, list_of_firebase_ids=target['firebase_id'])
 
     @staticmethod
     def modify_user_profile(request_json, request_header):
