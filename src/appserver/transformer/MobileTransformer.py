@@ -14,17 +14,17 @@ class MobileTransformer(object):
                 'mFileId': story['file_id'],
                 'mFileType': story['file_type'],
                 'mFlash': story['is_flash'],
-                'mLocation': story['location']
+                'mLocation': story['location'],
+                'mRelevance': story['relevance']
             }
             list_of_stories.append(story_for_mobile)
 
         return list_of_stories
 
     @staticmethod
-    def mobile_story_to_database(request_form, facebook_user_id, file_id, date, location):
+    def mobile_story_to_database(request_form, facebook_user_id, file_id, date, location, total_friends, stories_posted_today):
         flash = MobileTransformer.__string_to_boolean_value(dictionary=request_form, attribute='mFlash')
         private = MobileTransformer.__string_to_boolean_value(dictionary=request_form, attribute='mPrivate')
-
 
         story_data = {
             'title': MobileTransformer.__optional_value(request_form, 'mTitle'),
@@ -39,7 +39,9 @@ class MobileTransformer(object):
             'file_type': request_form['mFileType'],
             'location': location,
             'comments': [],
-            'reactions': []
+            'reactions': [],
+            'total_friends': total_friends,
+            'stories_posted_today': stories_posted_today
         }
 
         return story_data
