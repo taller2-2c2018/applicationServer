@@ -10,6 +10,7 @@ from appserver.repository.userRepository import UserRepository
 from appserver.transformer.MobileTransformer import MobileTransformer
 from appserver.validator.jsonValidator import JsonValidator
 from appserver.time.Time import Time
+from werkzeug.datastructures import FileStorage, MultiDict
 
 LOGGER = LoggerFactory().get_logger(__name__)
 
@@ -21,14 +22,14 @@ class StoryService(object):
         if validation_response.hasErrors:
             return ApplicationResponse.bad_request(message=validation_response.message)
 
+        request_json = request.get_json()
+
         try:
             LOGGER.info('Getting file for story')
-            file_content = request.get_json()['file']
-            text_file = open("file", "w")
-            text_file.write(file_content)
-            text_file.close()
-            text_file.flush()
-            upload_file_response = SharedServer.upload_file(text_file)
+            file_content = request_json['file']
+            multi_dict = MultiDict([('file', file_content)])
+            LOGGER.info('This is what multi dict has ' + str(multi_dict))
+            upload_file_response = SharedServer.upload_file(multi_dict)
             LOGGER.info("Response from shared server: " + str(upload_file_response))
         except Exception as e:
             LOGGER.error('There was error while getting file from shared server. Reason:' + str(e))
@@ -40,7 +41,7 @@ class StoryService(object):
 
         file_id = json.loads(upload_file_response.text)['data']['id']
 
-        request_json = request.get_json()
+
         facebook_id_poster = request.headers['facebookUserId']
         date = Time.now()
         LOGGER.info('Date is ' + str(date))
