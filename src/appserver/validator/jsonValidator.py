@@ -63,7 +63,6 @@ class JsonValidator(object):
         if form is None or file is None:
             return ValidationResponse(True, 'Content-Type: is not multipart/form-data, or missing file or form data.')
         validation_response = ValidationResponse(False, '')
-        validation_response = JsonValidator.__check_validity_form(file, 'file', validation_response)
         validation_response = JsonValidator.__check_validity_form(form, 'mFileType', validation_response)
         validation_response = JsonValidator.__check_validity_form(form, 'mFlash', validation_response)
         validation_response = JsonValidator.__check_type_boolean(form, 'mFlash', validation_response)
@@ -71,6 +70,7 @@ class JsonValidator(object):
         validation_response = JsonValidator.__check_type_boolean(form, 'mPrivate', validation_response)
         validation_response = JsonValidator.__check_validity_form(form, 'mLatitude', validation_response)
         validation_response = JsonValidator.__check_validity_form(form, 'mLongitude', validation_response)
+        validation_response = JsonValidator.__check_validity_form(file, 'file', validation_response)
 
         return validation_response
 
@@ -89,6 +89,7 @@ class JsonValidator(object):
 
     @staticmethod
     def __check_validity_form(form, field_name, validation_response):
+        LOGGER.info('Validating form: ' + str(form) + ' with field name: ' + field_name)
         return JsonValidator.__check_validity(form, field_name, validation_response, 'Form')
 
     @staticmethod
