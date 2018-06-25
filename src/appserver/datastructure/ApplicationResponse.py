@@ -7,6 +7,7 @@ BAD_REQUEST = 400
 NOT_FOUND = 404
 UNAUTHORIZED = 401
 SERVICE_UNAVAILABLE = 503
+INTERNAL_SERVER_ERROR = 500
 
 
 class ApplicationResponse:
@@ -29,6 +30,10 @@ class ApplicationResponse:
     @staticmethod
     def service_unavailable(message=''):
         return ApplicationResponse.__json_response(SERVICE_UNAVAILABLE, message, None)
+
+    @staticmethod
+    def internal_server_error(message=''):
+        return ApplicationResponse.__json_response(INTERNAL_SERVER_ERROR, message, None)
 
     @staticmethod
     def file(file):
