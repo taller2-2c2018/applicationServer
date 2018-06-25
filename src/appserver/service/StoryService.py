@@ -40,19 +40,22 @@ class StoryService(object):
         date = Time.now()
         LOGGER.info('Date is ' + str(date))
         location = GoogleMapsApi.get_location(request_form['mLatitude'], request_form['mLongitude'])
+        user = UserRepository.get_profile(facebook_id_poster)
+        total_friends = len(user['friendshipList']) - 1
+        stories_posted_today = StoryRepository.get_total_stories_posted_today_by_user(facebook_id_poster)
         story_data = MobileTransformer.mobile_story_to_database(request_form, facebook_id_poster, file_id, date,
-                                                                location)
+                                                                location, total_friends, stories_posted_today)
 
         response = StoryRepository.create_story(story_data)
         LOGGER.info('This is what I got from the database ' + str(response))
-        StoryService.__send_new_story_notification(facebook_id_poster)
+        StoryService.__send_new_story_notification(user)
 
         return ApplicationResponse.created(message='Created story successfully')
 
     @staticmethod
-    def __send_new_story_notification(facebook_id_poster):
+    def __send_new_story_notification(user):
         LOGGER.info('Sending push notification of new story')
-        user = UserRepository.get_profile(facebook_id_poster)
+        facebook_id_poster = user['facebookUserId']
         user_name = user['first_name'] + ' ' + user['last_name']
         title = user_name + ' ha subido una nueva historia'
         body = {'mMessage': 'Mira la nueva historia de ' + user_name}
@@ -85,6 +88,7 @@ class StoryService(object):
 
         filtered_stories = StoryService.__get_all_public_and_friends_private_stories(permanent_stories, friendship_list)
         filtered_stories.extend(list(flash_stories))
+        filtered_stories = StoryService.__calculate_relevance_of_story(filtered_stories)
         filtered_stories_for_mobile = MobileTransformer.database_list_of_stories_to_mobile(filtered_stories)
 
         return ApplicationResponse.success(data=filtered_stories_for_mobile)
@@ -97,8 +101,26 @@ class StoryService(object):
             LOGGER.info('Story to review ' + str(story))
             if (not story['is_private']) or (story['is_private'] and story['facebook_user_id'] in friendship_list):
                 LOGGER.info('Adding story to list ' + str(story))
+
                 stories_list.append(story)
         return stories_list
+
+    @staticmethod
+    def __calculate_relevance_of_story(stories):
+        rated_stories = []
+        LOGGER.info('Calculating relevance of stories')
+        for story in stories:
+            total_friends = story['total_friends']
+            total_publications = story['stories_posted_today']
+            total_comments = len(story['comments'])
+            total_reactions = len(story['reactions'])
+            total_hours_passed = Time.hours_passed(story['publication_date'])
+            # TODO cuenta mágica
+            # TODO story['mRelevance'] = cuenta mágica
+            story['relevance'] = 0.0
+            rated_stories.append(story)
+
+        return rated_stories
 
     @staticmethod
     def get_permanent_stories_of_given_user(requester_facebook_user_id, target_facebook_user_id):

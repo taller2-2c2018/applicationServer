@@ -50,3 +50,10 @@ class StoryRepository(object):
     def update_story_by_id(story_id, story):
         LOGGER.info('Updating story')
         return story_collection.update_one({'_id': ObjectId(story_id)}, {'$set': story}, upsert=False)
+
+    @staticmethod
+    def get_total_stories_posted_today_by_user(facebook_id):
+        LOGGER.info('Getting total stories posted today by user ' + str(facebook_id))
+        start_of_day = Time.start_of_today()
+
+        return story_collection.find({'facebook_user_id': facebook_id, 'publication_date': {'$gte': start_of_day}}).count()
