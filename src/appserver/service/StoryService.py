@@ -22,6 +22,7 @@ class StoryService(object):
             return ApplicationResponse.bad_request(message=validation_response.message)
 
         try:
+            LOGGER.info('Getting file for story')
             file = request.files
             upload_file_response = SharedServer.upload_file(file)
             LOGGER.info("Response from shared server: " + str(upload_file_response))

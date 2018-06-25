@@ -53,6 +53,7 @@ class JsonValidator(object):
 
     @staticmethod
     def validate_story_request(request):
+        LOGGER.info('Validating story request')
         validate_header = JsonValidator.validate_header_has_facebook_user_id(request.headers)
         if validate_header.hasErrors:
             return validate_header
