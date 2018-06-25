@@ -70,7 +70,7 @@ class JsonValidator(object):
         validation_response = JsonValidator.__check_type_boolean(form, 'mPrivate', validation_response)
         validation_response = JsonValidator.__check_validity_form(form, 'mLatitude', validation_response)
         validation_response = JsonValidator.__check_validity_form(form, 'mLongitude', validation_response)
-        validation_response = JsonValidator.__check_validity_form(file, 'file', validation_response)
+        validation_response = JsonValidator.__check_validity_file(file, 'file', validation_response)
 
         return validation_response
 
@@ -89,12 +89,19 @@ class JsonValidator(object):
 
     @staticmethod
     def __check_validity_form(form, field_name, validation_response):
-        LOGGER.info('Validating form: ' + str(form) + ' with field name: ' + field_name)
+        LOGGER.info('Validating form with field name: ' + field_name)
         return JsonValidator.__check_validity(form, field_name, validation_response, 'Form')
 
     @staticmethod
     def __check_validity_header(header, field_name, validation_response):
         return JsonValidator.__check_validity(header, field_name, validation_response, 'Header')
+
+    @staticmethod
+    def __check_validity_file(request_map, field_name, validation_response):
+        if field_name not in request_map:
+            validation_response.message += ' You must include a file in your post. '
+            validation_response.hasErrors = True
+        return validation_response
 
     @staticmethod
     def __check_type_boolean(data, field_name, validation_response):
