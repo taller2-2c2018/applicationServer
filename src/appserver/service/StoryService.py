@@ -23,7 +23,7 @@ class StoryService(object):
 
         try:
             LOGGER.info('Getting file for story')
-            file = request.files
+            file = request.get_json()['file']
             upload_file_response = SharedServer.upload_file(file)
             LOGGER.info("Response from shared server: " + str(upload_file_response))
         except Exception as e:
@@ -36,15 +36,15 @@ class StoryService(object):
 
         file_id = json.loads(upload_file_response.text)['data']['id']
 
-        request_form = request.form
+        request_json = request.get_json()
         facebook_id_poster = request.headers['facebookUserId']
         date = Time.now()
         LOGGER.info('Date is ' + str(date))
-        location = GoogleMapsApi.get_location(request_form['mLatitude'], request_form['mLongitude'])
+        location = GoogleMapsApi.get_location(request_json['mLatitude'], request_json['mLongitude'])
         user = UserRepository.get_profile(facebook_id_poster)
         total_friends = len(user['friendshipList']) - 1
         stories_posted_today = StoryRepository.get_total_stories_posted_today_by_user(facebook_id_poster)
-        story_data = MobileTransformer.mobile_story_to_database(request_form, facebook_id_poster, file_id, date,
+        story_data = MobileTransformer.mobile_story_to_database(request_json, facebook_id_poster, file_id, date,
                                                                 location, total_friends, stories_posted_today)
 
         response = StoryRepository.create_story(story_data)
