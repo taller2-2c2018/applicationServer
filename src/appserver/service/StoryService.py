@@ -23,8 +23,12 @@ class StoryService(object):
 
         try:
             LOGGER.info('Getting file for story')
-            file = request.get_json()['file']
-            upload_file_response = SharedServer.upload_file(file)
+            file_content = request.get_json()['file']
+            text_file = open("file", "w")
+            text_file.write(file_content)
+            text_file.close()
+            text_file.flush()
+            upload_file_response = SharedServer.upload_file(text_file)
             LOGGER.info("Response from shared server: " + str(upload_file_response))
         except Exception as e:
             LOGGER.error('There was error while getting file from shared server. Reason:' + str(e))

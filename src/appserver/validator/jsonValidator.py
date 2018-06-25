@@ -58,6 +58,7 @@ class JsonValidator(object):
         if validate_header.hasErrors:
             return validate_header
 
+        LOGGER.info('Testing')
         json = request.get_json()
         if json is None:
             return ValidationResponse(True, 'Content-Type: is not multipart/form-data, or missing file or form data.')
