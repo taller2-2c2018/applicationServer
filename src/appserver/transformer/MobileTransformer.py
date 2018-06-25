@@ -67,6 +67,7 @@ class MobileTransformer(object):
             'mSex': database_profile['sex'],
             'mProfilePictureId': MobileTransformer.__optional_value(database_profile, 'profile_picture_id', None),
             'mFileTypeProfilePicture': MobileTransformer.__optional_value(database_profile, 'file_type_profile_picture', None),
+            'mfriendshipList': database_profile['friendshipList'],
             'mStories': stories
         }
 
