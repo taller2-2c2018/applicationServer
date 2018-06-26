@@ -16,7 +16,9 @@ storiesEndpoint = Blueprint('storiesEndpoint', __name__)
 @controller_auditory
 def post_story():
     LOGGER.info('Creating new story')
-    return_value = StoryService.post_new_story(request)
+    headers = request.headers
+    story_json = request.get_json()
+    return_value = StoryService.post_new_story(headers=headers, story_json=story_json)
 
     return return_value
 

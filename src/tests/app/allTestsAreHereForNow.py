@@ -1,15 +1,15 @@
+import datetime
 import json
 import unittest
-import datetime
-import pytz
-from datetime import timezone
 from unittest.mock import *
 
-from appserver.app import database
-from appserver.service.UserService import UserService
-from appserver.service.StoryService import StoryService
-from tests.app.testCommons import BaseTestCase
+import pytz
 from bson import ObjectId
+
+from appserver.app import database
+from appserver.service.StoryService import StoryService
+from appserver.service.UserService import UserService
+from tests.app.testCommons import BaseTestCase
 
 
 def mock_user_identification(request_json):
@@ -213,19 +213,14 @@ class Tests(BaseTestCase):
 
     def test_post_new_story(self):
         Tests.__create_default_user()
-        request = Object()
-        request.headers = {'facebookUserId': 'facebookUserId'}
-        request.files = {'file': 'data'}
-        request.form = {'mFileType': 'jpg', 'mFlash': 'FaLsE', 'mPrivate': 'FALse', 'mLatitude': 40.714224,
-                        'mLongitude': -73.961452}
 
-        response_post_new_story = StoryService.post_new_story(request=request)
+        response_post_new_story = Tests.__create_default_story()
         self.assertEqual(response_post_new_story.status_code, 201)
 
         story = database.story.find_one({'facebook_user_id': 'facebookUserId'})
 
-        self.assertEqual(story['title'], '')
-        self.assertEqual(story['description'], '')
+        self.assertEqual(story['title'], 'title')
+        self.assertEqual(story['description'], 'description')
         self.assertEqual(story['facebook_user_id'], 'facebookUserId')
         self.assertEqual(story['is_flash'], False)
         self.assertEqual(story['is_private'], False)
@@ -239,15 +234,9 @@ class Tests(BaseTestCase):
 
     def test_get_all_stories_for_requester_gets_permanent_story(self):
         Tests.__create_default_user()
-        request = Object()
-        request.headers = {'facebookUserId': 'facebookUserId'}
-        request.files = {'file': 'data'}
-        request.form = {'mDescription': 'description', 'mFileType': 'jpg', 'mFlash': False,
-                        'mPrivate': False, 'mLatitude': 40.714224, 'mLongitude': -73.961452}
+        Tests.__create_default_story()
 
-        StoryService.post_new_story(request=request)
-
-        response_stories = StoryService.get_all_stories_for_requester(request.headers)
+        response_stories = StoryService.get_all_stories_for_requester(Tests.__default_header())
         self.assertEqual(response_stories.status_code, 200)
 
         stories_list = response_stories.get_json()['data']
@@ -255,7 +244,7 @@ class Tests(BaseTestCase):
 
         story = stories_list[0]
         self.assertTrue(story['mStoryId'] is not None)
-        self.assertEqual(story['mTitle'], '')
+        self.assertEqual(story['mTitle'], 'title')
         self.assertEqual(story['mDescription'], 'description')
         self.assertEqual(story['mFacebookUserId'], 'facebookUserId')
         self.assertEqual(story['mLatitude'], 40.714224)
@@ -268,15 +257,9 @@ class Tests(BaseTestCase):
 
     def test_get_all_stories_for_requester_gets_flash_story(self):
         Tests.__create_default_user()
-        request = Object()
-        request.headers = {'facebookUserId': 'facebookUserId'}
-        request.files = {'file': 'data'}
-        request.form = {'mDescription': 'description', 'mFileType': 'jpg', 'mFlash': True,
-                        'mPrivate': False, 'mLatitude': 40.714224, 'mLongitude': -73.961452}
+        Tests.__create_default_story(is_flash=True)
 
-        StoryService.post_new_story(request=request)
-
-        response_stories = StoryService.get_all_stories_for_requester(request.headers)
+        response_stories = StoryService.get_all_stories_for_requester(Tests.__default_header())
         self.assertEqual(response_stories.status_code, 200)
 
         stories_list = response_stories.get_json()['data']
@@ -284,7 +267,7 @@ class Tests(BaseTestCase):
 
         story = stories_list[0]
         self.assertTrue(story['mStoryId'] is not None)
-        self.assertEqual(story['mTitle'], '')
+        self.assertEqual(story['mTitle'], 'title')
         self.assertEqual(story['mDescription'], 'description')
         self.assertEqual(story['mFacebookUserId'], 'facebookUserId')
         self.assertEqual(story['mLatitude'], 40.714224)
@@ -299,15 +282,9 @@ class Tests(BaseTestCase):
     @patch('appserver.time.Time.Time.timedelta', mock_time_timedelta)
     def test_get_all_stories_for_requester_doesnt_get_caducated_flash_story(self):
         Tests.__create_default_user()
-        request = Object()
-        request.headers = {'facebookUserId': 'facebookUserId'}
-        request.files = {'file': 'data'}
-        request.form = {'mDescription': 'description', 'mFileType': 'jpg', 'mFlash': True,
-                        'mPrivate': False, 'mLatitude': 40.714224, 'mLongitude': -73.961452}
+        Tests.__create_default_story(is_flash=True)
 
-        StoryService.post_new_story(request=request)
-
-        response_stories = StoryService.get_all_stories_for_requester(request.headers)
+        response_stories = StoryService.get_all_stories_for_requester(Tests.__default_header())
         self.assertEqual(response_stories.status_code, 200)
 
         stories_list = response_stories.get_json()['data']
@@ -315,19 +292,13 @@ class Tests(BaseTestCase):
 
     def test_post_new_comment_in_story(self):
         Tests.__create_default_user()
-        request = Object()
-        request.headers = {'facebookUserId': 'facebookUserId'}
-        request.files = {'file': 'data'}
-        request.form = {'mDescription': 'description', 'mFileType': 'jpg', 'mFlash': False,
-                        'mPrivate': False, 'mLatitude': 40.714224, 'mLongitude': -73.961452}
+        Tests.__create_default_story()
 
-        StoryService.post_new_story(request=request)
-        response_stories = StoryService.get_all_stories_for_requester(request.headers)
+        response_stories = StoryService.get_all_stories_for_requester(Tests.__default_header())
         story_id = response_stories.get_json()['data'][0]['mStoryId']
 
-        header = {'facebookUserId': 'facebookUserId'}
         comment_json = {'mComment': 'comment'}
-        response_comment = StoryService.post_comment(header, comment_json, story_id)
+        response_comment = StoryService.post_comment(Tests.__default_header(), comment_json, story_id)
 
         self.assertEqual(response_comment.status_code, 201)
 
@@ -343,14 +314,8 @@ class Tests(BaseTestCase):
 
     def test_post_new_reaction_in_story(self):
         Tests.__create_default_user()
-        request = Object()
-        request.headers = {'facebookUserId': 'facebookUserId'}
-        request.files = {'file': 'data'}
-        request.form = {'mDescription': 'description', 'mFileType': 'jpg', 'mFlash': False,
-                        'mPrivate': False, 'mLatitude': 40.714224, 'mLongitude': -73.961452}
-
-        StoryService.post_new_story(request=request)
-        response_stories = StoryService.get_all_stories_for_requester(request.headers)
+        Tests.__create_default_story()
+        response_stories = StoryService.get_all_stories_for_requester(Tests.__default_header())
         story_id = response_stories.get_json()['data'][0]['mStoryId']
 
         header = {'facebookUserId': 'facebookUserId'}
@@ -373,6 +338,18 @@ class Tests(BaseTestCase):
     def __create_default_user():
         return UserService.register_new_user({'facebookUserId': 'facebookUserId',
                                               'facebookAuthToken': 'facebookAuthToken'})
+
+    @staticmethod
+    def __create_default_story(is_flash=False):
+        headers = Tests.__default_header()
+        story_json = {'file': 'data', 'mTitle': 'title', 'mDescription': 'description', 'mFileType': 'jpg',
+                      'mFlash': is_flash, 'mPrivate': False, 'mLatitude': 40.714224, 'mLongitude': -73.961452}
+
+        return StoryService.post_new_story(headers=headers, story_json=story_json)
+
+    @staticmethod
+    def __default_header():
+        return {'facebookUserId': 'facebookUserId'}
 
 
 if __name__ == '__main__':

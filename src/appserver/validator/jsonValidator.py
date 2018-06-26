@@ -52,16 +52,14 @@ class JsonValidator(object):
         return validation_response
 
     @staticmethod
-    def validate_story_request(request):
+    def validate_story_request(headers, json):
         LOGGER.info('Validating story request')
-        validate_header = JsonValidator.validate_header_has_facebook_user_id(request.headers)
+        validate_header = JsonValidator.validate_header_has_facebook_user_id(headers)
         if validate_header.hasErrors:
             return validate_header
 
-        LOGGER.info('Testing')
-        json = request.get_json()
         if json is None:
-            return ValidationResponse(True, 'Content-Type: is not multipart/form-data, or missing file or form data.')
+            return ValidationResponse(True, 'Content-Type: is not application/json, or missing json data.')
         validation_response = ValidationResponse(False, '')
         validation_response = JsonValidator.__check_validity_json(json, 'mFileType', validation_response)
         validation_response = JsonValidator.__check_validity_json(json, 'mFlash', validation_response)
