@@ -52,6 +52,15 @@ def get_friendship_requests_for_user():
     return_value = UserService().get_friendship_requests(request_header)
     return return_value
 
+@userEndpoint.route("/friends", methods=['GET'])
+@monitor
+@secure
+@controller_auditory
+def get_user_friends():
+    LOGGER.info('Getting all friends of given user')
+    request_header = request.headers
+    return_value = UserService().get_user_friends(request_header)
+    return return_value
 
 @userEndpoint.route("/friendship/accept/<facebook_user_id>", methods=['POST'])
 @monitor
