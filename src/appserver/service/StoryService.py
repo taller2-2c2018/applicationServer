@@ -23,7 +23,6 @@ class StoryService(object):
         if validation_response.hasErrors:
             return ApplicationResponse.bad_request(message=validation_response.message)
 
-
         try:
             LOGGER.info('Getting file for story')
             file_content = story_json['file']
@@ -94,7 +93,7 @@ class StoryService(object):
         filtered_stories = StoryService.__get_all_public_and_friends_private_stories(permanent_stories, friendship_list)
         filtered_stories.extend(list(flash_stories))
         filtered_stories = StoryService.__calculate_relevance_of_story(filtered_stories)
-        filtered_stories_for_mobile = MobileTransformer.database_list_of_stories_to_mobile(filtered_stories)
+        filtered_stories_for_mobile = MobileTransformer.database_list_of_stories_with_relevance_to_mobile(filtered_stories)
 
         return ApplicationResponse.success(data=filtered_stories_for_mobile)
 
@@ -150,18 +149,19 @@ class StoryService(object):
         story['comments'].append(comment_database)
 
         StoryRepository.update_story_by_id(story_id, story)
+        story = StoryRepository.get_story_by_id(story_id)
         LOGGER.info('Added comment to story')
-        StoryService.__send_new_comment_notification(facebook_user_id, comment)
+        story_for_mobile = MobileTransformer.database_story_to_mobile(story)
+        StoryService.__send_new_comment_notification(facebook_user_id, body=story_for_mobile)
 
         return ApplicationResponse.created('Comment created successfully')
 
     @staticmethod
-    def __send_new_comment_notification(facebook_user_id, comment):
+    def __send_new_comment_notification(facebook_user_id, body):
         LOGGER.info('Sending comment notification')
         user = UserRepository.get_profile(facebook_user_id)
         user_name = user['first_name'] + ' ' + user['last_name']
         title = user_name + ' ha realizado un comentario en tu historia'
-        body = {'mMessage': user_name + ": " + comment}
 
         StoryService.__send_notification_to_friends(facebook_user_id, title, body)
 
@@ -183,17 +183,19 @@ class StoryService(object):
         story['reactions'].append(comment_database)
 
         StoryRepository.update_story_by_id(story_id, story)
+        story = StoryRepository.get_story_by_id(story_id)
         LOGGER.info('Added reaction to story')
-        StoryService.__send_new_reaction_notification(facebook_user_id, reaction)
+        story_for_mobile = MobileTransformer.database_story_to_mobile(story)
+
+        StoryService.__send_new_reaction_notification(facebook_user_id, reaction, body=story_for_mobile)
 
         return ApplicationResponse.created('Reaction created successfully')
 
     @staticmethod
-    def __send_new_reaction_notification(facebook_user_id, reaction):
+    def __send_new_reaction_notification(facebook_user_id, reaction, body):
         LOGGER.info('Sending reaction notification')
         user = UserRepository.get_profile(facebook_user_id)
         user_name = user['first_name'] + ' ' + user['last_name']
-        title = user_name + ' ha reaccionado a tu historia'
-        body = {'mMessage': user_name + ": ha reaccionado con un " + reaction}
+        title = user_name + ' ha reaccionado con un ' + reaction + ' a tu historia'
 
         StoryService.__send_notification_to_friends(facebook_user_id, title, body)

@@ -1,3 +1,4 @@
+import sys
 from functools import wraps
 
 from appserver.datastructure.ApplicationResponse import ApplicationResponse
@@ -14,6 +15,10 @@ def controller_auditory(method):
             return method(*args, **kwargs)
         except Exception as e:
             error_message = 'Endpoint failed. Reason: ' + str(e)
+            LOGGER.error(error_message)
+            return ApplicationResponse.internal_server_error(message=error_message)
+        except:
+            error_message = 'Unexpected error occurred. System execution info: ' + str(sys.exc_info()[0])
             LOGGER.error(error_message)
             return ApplicationResponse.internal_server_error(message=error_message)
 

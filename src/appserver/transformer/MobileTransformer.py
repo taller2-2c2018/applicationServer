@@ -1,10 +1,18 @@
 class MobileTransformer(object):
 
     @staticmethod
-    def database_list_of_stories_to_mobile(stories):
+    def database_list_of_stories_with_relevance_to_mobile(stories):
         list_of_stories = []
         for story in stories:
-            story_for_mobile = {
+            story_for_mobile = MobileTransformer.database_story_to_mobile(story)
+            story_for_mobile['mRelevance'] = story['relevance']
+            list_of_stories.append(story_for_mobile)
+
+        return list_of_stories
+
+    @staticmethod
+    def database_story_to_mobile(story):
+        return {
                 'mStoryId': story['_id'],
                 'mTitle': MobileTransformer.__optional_value(story, 'title'),
                 'mDescription': MobileTransformer.__optional_value(story, 'description'),
@@ -14,12 +22,8 @@ class MobileTransformer(object):
                 'mFileId': story['file_id'],
                 'mFileType': story['file_type'],
                 'mFlash': story['is_flash'],
-                'mLocation': story['location'],
-                'mRelevance': story['relevance']
+                'mLocation': story['location']
             }
-            list_of_stories.append(story_for_mobile)
-
-        return list_of_stories
 
     @staticmethod
     def mobile_story_to_database(request_form, facebook_user_id, file_id, date, location, total_friends, stories_posted_today):
