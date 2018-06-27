@@ -4,6 +4,7 @@ from appserver.logger import LoggerFactory
 from appserver.monitor.monitor import monitor
 from appserver.service.StoryService import StoryService
 from appserver.validator.authValidator import secure
+from appserver.controller.ControllerAuditory import controller_auditory
 
 LOGGER = LoggerFactory().get_logger(__name__)
 storiesEndpoint = Blueprint('storiesEndpoint', __name__)
@@ -12,9 +13,12 @@ storiesEndpoint = Blueprint('storiesEndpoint', __name__)
 @storiesEndpoint.route("", methods=['POST'])
 @monitor
 @secure
+@controller_auditory
 def post_story():
     LOGGER.info('Creating new story')
-    return_value = StoryService.post_new_story(request)
+    headers = request.headers
+    story_json = request.get_json()
+    return_value = StoryService.post_new_story(headers=headers, story_json=story_json)
 
     return return_value
 
@@ -22,6 +26,7 @@ def post_story():
 @storiesEndpoint.route("", methods=['GET'])
 @monitor
 @secure
+@controller_auditory
 def get_stories():
     LOGGER.info('Getting all permanent stories')
     request_header = request.headers
@@ -33,6 +38,7 @@ def get_stories():
 @storiesEndpoint.route("/<story_id>/comment", methods=['POST'])
 @monitor
 @secure
+@controller_auditory
 def post_comment(story_id):
     LOGGER.info('Commenting story')
     header = request.headers
@@ -45,6 +51,7 @@ def post_comment(story_id):
 @storiesEndpoint.route("/<story_id>/reaction", methods=['POST'])
 @monitor
 @secure
+@controller_auditory
 def post_reaction(story_id):
     LOGGER.info('Reacting to story')
     header = request.headers

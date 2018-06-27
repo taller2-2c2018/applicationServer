@@ -1,29 +1,35 @@
 import json
 
+from werkzeug.datastructures import MultiDict
+
 from appserver.datastructure.ApplicationResponse import ApplicationResponse
-from appserver.externalcommunication.sharedServer import SharedServer
-from appserver.externalcommunication.GoogleMapsApi import GoogleMapsApi
 from appserver.externalcommunication.FirebaseCloudMessaging import FirebaseCloudMessaging
+from appserver.externalcommunication.GoogleMapsApi import GoogleMapsApi
+from appserver.externalcommunication.sharedServer import SharedServer
 from appserver.logger import LoggerFactory
 from appserver.repository.storyRepository import StoryRepository
 from appserver.repository.userRepository import UserRepository
+from appserver.time.Time import Time
 from appserver.transformer.MobileTransformer import MobileTransformer
 from appserver.validator.jsonValidator import JsonValidator
-from appserver.time.Time import Time
 
 LOGGER = LoggerFactory().get_logger(__name__)
 
 
 class StoryService(object):
     @staticmethod
-    def post_new_story(request):
-        validation_response = JsonValidator.validate_story_request(request)
+    def post_new_story(headers, story_json):
+        validation_response = JsonValidator.validate_story_request(headers, story_json)
         if validation_response.hasErrors:
             return ApplicationResponse.bad_request(message=validation_response.message)
 
+
         try:
-            file = request.files
-            upload_file_response = SharedServer.upload_file(file)
+            LOGGER.info('Getting file for story')
+            file_content = story_json['file']
+            multi_dict = MultiDict([('file', file_content)])
+            LOGGER.info('This is what multi dict has ' + str(multi_dict))
+            upload_file_response = SharedServer.upload_file(multi_dict)
             LOGGER.info("Response from shared server: " + str(upload_file_response))
         except Exception as e:
             LOGGER.error('There was error while getting file from shared server. Reason:' + str(e))
@@ -35,15 +41,14 @@ class StoryService(object):
 
         file_id = json.loads(upload_file_response.text)['data']['id']
 
-        request_form = request.form
-        facebook_id_poster = request.headers['facebookUserId']
+        facebook_id_poster = headers['facebookUserId']
         date = Time.now()
         LOGGER.info('Date is ' + str(date))
-        location = GoogleMapsApi.get_location(request_form['mLatitude'], request_form['mLongitude'])
+        location = GoogleMapsApi.get_location(story_json['mLatitude'], story_json['mLongitude'])
         user = UserRepository.get_profile(facebook_id_poster)
         total_friends = len(user['friendshipList']) - 1
         stories_posted_today = StoryRepository.get_total_stories_posted_today_by_user(facebook_id_poster)
-        story_data = MobileTransformer.mobile_story_to_database(request_form, facebook_id_poster, file_id, date,
+        story_data = MobileTransformer.mobile_story_to_database(story_json, facebook_id_poster, file_id, date,
                                                                 location, total_friends, stories_posted_today)
 
         response = StoryRepository.create_story(story_data)

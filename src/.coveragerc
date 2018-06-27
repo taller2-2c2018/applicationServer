@@ -8,3 +8,4 @@ omit =
   *monitor/*
   *config/*
   *logger/*
+  *authValidator.py

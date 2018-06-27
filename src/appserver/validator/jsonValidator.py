@@ -52,24 +52,23 @@ class JsonValidator(object):
         return validation_response
 
     @staticmethod
-    def validate_story_request(request):
-        validate_header = JsonValidator.validate_header_has_facebook_user_id(request.headers)
+    def validate_story_request(headers, json):
+        LOGGER.info('Validating story request')
+        validate_header = JsonValidator.validate_header_has_facebook_user_id(headers)
         if validate_header.hasErrors:
             return validate_header
 
-        form = request.form
-        file = request.files
-        if form is None or file is None:
-            return ValidationResponse(True, 'Content-Type: is not multipart/form-data, or missing file or form data.')
+        if json is None:
+            return ValidationResponse(True, 'Content-Type: is not application/json, or missing json data.')
         validation_response = ValidationResponse(False, '')
-        validation_response = JsonValidator.__check_validity_form(file, 'file', validation_response)
-        validation_response = JsonValidator.__check_validity_form(form, 'mFileType', validation_response)
-        validation_response = JsonValidator.__check_validity_form(form, 'mFlash', validation_response)
-        validation_response = JsonValidator.__check_type_boolean(form, 'mFlash', validation_response)
-        validation_response = JsonValidator.__check_validity_form(form, 'mPrivate', validation_response)
-        validation_response = JsonValidator.__check_type_boolean(form, 'mPrivate', validation_response)
-        validation_response = JsonValidator.__check_validity_form(form, 'mLatitude', validation_response)
-        validation_response = JsonValidator.__check_validity_form(form, 'mLongitude', validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, 'mFileType', validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, 'mFlash', validation_response)
+        validation_response = JsonValidator.__check_type_boolean(json, 'mFlash', validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, 'mPrivate', validation_response)
+        validation_response = JsonValidator.__check_type_boolean(json, 'mPrivate', validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, 'mLatitude', validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, 'mLongitude', validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, 'file', validation_response)
 
         return validation_response
 
@@ -88,11 +87,19 @@ class JsonValidator(object):
 
     @staticmethod
     def __check_validity_form(form, field_name, validation_response):
+        LOGGER.info('Validating form with field name: ' + field_name)
         return JsonValidator.__check_validity(form, field_name, validation_response, 'Form')
 
     @staticmethod
     def __check_validity_header(header, field_name, validation_response):
         return JsonValidator.__check_validity(header, field_name, validation_response, 'Header')
+
+    @staticmethod
+    def __check_validity_file(request_map, field_name, validation_response):
+        if field_name not in request_map:
+            validation_response.message += ' You must include a file in your post. '
+            validation_response.hasErrors = True
+        return validation_response
 
     @staticmethod
     def __check_type_boolean(data, field_name, validation_response):
