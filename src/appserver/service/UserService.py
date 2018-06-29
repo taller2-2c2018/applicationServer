@@ -137,6 +137,18 @@ class UserService(object):
         return ApplicationResponse.success(data=friendship_list)
 
     @staticmethod
+    def get_user_friends(request_header):
+        requester_facebook_id = request_header['facebookUserId']
+        list_of_friends = UserRepository.get_friendship_list(requester_facebook_id)
+        if requester_facebook_id in list_of_friends:
+            list_of_friends.remove(requester_facebook_id)
+
+        friends_list = UserRepository.get_friends_information_list(list_of_friends)
+        mobile_friend_list = MobileTransformer.database_list_of_friends_to_mobile(friends_list)
+
+        return ApplicationResponse.success(data=mobile_friend_list)
+
+    @staticmethod
     def accept_friendship_request(request_header, target_user):
         validation_response = JsonValidator.validate_header_has_facebook_user_id(request_header)
         if validation_response.hasErrors:

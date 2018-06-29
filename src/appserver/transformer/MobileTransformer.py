@@ -89,3 +89,16 @@ class MobileTransformer(object):
     @staticmethod
     def mobile_reaction_to_database(reaction, facebook_user_id, date):
         return {'reaction': reaction, 'facebook_user_id': facebook_user_id, 'date': date}
+
+    @staticmethod
+    def database_list_of_friends_to_mobile(friends_list):
+        mobile_friend_list = []
+        for friend in friends_list:
+            mobile_friend = {
+                'mFirebaseId': friend['firebase_id'],
+                'mBirthDate': friend['birth_date'],
+                'mFacebookUserId': friend['facebookUserId']
+            }
+            mobile_friend_list.append(mobile_friend)
+
+        return mobile_friend_list
