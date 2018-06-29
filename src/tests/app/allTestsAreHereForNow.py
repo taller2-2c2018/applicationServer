@@ -191,10 +191,9 @@ class Tests(BaseTestCase):
 
         self.assertEqual(len(friends_list), 1)
         friend = friends_list[0]
-        self.assertEqual(friend['firebase_id'], '5678')
-        self.assertEqual(friend['birth_date'], '11/02/1992')
-        self.assertEqual(friend['facebookUserId'], 'requester')
-
+        self.assertEqual(friend['mFirebaseId'], '5678')
+        self.assertEqual(friend['mBirthDate'], '11/02/1992')
+        self.assertEqual(friend['mFacebookUserId'], 'requester')
 
     def test_modify_profile_picture(self):
         Tests.__create_default_user()

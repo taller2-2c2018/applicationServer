@@ -144,7 +144,9 @@ class UserService(object):
             list_of_friends.remove(requester_facebook_id)
 
         friends_list = UserRepository.get_friends_information_list(list_of_friends)
-        return ApplicationResponse.success(data=friends_list)
+        mobile_friend_list = MobileTransformer.database_list_of_friends_to_mobile(friends_list)
+
+        return ApplicationResponse.success(data=mobile_friend_list)
 
     @staticmethod
     def accept_friendship_request(request_header, target_user):
