@@ -49,6 +49,18 @@ def mock_authenticate_user(request_json):
     return shared_server_response
 
 
+def bad_request(*args, **kwargs):
+    shared_server_response = Mock()
+    shared_server_response.text = 'text'
+    shared_server_response.status_code = 400
+
+    return shared_server_response
+
+
+def bad_request_json(*args, **kwargs):
+    return {'code': 400}
+
+
 def mock_get_file(file_id):
     return 'file'
 
@@ -102,11 +114,23 @@ class Tests(BaseTestCase):
 
             self.assertEqual(response_register_user.status_code, 503)
 
+    def test_register_user_facebook_token_invalid(self):
+        with patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=False)):
+            response_register_user = Tests.__create_default_user()
+
+            self.assertEqual(response_register_user.status_code, 400)
+
     def test_register_user_unavailable_shared_service(self):
         with patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_raise_exception):
             response_register_user = Tests.__create_default_user()
 
             self.assertEqual(response_register_user.status_code, 503)
+
+    def test_register_user_invalid_for_shared_server(self):
+        with patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', bad_request):
+            response_register_user = Tests.__create_default_user()
+
+            self.assertEqual(response_register_user.status_code, 400)
 
     def test_register_existing_user_doesnt_add_it_again(self):
         Tests.__create_default_user()
@@ -145,6 +169,46 @@ class Tests(BaseTestCase):
         response_json = response_authenticate.get_json()['data']
 
         self.assertEqual(response_json['token'], 'token')
+
+    def test_authenticate_user_bad_request(self):
+        response_authenticate = UserService.authenticate_user({})
+
+        self.assertEqual(response_authenticate.status_code, 400)
+
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.authenticate_user', mock_authenticate_user)
+    def test_authenticate_user_invalid_token(self):
+        with patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid',
+                   MagicMock(return_value=False)):
+            response_authenticate = UserService.authenticate_user({'facebookUserId': 'facebookUserId',
+                                                                   'facebookAuthToken': 'facebookAuthToken',
+                                                                   'firebaseId': 'firebaseId'})
+
+            self.assertEqual(response_authenticate.status_code, 400)
+
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.authenticate_user', mock_authenticate_user)
+    def test_authenticate_user_unavailable_facebook_service(self):
+        with patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', mock_raise_exception):
+            response_authenticate = UserService.authenticate_user({'facebookUserId': 'facebookUserId',
+                                                                   'facebookAuthToken': 'facebookAuthToken',
+                                                                   'firebaseId': 'firebaseId'})
+
+            self.assertEqual(response_authenticate.status_code, 503)
+
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.authenticate_user', mock_raise_exception)
+    def test_authenticate_user_unavailable_shared_service(self):
+        response_authenticate = UserService.authenticate_user({'facebookUserId': 'facebookUserId',
+                                                                   'facebookAuthToken': 'facebookAuthToken',
+                                                                   'firebaseId': 'firebaseId'})
+
+        self.assertEqual(response_authenticate.status_code, 503)
+
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.authenticate_user', bad_request_json)
+    def test_authenticate_user_invalid_response_shared_service(self):
+        response_authenticate = UserService.authenticate_user({'facebookUserId': 'facebookUserId',
+                                                               'facebookAuthToken': 'facebookAuthToken',
+                                                               'firebaseId': 'firebaseId'})
+
+        self.assertEqual(response_authenticate.status_code, 400)
 
     @patch('appserver.externalcommunication.sharedServer.SharedServer.get_file', mock_get_file)
     def test_get_file(self):
