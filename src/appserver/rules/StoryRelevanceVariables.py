@@ -9,3 +9,19 @@ class StoryRelevanceVariables(BaseVariables):
     @numeric_rule_variable
     def total_friends(self):
         return self.story_relevance.total_friends
+
+    @numeric_rule_variable
+    def total_publications(self):
+        return self.story_relevance.total_publications
+
+    @numeric_rule_variable
+    def total_comments(self):
+        return self.story_relevance.total_comments
+
+    @numeric_rule_variable
+    def total_reactions(self):
+        return self.story_relevance.total_reactions
+
+    @numeric_rule_variable
+    def total_hours_passed(self):
+        return self.story_relevance.total_hours_passed

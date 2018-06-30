@@ -12,6 +12,4 @@ class RelevanceEngine(object):
     def run_rule(story_relevance):
         run_all(rule_list=rules,
                 defined_variables=StoryRelevanceVariables(story_relevance),
-                defined_actions=StoryRelevanceActions(story_relevance),
-                stop_on_first_trigger=True
-                )
+                defined_actions=StoryRelevanceActions(story_relevance))
