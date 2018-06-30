@@ -10,6 +10,8 @@ from appserver.app import database
 from appserver.service.StoryService import StoryService
 from appserver.service.UserService import UserService
 from tests.app.testCommons import BaseTestCase
+from appserver.rules.RelevanceEngine import RelevanceEngine
+from appserver.rules.StoryRelevance import StoryRelevance
 
 
 def mock_user_identification(request_json):
@@ -79,7 +81,8 @@ class Tests(BaseTestCase):
     def test_create_user_profile(self):
         Tests.__create_default_user()
         response_update_profile = UserService.modify_user_profile(
-            {'mFirstName': 'name', 'mLastName': 'surname', 'mBirthDate': '01/01/1990', 'mEmail': 'mail@email.com', 'mSex': 'male'},
+            {'mFirstName': 'name', 'mLastName': 'surname', 'mBirthDate': '01/01/1990', 'mEmail': 'mail@email.com',
+             'mSex': 'male'},
             {'facebookUserId': 'facebookUserId'})
 
         self.assertEqual(response_update_profile.status_code, 201)
@@ -95,7 +98,8 @@ class Tests(BaseTestCase):
     def test_get_user_profile(self):
         Tests.__create_default_user()
         UserService.modify_user_profile(
-            {'mFirstName': 'name', 'mLastName': 'surname', 'mBirthDate': '01/01/1990', 'mEmail': 'mail@email.com', 'mSex': 'male'},
+            {'mFirstName': 'name', 'mLastName': 'surname', 'mBirthDate': '01/01/1990', 'mEmail': 'mail@email.com',
+             'mSex': 'male'},
             {'facebookUserId': 'facebookUserId'})
         request = Object()
         request.headers = {'facebookUserId': 'facebookUserId'}
@@ -358,6 +362,12 @@ class Tests(BaseTestCase):
         self.assertEqual(reaction['reaction'], 'me gusta')
         self.assertEqual(reaction['facebook_user_id'], 'facebookUserId')
         self.assertTrue(reaction['date'] is not None)
+
+    def test_relevance_engine(self):
+        story_relevance = StoryRelevance(1, 0, 0, 0, 0)
+        RelevanceEngine.run_rule(story_relevance)
+
+        self.assertEqual(story_relevance.get_relevance_points(), 1)
 
     @staticmethod
     def __create_default_user():
