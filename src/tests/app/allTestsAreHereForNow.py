@@ -308,6 +308,46 @@ class Tests(BaseTestCase):
         self.assertTrue(story['mRelevance'] is not None)
 
     @patch('appserver.time.Time.Time.now', mock_time_now)
+    def test_get_all_stories_for_requester_gets_stories_ordered_by_relevance(self):
+        Tests.__create_default_user()
+        Tests.__create_default_story()
+        Tests.__create_default_story(title='secondTitle', description='secondDescription')
+
+        response_stories = StoryService.get_all_stories_for_requester(Tests.__default_header())
+        self.assertEqual(response_stories.status_code, 200)
+
+        stories_list = response_stories.get_json()['data']
+        self.assertEqual(len(stories_list), 2)
+
+        first_story = stories_list[0]
+        self.assertTrue(first_story['mStoryId'] is not None)
+        self.assertEqual(first_story['mTitle'], 'title')
+        self.assertEqual(first_story['mDescription'], 'description')
+        self.assertEqual(first_story['mFacebookUserId'], 'facebookUserId')
+        self.assertEqual(first_story['mLatitude'], 40.714224)
+        self.assertEqual(first_story['mLongitude'], -73.961452)
+        self.assertEqual(first_story['mFileId'], 1)
+        self.assertEqual(first_story['mFileType'], 'jpg')
+        self.assertEqual(first_story['mFlash'], False)
+        self.assertEqual(first_story['mLocation'], 'San Telmo, Buenos Aires')
+        self.assertTrue(first_story['mRelevance'] is not None)
+
+        second_story = stories_list[1]
+        self.assertTrue(second_story['mStoryId'] is not None)
+        self.assertEqual(second_story['mTitle'], 'secondTitle')
+        self.assertEqual(second_story['mDescription'], 'secondDescription')
+        self.assertEqual(second_story['mFacebookUserId'], 'facebookUserId')
+        self.assertEqual(second_story['mLatitude'], 40.714224)
+        self.assertEqual(second_story['mLongitude'], -73.961452)
+        self.assertEqual(second_story['mFileId'], 1)
+        self.assertEqual(second_story['mFileType'], 'jpg')
+        self.assertEqual(second_story['mFlash'], False)
+        self.assertEqual(second_story['mLocation'], 'San Telmo, Buenos Aires')
+        self.assertTrue(second_story['mRelevance'] is not None)
+
+        self.assertTrue(second_story['mRelevance'] < first_story['mRelevance'])
+
+    @patch('appserver.time.Time.Time.now', mock_time_now)
     @patch('appserver.time.Time.Time.timedelta', mock_time_timedelta)
     def test_get_all_stories_for_requester_doesnt_get_caducated_flash_story(self):
         Tests.__create_default_user()
@@ -401,9 +441,9 @@ class Tests(BaseTestCase):
                                               'facebookAuthToken': 'facebookAuthToken'})
 
     @staticmethod
-    def __create_default_story(is_flash=False):
+    def __create_default_story(is_flash=False, title='title', description='description'):
         headers = Tests.__default_header()
-        story_json = {'file': 'data', 'mTitle': 'title', 'mDescription': 'description', 'mFileType': 'jpg',
+        story_json = {'file': 'data', 'mTitle': title, 'mDescription': description, 'mFileType': 'jpg',
                       'mFlash': is_flash, 'mPrivate': False, 'mLatitude': 40.714224, 'mLongitude': -73.961452}
 
         return StoryService.post_new_story(headers=headers, story_json=story_json)

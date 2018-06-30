@@ -2,7 +2,7 @@
 omit =
   *__init__*
   *app.py
-  *Controller.py
+  *controller/*
   *datastructure/*
   *externalcommunication/*
   *monitor/*
