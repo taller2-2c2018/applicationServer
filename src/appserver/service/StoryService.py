@@ -12,6 +12,8 @@ from appserver.repository.userRepository import UserRepository
 from appserver.time.Time import Time
 from appserver.transformer.MobileTransformer import MobileTransformer
 from appserver.validator.jsonValidator import JsonValidator
+from appserver.rules.StoryRelevance import StoryRelevance
+from appserver.rules.RelevanceEngine import RelevanceEngine
 
 LOGGER = LoggerFactory().get_logger(__name__)
 
@@ -119,9 +121,12 @@ class StoryService(object):
             total_comments = len(story['comments'])
             total_reactions = len(story['reactions'])
             total_hours_passed = Time.hours_passed(story['publication_date'])
-            # TODO cuenta mágica
-            # TODO story['mRelevance'] = cuenta mágica
-            story['relevance'] = 0.0
+
+            story_relevance = StoryRelevance(total_friends, total_publications, total_comments, total_reactions,
+                                             total_hours_passed)
+            RelevanceEngine.run_rule(story_relevance)
+            story['relevance'] = story_relevance.get_relevance_points()
+
             rated_stories.append(story)
 
         return rated_stories

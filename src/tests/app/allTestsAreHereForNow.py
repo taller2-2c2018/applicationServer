@@ -10,6 +10,8 @@ from appserver.app import database
 from appserver.service.StoryService import StoryService
 from appserver.service.UserService import UserService
 from tests.app.testCommons import BaseTestCase
+from appserver.rules.RelevanceEngine import RelevanceEngine
+from appserver.rules.StoryRelevance import StoryRelevance
 
 
 def mock_user_identification(request_json):
@@ -79,7 +81,8 @@ class Tests(BaseTestCase):
     def test_create_user_profile(self):
         Tests.__create_default_user()
         response_update_profile = UserService.modify_user_profile(
-            {'mFirstName': 'name', 'mLastName': 'surname', 'mBirthDate': '01/01/1990', 'mEmail': 'mail@email.com', 'mSex': 'male'},
+            {'mFirstName': 'name', 'mLastName': 'surname', 'mBirthDate': '01/01/1990', 'mEmail': 'mail@email.com',
+             'mSex': 'male'},
             {'facebookUserId': 'facebookUserId'})
 
         self.assertEqual(response_update_profile.status_code, 201)
@@ -95,7 +98,8 @@ class Tests(BaseTestCase):
     def test_get_user_profile(self):
         Tests.__create_default_user()
         UserService.modify_user_profile(
-            {'mFirstName': 'name', 'mLastName': 'surname', 'mBirthDate': '01/01/1990', 'mEmail': 'mail@email.com', 'mSex': 'male'},
+            {'mFirstName': 'name', 'mLastName': 'surname', 'mBirthDate': '01/01/1990', 'mEmail': 'mail@email.com',
+             'mSex': 'male'},
             {'facebookUserId': 'facebookUserId'})
         request = Object()
         request.headers = {'facebookUserId': 'facebookUserId'}
@@ -358,6 +362,38 @@ class Tests(BaseTestCase):
         self.assertEqual(reaction['reaction'], 'me gusta')
         self.assertEqual(reaction['facebook_user_id'], 'facebookUserId')
         self.assertTrue(reaction['date'] is not None)
+
+    def test_relevance_engine_low_rules(self):
+        story_relevance = StoryRelevance(1, 0, 1, 1, 1)
+        RelevanceEngine.run_rule(story_relevance)
+
+        expected_points = 1 * 1 + 5 + 1 * 2 + 1 * 0.5 - 1.5
+
+        self.assertEqual(story_relevance.get_relevance_points(), expected_points)
+
+    def test_relevance_engine_medium_rules(self):
+        story_relevance = StoryRelevance(10, 0, 10, 10, 1)
+        RelevanceEngine.run_rule(story_relevance)
+
+        expected_points = 10 * 0.4 + 5 + 10 * 0.8 + 10 * 0.2 - 1.5
+
+        self.assertEqual(story_relevance.get_relevance_points(), expected_points)
+
+    def test_relevance_engine_high_rules(self):
+        story_relevance = StoryRelevance(100, 0, 100, 100, 1)
+        RelevanceEngine.run_rule(story_relevance)
+
+        expected_points = 100 * 0.12 + 5 + 100 * 0.24 + 100 * 0.06 - 1.5
+
+        self.assertEqual(story_relevance.get_relevance_points(), expected_points)
+
+    def test_relevance_engine_multiple_stories_rule(self):
+        story_relevance = StoryRelevance(0, 10, 0, 0, 0)
+        RelevanceEngine.run_rule(story_relevance)
+
+        expected_points = -3 * 10
+
+        self.assertEqual(story_relevance.get_relevance_points(), expected_points)
 
     @staticmethod
     def __create_default_user():
