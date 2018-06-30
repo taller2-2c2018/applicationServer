@@ -1,6 +1,7 @@
 import json
 
 from werkzeug.datastructures import MultiDict
+from operator import itemgetter
 
 from appserver.datastructure.ApplicationResponse import ApplicationResponse
 from appserver.externalcommunication.FirebaseCloudMessaging import FirebaseCloudMessaging
@@ -95,6 +96,7 @@ class StoryService(object):
         filtered_stories = StoryService.__get_all_public_and_friends_private_stories(permanent_stories, friendship_list)
         filtered_stories.extend(list(flash_stories))
         filtered_stories = StoryService.__calculate_relevance_of_story(filtered_stories)
+        filtered_stories = sorted(filtered_stories, key=itemgetter('relevance'), reverse=True)
         filtered_stories_for_mobile = MobileTransformer.database_list_of_stories_with_relevance_to_mobile(filtered_stories)
 
         return ApplicationResponse.success(data=filtered_stories_for_mobile)
