@@ -86,6 +86,7 @@ class UserService(object):
         firebase_id = request_json['firebaseId']
         UserRepository.update_firebase_id(facebook_id, firebase_id)
         response = {'message': 'Logged in successfully.', 'token': token}
+
         return ApplicationResponse.success(data=response)
 
     @staticmethod

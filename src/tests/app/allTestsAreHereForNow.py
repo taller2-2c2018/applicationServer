@@ -9,6 +9,7 @@ from bson import ObjectId
 from appserver.app import database
 from appserver.service.StoryService import StoryService
 from appserver.service.UserService import UserService
+from appserver.service.FileService import FileService
 from tests.app.testCommons import BaseTestCase
 from appserver.rules.RelevanceEngine import RelevanceEngine
 from appserver.rules.StoryRelevance import StoryRelevance
@@ -33,6 +34,23 @@ def mock_upload_file(file):
     shared_server_response.status_code = 200
 
     return shared_server_response
+
+
+def mock_authenticate_user(request_json):
+    shared_server_response = {
+        'code': 200,
+        'data': {
+            'facebook_id': 'facebookId',
+            'token': 'token',
+            'expires_at': 'expires_at'
+        }
+    }
+
+    return shared_server_response
+
+
+def mock_get_file(file_id):
+    return 'file'
 
 
 def mock_time_now():
@@ -94,6 +112,25 @@ class Tests(BaseTestCase):
         self.assertEqual(inserted_profile['birth_date'], '01/01/1990')
         self.assertEqual(inserted_profile['mail'], 'mail@email.com')
         self.assertEqual(inserted_profile['sex'], 'male')
+
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.authenticate_user', mock_authenticate_user)
+    def test_authenticate_user(self):
+        response_authenticate = UserService.authenticate_user({'facebookUserId': 'facebookUserId',
+                                                               'facebookAuthToken': 'facebookAuthToken',
+                                                               'firebaseId': 'firebaseId'})
+
+        self.assertEqual(response_authenticate.status_code, 200)
+
+        response_json = response_authenticate.get_json()['data']
+
+        self.assertEqual(response_json['token'], 'token')
+
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.get_file', mock_get_file)
+    def test_get_file(self):
+        response_file = FileService.get_file(1)
+
+        self.assertEqual(response_file.status_code, 200)
+        self.assertTrue(response_file.data is not None)
 
     def test_get_user_profile(self):
         Tests.__create_default_user()
