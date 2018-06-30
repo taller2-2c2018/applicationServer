@@ -53,6 +53,10 @@ def mock_get_file(file_id):
     return 'file'
 
 
+def mock_raise_exception(*args, **kwargs):
+    raise Exception('Test')
+
+
 def mock_time_now():
     buenos_aires = pytz.timezone(zone='America/Argentina/Buenos_Aires')
     return datetime.datetime(year=2018, month=12, day=25, hour=17, minute=5, second=55, tzinfo=buenos_aires)
@@ -86,6 +90,23 @@ class Tests(BaseTestCase):
         self.assertEqual(inserted_user['facebookAuthToken'], 'facebookAuthToken')
         self.assertEqual(inserted_user['last_name'], 'last_name')
         self.assertEqual(inserted_user['first_name'], 'first_name')
+
+    def test_register_user_bad_input(self):
+        response_register_user = UserService.register_new_user({})
+
+        self.assertEqual(response_register_user.status_code, 400)
+
+    def test_register_user_unavailable_facebook_service(self):
+        with patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', mock_raise_exception):
+            response_register_user = Tests.__create_default_user()
+
+            self.assertEqual(response_register_user.status_code, 503)
+
+    def test_register_user_unavailable_shared_service(self):
+        with patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_raise_exception):
+            response_register_user = Tests.__create_default_user()
+
+            self.assertEqual(response_register_user.status_code, 503)
 
     def test_register_existing_user_doesnt_add_it_again(self):
         Tests.__create_default_user()
@@ -131,6 +152,12 @@ class Tests(BaseTestCase):
 
         self.assertEqual(response_file.status_code, 200)
         self.assertTrue(response_file.data is not None)
+
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.get_file', mock_raise_exception)
+    def test_get_file_unavailable_service(self):
+        response_file = FileService.get_file(1)
+
+        self.assertEqual(response_file.status_code, 503)
 
     def test_get_user_profile(self):
         Tests.__create_default_user()
