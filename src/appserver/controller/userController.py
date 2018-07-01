@@ -105,3 +105,13 @@ def get_user_profile(facebook_user_id):
     LOGGER.info('Getting profile of ' + facebook_user_id)
     return_value = UserService().get_user_profile(request, facebook_user_id)
     return return_value
+
+
+@userEndpoint.route("/list", methods=['GET'])
+@monitor
+@secure
+@controller_auditory
+def get_user_list():
+    LOGGER.info('Getting all users')
+    return_value = UserService().get_user_list(request.headers)
+    return return_value

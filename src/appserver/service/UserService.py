@@ -41,7 +41,8 @@ class UserService(object):
         try:
             shared_server_response = SharedServer.register_user(request_json)
             LOGGER.info("Response from shared server: " + str(shared_server_response))
-            shared_server_response_validation = JsonValidator.validate_shared_server_register_user(shared_server_response)
+            shared_server_response_validation = JsonValidator.validate_shared_server_register_user(
+                shared_server_response)
             if shared_server_response_validation.hasErrors:
                 return ApplicationResponse.bad_request(message=shared_server_response_validation.message)
         except Exception as e:
@@ -232,3 +233,15 @@ class UserService(object):
         UserRepository.modify_profile(request.headers['facebookUserId'], profile_update)
 
         return ApplicationResponse.success(message='Profile picture updated')
+
+    @staticmethod
+    def get_user_list(request_header):
+        validation_header = JsonValidator.validate_header_has_facebook_user_id(request_header)
+        if validation_header.hasErrors:
+            return ApplicationResponse.bad_request(message=validation_header.message)
+
+        user_facebook_id = request_header['facebookUserId']
+        user_list = UserRepository.get_all_but(user_facebook_id)
+        user_list = MobileTransformer.database_list_of_users_to_mobile(user_list)
+
+        return ApplicationResponse.success(data=user_list)
