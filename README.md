@@ -5,6 +5,12 @@
 [![Coverage Status](https://img.shields.io/coveralls/github/taller2-2c2018/applicationServer/master.svg)](https://coveralls.io/github/taller2-2c2018/applicationServer?branch=master)
 ## Descripción
 
+ApplicationServer es un backend que permite administrar una red social de usuarios, donde los mismos pueden:
+- Administrar amistades
+- Publicar historias con fotos, videos, título, descripción, especificadas en una ubicación geográfica por coordenadas
+- Publicar historias rápidas con un período de 4hs de vigencia
+- Envío de notificaciones relevantes para el usuario
+
 Esta es una aplicación desarrollada en python flask v1, conectada a una base de datos mongodb, y una base redis.
 
 A su vez esta aplicación se encuentra conectada a una instancia del backend de [shared server](https://github.com/taller2-2c2018/ApiNodeBackend).
@@ -29,7 +35,7 @@ FIREBASE_SERVER_KEY=<FIREBASE_SERVER_KEY>
 LOGGING_LEVEL=<DEBUG|OTHER>
 ```
 
-## Correr con docker:
+## Ejecución en docker:
 
 ### Requerimientos:
 - Docker
