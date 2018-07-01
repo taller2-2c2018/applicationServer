@@ -1,5 +1,6 @@
-from appserver.logger import LoggerFactory
+import operator
 from appserver import app
+from appserver.logger import LoggerFactory
 
 LOGGER = LoggerFactory.get_logger(__name__)
 
@@ -68,8 +69,9 @@ class UserRepository(object):
 
     @staticmethod
     def get_firebase_id_list(list_of_friends):
-        return list(
-            user_collection.find({'facebookUserId': {'$in': list_of_friends}}, {'firebase_id': 1})['firebase_id'])
+        list_of_firebase_id_dictionary = list(
+            user_collection.find({'facebookUserId': {'$in': list_of_friends}}, {'firebase_id': 1}))
+        return [element['firebase_id'] for element in list_of_firebase_id_dictionary if 'firebase_id' in element]
 
     @staticmethod
     def get_friends_information_list(list_of_friend_facebook_ids):

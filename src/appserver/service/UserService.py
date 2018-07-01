@@ -50,6 +50,9 @@ class UserService(object):
             return ApplicationResponse.service_unavailable(message='Could not register user to Shared Server')
 
         request_json.update({'friendshipList': [request_json['facebookUserId']], 'profile_picture_id': None})
+        if 'firebase_id' not in request_json:
+            request_json.update({'firebase_id': None})
+
         UserRepository.insert(request_json)
 
         return ApplicationResponse.created(message='Created user successfully')

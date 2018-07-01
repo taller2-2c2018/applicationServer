@@ -95,13 +95,6 @@ class JsonValidator(object):
         return JsonValidator.__check_validity(header, field_name, validation_response, 'Header')
 
     @staticmethod
-    def __check_validity_file(request_map, field_name, validation_response):
-        if field_name not in request_map:
-            validation_response.message += ' You must include a file in your post. '
-            validation_response.hasErrors = True
-        return validation_response
-
-    @staticmethod
     def __check_type_boolean(data, field_name, validation_response):
         if field_name in data and (not isinstance(data[field_name], bool)):
             if 'false' == data[field_name].lower() or 'true' == data[field_name].lower():
@@ -204,3 +197,25 @@ class JsonValidator(object):
     @staticmethod
     def __valid_reactions():
         return ['me gusta', 'no me gusta', 'me divierte', 'me aburre']
+
+    @staticmethod
+    def validate_story_request_multipart(request):
+        validate_header = JsonValidator.validate_header_has_facebook_user_id(request.headers)
+        if validate_header.hasErrors:
+            return validate_header
+
+        form = request.form
+        file = request.files
+        if form is None or file is None:
+            return ValidationResponse(True, "Content-Type: is not multipart/form-data, or missing file or form data.")
+        validation_response = ValidationResponse(False, "")
+        validation_response = JsonValidator.__check_validity_form(file, "file", validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, "mFileType", validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, "mFlash", validation_response)
+        validation_response = JsonValidator.__check_type_boolean(form, 'mFlash', validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, "mPrivate", validation_response)
+        validation_response = JsonValidator.__check_type_boolean(form, 'mPrivate', validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, "mLatitude", validation_response)
+        validation_response = JsonValidator.__check_validity_form(form, "mLongitude", validation_response)
+
+        return validation_response
