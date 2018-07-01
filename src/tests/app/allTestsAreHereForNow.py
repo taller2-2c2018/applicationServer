@@ -462,6 +462,12 @@ class Tests(BaseTestCase):
 
     def test_post_new_story(self):
         Tests.__create_default_user()
+        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
+        UserService.send_user_friendship_request(
+            {'mTargetUsername': 'target', 'mDescription': 'Add me to your friend list'},
+            {'facebookUserId': 'facebookUserId'})
+
+        UserService.accept_friendship_request({'facebookUserId': 'target'}, 'facebookUserId')
 
         response_post_new_story = Tests.__create_default_story()
         self.assertEqual(response_post_new_story.status_code, 201)
@@ -478,8 +484,21 @@ class Tests(BaseTestCase):
         self.assertEqual(story['file_id'], 1)
         self.assertEqual(story['file_type'], 'jpg')
         self.assertEqual(story['location'], 'San Telmo, Buenos Aires')
-        self.assertEqual(story['total_friends'], 0)
+        self.assertEqual(story['total_friends'], 1)
         self.assertEqual(story['stories_posted_today'], 0)
+
+    def test_post_new_story_no_json(self):
+        Tests.__create_default_user()
+
+        response_post_new_story = StoryService.post_new_story(headers=Tests.__default_header(), story_json=None)
+        self.assertEqual(response_post_new_story.status_code, 400)
+
+    def test_post_new_story_shared_server_unavailable(self):
+        with patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', mock_raise_exception):
+            Tests.__create_default_user()
+
+            response_post_new_story = Tests.__create_default_story()
+            self.assertEqual(response_post_new_story.status_code, 503)
 
     def test_post_new_story_multipart(self):
         Tests.__create_default_user()
@@ -506,6 +525,32 @@ class Tests(BaseTestCase):
         self.assertEqual(story['location'], 'San Telmo, Buenos Aires')
         self.assertEqual(story['total_friends'], 0)
         self.assertEqual(story['stories_posted_today'], 0)
+
+    def test_post_new_story_multipart_no_form(self):
+        Tests.__create_default_user()
+
+        request = Object()
+        request.headers = {'facebookUserId': 'facebookUserId'}
+        request.files = {'file': 'data'}
+        request.form = None
+
+        response_post_new_story = StoryService.post_new_story_multipart(request=request)
+
+        self.assertEqual(response_post_new_story.status_code, 400)
+
+    def test_post_new_story_multipart_shared_server_unavailable(self):
+        with patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', mock_raise_exception):
+            Tests.__create_default_user()
+
+            request = Object()
+            request.headers = {'facebookUserId': 'facebookUserId'}
+            request.files = {'file': 'data'}
+            request.form = {'mFileType': 'jpg', 'mFlash': False, 'mPrivate': False, 'mLatitude': 40.714224,
+                            'mLongitude': -73.961452}
+
+            response_post_new_story = StoryService.post_new_story_multipart(request=request)
+
+            self.assertEqual(response_post_new_story.status_code, 503)
 
     def test_get_all_stories_for_requester_gets_permanent_story(self):
         Tests.__create_default_user()
@@ -652,6 +697,16 @@ class Tests(BaseTestCase):
         self.assertEqual(reaction['reaction'], 'me gusta')
         self.assertEqual(reaction['facebook_user_id'], 'facebookUserId')
         self.assertTrue(reaction['date'] is not None)
+
+    def test_post_new_reaction_in_inexistent_story(self):
+        Tests.__create_default_user()
+
+        header = {'facebookUserId': 'facebookUserId'}
+        reaction_json = {'mReaction': 'me gusta'}
+        response_comment = StoryService.post_reaction(header, reaction_json, 666)
+
+        self.assertEqual(response_comment.status_code, 400)
+
 
     def test_post_different_reaction_in_story_changes_reaction(self):
         Tests.__create_default_user()
