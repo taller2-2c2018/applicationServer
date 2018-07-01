@@ -23,6 +23,17 @@ def post_story():
     return return_value
 
 
+@storiesEndpoint.route('/multipart', methods=['POST'])
+@monitor
+@secure
+@controller_auditory
+def post_story_multipart():
+    LOGGER.info('Creating new story using multipart')
+    return_value = StoryService().post_new_story_multipart(request)
+
+    return return_value
+
+
 @storiesEndpoint.route('', methods=['GET'])
 @monitor
 @secure

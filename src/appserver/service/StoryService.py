@@ -60,6 +60,41 @@ class StoryService(object):
         return ApplicationResponse.created(message='Created story successfully')
 
     @staticmethod
+    def post_new_story_multipart(request):
+        validation_response = JsonValidator.validate_story_request_multipart(request)
+        if validation_response.hasErrors:
+            return ApplicationResponse.bad_request(message=validation_response.message)
+
+        try:
+            file = request.files
+            upload_file_response = SharedServer.upload_file(file)
+        except Exception as e:
+            LOGGER.error('There was error while getting file from shared server. Reason:' + str(e))
+            return ApplicationResponse.service_unavailable(message='Could not upload file to Shared Server')
+
+        shared_server_response_validation = JsonValidator.validate_shared_server_register_user(upload_file_response)
+        if shared_server_response_validation.hasErrors:
+            return ApplicationResponse.bad_request(message=shared_server_response_validation.message)
+
+        file_id = json.loads(upload_file_response.text)['data']['id']
+
+        facebook_id_poster = request.headers['facebookUserId']
+        date = Time.now()
+        LOGGER.info('Date is ' + str(date))
+        location = GoogleMapsApi.get_location(request.form['mLatitude'], request.form['mLongitude'])
+        user = UserRepository.get_profile(facebook_id_poster)
+        total_friends = len(user['friendshipList']) - 1
+        stories_posted_today = StoryRepository.get_total_stories_posted_today_by_user(facebook_id_poster)
+        story_data = MobileTransformer.mobile_story_to_database(request.form, facebook_id_poster, file_id, date,
+                                                                location, total_friends, stories_posted_today)
+
+        response = StoryRepository.create_story(story_data)
+        LOGGER.info('This is what I got from the database ' + str(response))
+        StoryService.__send_new_story_notification(user)
+
+        return ApplicationResponse.created(message='Created story successfully')
+
+    @staticmethod
     def __send_new_story_notification(user):
         LOGGER.info('Sending push notification of new story')
         facebook_id_poster = user['facebookUserId']
@@ -243,4 +278,3 @@ class StoryService(object):
         list_of_dictionaries[:] = [element for element in list_of_dictionaries if element.get(key) != value]
 
         return list_of_dictionaries
-

@@ -389,6 +389,32 @@ class Tests(BaseTestCase):
         self.assertEqual(story['total_friends'], 0)
         self.assertEqual(story['stories_posted_today'], 0)
 
+    def test_post_new_story_multipart(self):
+        Tests.__create_default_user()
+        request = Object()
+        request.headers = {'facebookUserId': 'facebookUserId'}
+        request.files = {'file': 'data'}
+        request.form = {'mFileType': 'jpg', 'mFlash': False, 'mPrivate': False, 'mLatitude': 40.714224,
+                        'mLongitude': -73.961452}
+
+        response_post_new_story = StoryService.post_new_story_multipart(request=request)
+        self.assertEqual(response_post_new_story.status_code, 201)
+
+        story = database.story.find_one({'facebook_user_id': 'facebookUserId'})
+
+        self.assertEqual(story['title'], '')
+        self.assertEqual(story['description'], '')
+        self.assertEqual(story['facebook_user_id'], 'facebookUserId')
+        self.assertEqual(story['is_flash'], False)
+        self.assertEqual(story['is_private'], False)
+        self.assertEqual(story['latitude'], 40.714224)
+        self.assertEqual(story['longitude'], -73.961452)
+        self.assertEqual(story['file_id'], 1)
+        self.assertEqual(story['file_type'], 'jpg')
+        self.assertEqual(story['location'], 'San Telmo, Buenos Aires')
+        self.assertEqual(story['total_friends'], 0)
+        self.assertEqual(story['stories_posted_today'], 0)
+
     def test_get_all_stories_for_requester_gets_permanent_story(self):
         Tests.__create_default_user()
         Tests.__create_default_story()
