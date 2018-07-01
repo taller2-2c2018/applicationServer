@@ -5,7 +5,29 @@
 [![Coverage Status](https://img.shields.io/coveralls/github/taller2-2c2018/applicationServer/master.svg)](https://coveralls.io/github/taller2-2c2018/applicationServer?branch=master)
 ## Descripción
 
-Esta es una aplicación flask conectada a una base de datos mongodb.
+Esta es una aplicación desarrollada en python flask v1, conectada a una base de datos mongodb, y una base redis.
+
+A su vez esta aplicación se encuentra conectada a una instancia del backend de [shared server](https://github.com/taller2-2c2018/ApiNodeBackend).
+
+Paralelamente, se utilizan algunos servicios externos:
+- Facebook para autenticación de usuarios
+- Firebase para envío de notificaciones push
+
+## Configuración local
+
+Para correr la app local, debe existir un archivo en el directorio `/src/config/.env` con las siguientes variables:
+
+```
+SHARED_SERVER_HOST=<SHARED_SERVER_HEROKU_URL>
+SERVER_USER=<SHARED_SERVER_ADMIN_USER>
+SERVER_PASSWORD=<SHARED_SERVER_ADMIN_PASSWORD>
+MONGO_URL=<MONGO_DB_CONNECTION_URL>
+REDIS_HOST=<REDIS_HOST>
+REDIS_PORT=<REDIS_PORT>
+ANDROID_APP_TOKEN=<FACEBOOK_ANDROID_SDK_TOKEN>
+FIREBASE_SERVER_KEY=<FIREBASE_SERVER_KEY>
+LOGGING_LEVEL=<DEBUG|OTHER>
+```
 
 ## Correr con docker:
 
@@ -25,9 +47,4 @@ Para ejecutar comandos como pip install \<paquete>, se puede conectar al docker 
 
 ```
 $~ docker exec -it <nombre_del_container> sh
-```
-
-## Data sample
-```
-curl -X POST -H "Content-Type:application/json" 127.0.0.1:5000/user/ --data '{"user":"newUser", "password":"1234rfghu9"}'
 ```
