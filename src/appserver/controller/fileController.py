@@ -10,10 +10,19 @@ LOGGER = LoggerFactory().get_logger('fileController')
 filesEndpoint = Blueprint('filesEndpoint', __name__)
 
 
+@filesEndpoint.route('/stream/<file_id>', methods=['GET'])
+@monitor
+@secure
+@controller_auditory
+def get_file(file_id):
+    LOGGER.info('Getting file with id: ' + str(file_id))
+    return FileService().get_file(file_id)
+
+
 @filesEndpoint.route('/<file_id>', methods=['GET'])
 @monitor
 @secure
 @controller_auditory
-def get(file_id):
+def get_file_as_json(file_id):
     LOGGER.info('Getting file with id: ' + str(file_id))
-    return FileService().get_file(file_id)
+    return FileService().get_file_json(file_id)
