@@ -245,6 +245,21 @@ class Tests(BaseTestCase):
 
         self.assertEqual(response_file.status_code, 503)
 
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.get_file', mock_get_file)
+    def test_get_file_json(self):
+        response_file = FileService.get_file_json(1)
+
+        self.assertEqual(response_file.status_code, 200)
+
+        response_json = Tests.__get_data_from_response(response_file)
+        self.assertEqual(response_json['mFile'], 'file')
+
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.get_file', mock_raise_exception)
+    def test_get_file_json_unavailable_service(self):
+        response_file = FileService.get_file_json(1)
+
+        self.assertEqual(response_file.status_code, 503)
+
     def test_get_user_profile(self):
         Tests.__create_default_user()
         UserService.modify_user_profile(
