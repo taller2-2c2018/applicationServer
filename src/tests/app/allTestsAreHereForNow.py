@@ -535,6 +535,47 @@ class Tests(BaseTestCase):
         self.assertEqual(reaction['facebook_user_id'], 'facebookUserId')
         self.assertTrue(reaction['date'] is not None)
 
+    def test_post_different_reaction_in_story_changes_reaction(self):
+        Tests.__create_default_user()
+        Tests.__create_default_story()
+        response_stories = StoryService.get_all_stories_for_requester(Tests.__default_header())
+        story_id = response_stories.get_json()['data'][0]['mStoryId']
+
+        header = {'facebookUserId': 'facebookUserId'}
+        reaction_json = {'mReaction': 'me divierte'}
+        StoryService.post_reaction(header, reaction_json, story_id)
+        reaction_json['mReaction'] = 'me gusta'
+        response_comment = StoryService.post_reaction(header, reaction_json, story_id)
+
+        self.assertEqual(response_comment.status_code, 201)
+
+        modified_story = database.story.find_one({'_id': ObjectId(story_id)})
+        list_of_reactions = modified_story['reactions']
+        self.assertEqual(len(list_of_reactions), 1)
+
+        reaction = list_of_reactions[0]
+
+        self.assertEqual(reaction['reaction'], 'me gusta')
+        self.assertEqual(reaction['facebook_user_id'], 'facebookUserId')
+        self.assertTrue(reaction['date'] is not None)
+
+    def test_post_same_reaction_in_story_removes_it(self):
+        Tests.__create_default_user()
+        Tests.__create_default_story()
+        response_stories = StoryService.get_all_stories_for_requester(Tests.__default_header())
+        story_id = response_stories.get_json()['data'][0]['mStoryId']
+
+        header = {'facebookUserId': 'facebookUserId'}
+        reaction_json = {'mReaction': 'me gusta'}
+        StoryService.post_reaction(header, reaction_json, story_id)
+        response_comment = StoryService.post_reaction(header, reaction_json, story_id)
+
+        self.assertEqual(response_comment.status_code, 200)
+
+        modified_story = database.story.find_one({'_id': ObjectId(story_id)})
+        list_of_reactions = modified_story['reactions']
+        self.assertEqual(len(list_of_reactions), 0)
+
     def test_relevance_engine_low_rules(self):
         story_relevance = StoryRelevance(1, 0, 1, 1, 1)
         RelevanceEngine.run_rule(story_relevance)

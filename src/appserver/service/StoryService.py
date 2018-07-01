@@ -184,9 +184,22 @@ class StoryService(object):
         if story is None:
             return ApplicationResponse.bad_request(message='No such story was found')
 
+        poster_facebook_id = header['facebookUserId']
         reaction = json_reaction['mReaction']
         facebook_user_id = header['facebookUserId']
         date = Time.now()
+        user_reactions_to_story = StoryService.__search_dictionaries('facebook_user_id', poster_facebook_id, story['reactions'])
+        if len(user_reactions_to_story) > 0:
+            story['reactions'] = StoryService.__remove_dictionary_entry_from_list('facebook_user_id',
+                                                                                  poster_facebook_id,
+                                                                                  story['reactions'])
+            old_reaction = user_reactions_to_story[0]['reaction']
+            if old_reaction == reaction:
+                StoryRepository.update_story_by_id(story_id, story)
+                LOGGER.info('Removed reaction successfully')
+
+                return ApplicationResponse.success('Reaction removed successfully')
+
         comment_database = MobileTransformer.mobile_reaction_to_database(reaction, facebook_user_id, date)
         story['reactions'].append(comment_database)
 
@@ -194,7 +207,6 @@ class StoryService(object):
         story = StoryRepository.get_story_by_id(story_id)
         LOGGER.info('Added reaction to story')
         story_for_mobile = MobileTransformer.database_story_to_mobile(story)
-
         StoryService.__send_new_reaction_notification(facebook_user_id, reaction, body=story_for_mobile)
 
         return ApplicationResponse.created('Reaction created successfully')
@@ -214,7 +226,8 @@ class StoryService(object):
         all_users = UserRepository.get_all()
 
         for story in filtered_stories:
-            profile_picture_id = StoryService.__search_dictionaries('facebookUserId', story['facebook_user_id'], all_users)
+            profile_picture_id = StoryService.__search_dictionaries('facebookUserId', story['facebook_user_id'],
+                                                                    all_users)[0]['profile_picture_id']
             story.update({'profile_picture_id': profile_picture_id})
 
             stories_with_profile_picture.append(story)
@@ -223,4 +236,11 @@ class StoryService(object):
 
     @staticmethod
     def __search_dictionaries(key, value, list_of_dictionaries):
-        return [element for element in list_of_dictionaries if element[key] == value][0]['profile_picture_id']
+        return [element for element in list_of_dictionaries if element[key] == value]
+
+    @staticmethod
+    def __remove_dictionary_entry_from_list(key, value, list_of_dictionaries):
+        list_of_dictionaries[:] = [element for element in list_of_dictionaries if element.get(key) != value]
+
+        return list_of_dictionaries
+
