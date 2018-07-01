@@ -23,7 +23,9 @@ class MobileTransformer(object):
                 'mFileId': story['file_id'],
                 'mFileType': story['file_type'],
                 'mFlash': story['is_flash'],
-                'mLocation': story['location']
+                'mLocation': story['location'],
+                'mComments': MobileTransformer.__database_comments_to_mobile(story['comments']),
+                'mReactions': MobileTransformer.__database_reactions_to_mobile(story['reactions'])
             }
 
     @staticmethod
@@ -120,3 +122,33 @@ class MobileTransformer(object):
             mobile_users.append(mobile_user)
 
         return mobile_users
+
+    @staticmethod
+    def __database_comments_to_mobile(comments_list):
+        mobile_comment_list = []
+
+        for comment in comments_list:
+            mobile_comment = {
+                'mComment': comment['text'],
+                'mFacebookUserId': comment['facebook_user_id'],
+                'mDate': comment['date']
+            }
+
+            mobile_comment_list.append(mobile_comment)
+
+        return mobile_comment_list
+
+    @staticmethod
+    def __database_reactions_to_mobile(reactions_list):
+        mobile_reaction_list = []
+
+        for reaction in reactions_list:
+            mobile_reaction = {
+                'mReaction': reaction['reaction'],
+                'mFacebookUserId': reaction['facebook_user_id'],
+                'mDate': reaction['date']
+            }
+
+            mobile_reaction_list.append(mobile_reaction)
+
+        return mobile_reaction_list

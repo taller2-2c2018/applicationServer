@@ -676,6 +676,13 @@ class Tests(BaseTestCase):
         self.assertEqual(comment['facebook_user_id'], 'facebookUserId')
         self.assertTrue(comment['date'] is not None)
 
+        response_stories = StoryService.get_all_stories_for_requester(Tests.__default_header())
+        response_json = Tests.__get_data_from_response(response_stories)[0]
+
+        self.assertTrue(len(response_json['mComments']) == 1)
+        self.assertEqual(response_json['mComments'][0]['mComment'], 'comment')
+        self.assertEqual(response_json['mComments'][0]['mFacebookUserId'], 'facebookUserId')
+
     def test_post_new_reaction_in_story(self):
         Tests.__create_default_user()
         Tests.__create_default_story()
@@ -697,6 +704,13 @@ class Tests(BaseTestCase):
         self.assertEqual(reaction['reaction'], 'me gusta')
         self.assertEqual(reaction['facebook_user_id'], 'facebookUserId')
         self.assertTrue(reaction['date'] is not None)
+
+        response_stories = StoryService.get_all_stories_for_requester(Tests.__default_header())
+        response_json = Tests.__get_data_from_response(response_stories)[0]
+
+        self.assertTrue(len(response_json['mReactions']) == 1)
+        self.assertEqual(response_json['mReactions'][0]['mReaction'], 'me gusta')
+        self.assertEqual(response_json['mReactions'][0]['mFacebookUserId'], 'facebookUserId')
 
     def test_post_new_reaction_in_inexistent_story(self):
         Tests.__create_default_user()
