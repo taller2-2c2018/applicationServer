@@ -2,7 +2,7 @@ from appserver.datastructure.ApplicationResponse import ApplicationResponse
 from appserver.externalcommunication.sharedServer import SharedServer
 from appserver.logger import LoggerFactory
 
-LOGGER = LoggerFactory().get_logger('FileService')
+LOGGER = LoggerFactory().get_logger(__name__)
 
 
 class FileService(object):
@@ -21,9 +21,11 @@ class FileService(object):
     @staticmethod
     def get_file_json(file_id):
         try:
+            LOGGER.info('Getting file from shared server')
             file_response = SharedServer.get_file(file_id)
             LOGGER.info('response from shared server is' + str(file_response))
-            data = {'mFile': file_response}
+
+            data = {'mFile': file_response.content}
         except Exception as e:
             LOGGER.error('There was error while getting file from shared server. Reason:' + str(e))
             return ApplicationResponse.service_unavailable(message='Could not get file from Shared Server')

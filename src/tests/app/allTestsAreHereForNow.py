@@ -62,6 +62,13 @@ def bad_request_json(*args, **kwargs):
 
 
 def mock_get_file(file_id):
+    file = Object()
+    file.content = 'file'
+
+    return file
+
+
+def mock_get_file_stream(file_id):
     return 'file'
 
 
@@ -232,7 +239,7 @@ class Tests(BaseTestCase):
 
         self.assertEqual(response_authenticate.status_code, 400)
 
-    @patch('appserver.externalcommunication.sharedServer.SharedServer.get_file', mock_get_file)
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.get_file', mock_get_file_stream)
     def test_get_file(self):
         response_file = FileService.get_file(1)
 
