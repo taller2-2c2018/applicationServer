@@ -1,3 +1,4 @@
+import os
 from bson import ObjectId
 
 from appserver import app
@@ -7,6 +8,7 @@ from appserver.time.Time import Time
 LOGGER = LoggerFactory.get_logger(__name__)
 
 story_collection = app.database.story
+flash_story_valid_hours = os.environ.get('FLASH_STORY_VALID_HOURS', 4)
 
 
 class StoryRepository(object):
@@ -24,12 +26,12 @@ class StoryRepository(object):
     @staticmethod
     def get_permanent_stories_from_user(target_facebook_user_id):
         LOGGER.info('Getting permanent stories from user with facebookId: ' + str(target_facebook_user_id))
-        return story_collection.find({'is_flash': 'False', 'facebook_user_id': target_facebook_user_id},  {'_id': 0})
+        return story_collection.find({'is_flash': 'False', 'facebook_user_id': target_facebook_user_id}, {'_id': 0})
 
     @staticmethod
     def get_all_valid_flash_stories():
         LOGGER.info('Getting all flash stories')
-        valid_time_for_stories = Time.now() - Time.timedelta(hours=4)
+        valid_time_for_stories = Time.now() - Time.timedelta(hours=flash_story_valid_hours)
         return story_collection.find({'is_flash': True, 'publication_date': {'$gte': valid_time_for_stories}})
 
     @staticmethod
@@ -51,4 +53,5 @@ class StoryRepository(object):
         LOGGER.info('Getting total stories posted today by user ' + str(facebook_id))
         start_of_day = Time.start_of_today()
 
-        return story_collection.find({'facebook_user_id': facebook_id, 'publication_date': {'$gte': start_of_day}}).count()
+        return story_collection.find(
+            {'facebook_user_id': facebook_id, 'publication_date': {'$gte': start_of_day}}).count()
