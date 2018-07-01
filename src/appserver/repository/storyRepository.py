@@ -24,7 +24,7 @@ class StoryRepository(object):
     @staticmethod
     def get_permanent_stories_from_user(target_facebook_user_id):
         LOGGER.info('Getting permanent stories from user with facebookId: ' + str(target_facebook_user_id))
-        return story_collection.find({'is_flash': 'False', 'facebook_user_id': target_facebook_user_id},  {"_id": 0})
+        return story_collection.find({'is_flash': 'False', 'facebook_user_id': target_facebook_user_id},  {'_id': 0})
 
     @staticmethod
     def get_all_valid_flash_stories():

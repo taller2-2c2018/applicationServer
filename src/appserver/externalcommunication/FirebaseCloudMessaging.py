@@ -17,10 +17,10 @@ class FirebaseCloudMessaging(object):
     def send_notification(title, body, list_of_firebase_ids):
         try:
             json = {
-                "registration_ids": list_of_firebase_ids,
-                "notification": {
-                    "title": title,
-                    "body": body}
+                'registration_ids': list_of_firebase_ids,
+                'notification': {
+                    'title': title,
+                    'body': body}
             }
 
             response = requests.post(URL, json=json, headers={'Authorization': FIREBASE_SERVER_KEY})

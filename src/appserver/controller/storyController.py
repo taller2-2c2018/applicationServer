@@ -10,7 +10,7 @@ LOGGER = LoggerFactory().get_logger(__name__)
 storiesEndpoint = Blueprint('storiesEndpoint', __name__)
 
 
-@storiesEndpoint.route("", methods=['POST'])
+@storiesEndpoint.route('', methods=['POST'])
 @monitor
 @secure
 @controller_auditory
@@ -23,7 +23,7 @@ def post_story():
     return return_value
 
 
-@storiesEndpoint.route("", methods=['GET'])
+@storiesEndpoint.route('', methods=['GET'])
 @monitor
 @secure
 @controller_auditory
@@ -35,7 +35,7 @@ def get_stories():
     return return_value
 
 
-@storiesEndpoint.route("/<story_id>/comment", methods=['POST'])
+@storiesEndpoint.route('/<story_id>/comment', methods=['POST'])
 @monitor
 @secure
 @controller_auditory
@@ -48,7 +48,7 @@ def post_comment(story_id):
     return return_value
 
 
-@storiesEndpoint.route("/<story_id>/reaction", methods=['POST'])
+@storiesEndpoint.route('/<story_id>/reaction', methods=['POST'])
 @monitor
 @secure
 @controller_auditory

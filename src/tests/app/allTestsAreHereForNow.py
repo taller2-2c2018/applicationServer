@@ -411,6 +411,7 @@ class Tests(BaseTestCase):
         self.assertEqual(story['mFlash'], False)
         self.assertEqual(story['mLocation'], 'San Telmo, Buenos Aires')
         self.assertTrue(story['mRelevance'] is not None)
+        self.assertTrue('mProfilePictureId' in story)
 
     def test_get_all_stories_for_requester_gets_flash_story(self):
         Tests.__create_default_user()
@@ -434,6 +435,7 @@ class Tests(BaseTestCase):
         self.assertEqual(story['mFlash'], True)
         self.assertEqual(story['mLocation'], 'San Telmo, Buenos Aires')
         self.assertTrue(story['mRelevance'] is not None)
+        self.assertTrue('mProfilePictureId' in story)
 
     @patch('appserver.time.Time.Time.now', mock_time_now)
     def test_get_all_stories_for_requester_gets_stories_ordered_by_relevance(self):
@@ -459,6 +461,7 @@ class Tests(BaseTestCase):
         self.assertEqual(first_story['mFlash'], False)
         self.assertEqual(first_story['mLocation'], 'San Telmo, Buenos Aires')
         self.assertTrue(first_story['mRelevance'] is not None)
+        self.assertTrue('mProfilePictureId' in first_story)
 
         second_story = stories_list[1]
         self.assertTrue(second_story['mStoryId'] is not None)
@@ -472,6 +475,7 @@ class Tests(BaseTestCase):
         self.assertEqual(second_story['mFlash'], False)
         self.assertEqual(second_story['mLocation'], 'San Telmo, Buenos Aires')
         self.assertTrue(second_story['mRelevance'] is not None)
+        self.assertTrue('mProfilePictureId' in second_story)
 
         self.assertTrue(second_story['mRelevance'] < first_story['mRelevance'])
 

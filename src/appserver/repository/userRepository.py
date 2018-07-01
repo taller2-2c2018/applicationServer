@@ -80,3 +80,7 @@ class UserRepository(object):
     @staticmethod
     def get_all_but(user_facebook_id):
         return list(user_collection.find({'facebookUserId': {'$not': {'$eq': user_facebook_id}}}))
+
+    @staticmethod
+    def get_all():
+        return list(user_collection.find())

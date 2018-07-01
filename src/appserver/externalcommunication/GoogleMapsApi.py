@@ -10,7 +10,7 @@ class GoogleMapsApi(object):
     @staticmethod
     def get_location(latitude, longitude):
         try:
-            LOGGER.info("Getting location info from GoogleMaps API")
+            LOGGER.info('Getting location info from GoogleMaps API')
             complete_url = URL + str(latitude) + ',' + str(longitude)
             response = requests.get(complete_url)
             location = response.json()['results'][2]['formatted_address']
