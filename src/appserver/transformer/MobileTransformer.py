@@ -102,3 +102,20 @@ class MobileTransformer(object):
             mobile_friend_list.append(mobile_friend)
 
         return mobile_friend_list
+
+    @staticmethod
+    def database_list_of_users_to_mobile(user_list):
+        mobile_users = []
+
+        for user in user_list:
+            mobile_user = {
+                'mFacebookUserId': user['facebookUserId'],
+                'mFirebaseId': MobileTransformer.__optional_value(user, 'firebase_id', None),
+                'mFirstName': MobileTransformer.__optional_value(user, 'first_name', None),
+                'mLastName': MobileTransformer.__optional_value(user, 'last_name', None),
+                'mProfilePictureId': MobileTransformer.__optional_value(user, 'profile_picture_id', None)
+            }
+
+            mobile_users.append(mobile_user)
+
+        return mobile_users

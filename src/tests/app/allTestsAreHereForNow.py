@@ -563,9 +563,36 @@ class Tests(BaseTestCase):
 
         self.assertEqual(story_relevance.get_relevance_points(), expected_points)
 
+    def test_list_users_returns_all_but_oneself(self):
+        Tests.__create_default_user()
+        Tests.__create_default_user(facebook_user_id='otherUserOne')
+        Tests.__create_default_user(facebook_user_id='otherUserTwo')
+
+        user_list_response = UserService.get_user_list(Tests.__default_header())
+
+        self.assertEqual(user_list_response.status_code, 200)
+
+        user_list = Tests.__get_data_from_response(user_list_response)
+
+        self.assertEqual(len(user_list), 2)
+        self.assertTrue(user_list[0]['mFacebookUserId'] is not 'facebookUserId')
+        self.assertTrue(user_list[1]['mFacebookUserId'] is not 'facebookUserId')
+
+    def test_list_users_invalid_header(self):
+        Tests.__create_default_user()
+        Tests.__create_default_user(facebook_user_id='otherUserOne')
+
+        user_list_response = UserService.get_user_list({})
+
+        self.assertEqual(user_list_response.status_code, 400)
+
     @staticmethod
-    def __create_default_user():
-        return UserService.register_new_user({'facebookUserId': 'facebookUserId',
+    def __get_data_from_response(response):
+        return response.get_json()['data']
+
+    @staticmethod
+    def __create_default_user(facebook_user_id='facebookUserId'):
+        return UserService.register_new_user({'facebookUserId': facebook_user_id,
                                               'facebookAuthToken': 'facebookAuthToken'})
 
     @staticmethod

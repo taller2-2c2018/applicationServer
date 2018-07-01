@@ -18,8 +18,8 @@ class UserRepository(object):
         LOGGER.info('Updating token to existing user')
         user_collection.update_one({'facebookUserId': facebook_id}, {
             '$set': {
-                       'token': token,
-                       'expires_at': expires_at
+                'token': token,
+                'expires_at': expires_at
             }
         }, upsert=False)
 
@@ -28,7 +28,7 @@ class UserRepository(object):
         LOGGER.info('Updating firebase_id to existing user')
         user_collection.update_one({'facebookUserId': facebook_id}, {
             '$set': {
-                       'firebase_id': firebase_id
+                'firebase_id': firebase_id
             }
         }, upsert=False)
 
@@ -50,7 +50,8 @@ class UserRepository(object):
         else:
             friendship_list = user_entity['friendshipList']
             friendship_list.append(friend_to_add)
-        user_collection.update_one({'facebookUserId': user}, {'$set': {'friendshipList': friendship_list}}, upsert=False)
+        user_collection.update_one({'facebookUserId': user}, {'$set': {'friendshipList': friendship_list}},
+                                   upsert=False)
 
     @staticmethod
     def modify_profile(facebook_user_id, profile):
@@ -67,10 +68,15 @@ class UserRepository(object):
 
     @staticmethod
     def get_firebase_id_list(list_of_friends):
-        return list(user_collection.find({'facebookUserId': {'$in': list_of_friends}}, {'firebase_id': 1})['firebase_id'])
+        return list(
+            user_collection.find({'facebookUserId': {'$in': list_of_friends}}, {'firebase_id': 1})['firebase_id'])
 
     @staticmethod
     def get_friends_information_list(list_of_friend_facebook_ids):
         return list(user_collection.find({'facebookUserId': {'$in': list_of_friend_facebook_ids}},
-                                    {'facebookUserId': 1, 'last_name': 1, 'first_name': 1, 'mail': 1, 'firebase_id': 1,
-                                     'birth_date': 1, '_id': 0}))
+                                         {'facebookUserId': 1, 'last_name': 1, 'first_name': 1, 'mail': 1,
+                                          'firebase_id': 1, 'birth_date': 1, '_id': 0}))
+
+    @staticmethod
+    def get_all_but(user_facebook_id):
+        return list(user_collection.find({'facebookUserId': {'$not': {'$eq': user_facebook_id}}}))
