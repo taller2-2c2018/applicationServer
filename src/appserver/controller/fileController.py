@@ -10,7 +10,7 @@ LOGGER = LoggerFactory().get_logger('fileController')
 filesEndpoint = Blueprint('filesEndpoint', __name__)
 
 
-@filesEndpoint.route("/<file_id>", methods=['GET'])
+@filesEndpoint.route('/<file_id>', methods=['GET'])
 @monitor
 @secure
 @controller_auditory

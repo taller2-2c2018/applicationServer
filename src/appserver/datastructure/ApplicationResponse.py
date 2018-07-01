@@ -45,6 +45,6 @@ class ApplicationResponse:
         return Response(message_json, status=status, mimetype='application/json')
 
     @staticmethod
-    def __create_json(status, message="", data=None):
+    def __create_json(status, message='', data=None):
         response = {'status': status, 'message': message, 'data': data}
         return json.dumps(response, default=str)

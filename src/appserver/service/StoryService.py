@@ -32,7 +32,7 @@ class StoryService(object):
             multi_dict = MultiDict([('file', file_content)])
             LOGGER.info('This is what multi dict has ' + str(multi_dict))
             upload_file_response = SharedServer.upload_file(multi_dict)
-            LOGGER.info("Response from shared server: " + str(upload_file_response))
+            LOGGER.info('Response from shared server: ' + str(upload_file_response))
         except Exception as e:
             LOGGER.error('There was error while getting file from shared server. Reason:' + str(e))
             return ApplicationResponse.service_unavailable(message='Could not upload file to Shared Server')
@@ -86,15 +86,16 @@ class StoryService(object):
         if validation_response.hasErrors:
             return ApplicationResponse.bad_request(message=validation_response.message)
 
-        facebook_user_id = request_header["facebookUserId"]
+        facebook_user_id = request_header['facebookUserId']
         friendship_list = UserRepository.get_friendship_list(facebook_user_id)
-        LOGGER.info("Got friendshipList" + str(friendship_list))
+        LOGGER.info('Got friendshipList' + str(friendship_list))
         LOGGER.info('Fetching permantent and flash stories')
         permanent_stories = StoryRepository.get_all_permanent_stories()
         flash_stories = StoryRepository.get_all_valid_flash_stories()
 
         filtered_stories = StoryService.__get_all_public_and_friends_private_stories(permanent_stories, friendship_list)
         filtered_stories.extend(list(flash_stories))
+        filtered_stories = StoryService.__add_profile_picture_to_stories(filtered_stories)
         filtered_stories = StoryService.__calculate_relevance_of_story(filtered_stories)
         filtered_stories = sorted(filtered_stories, key=itemgetter('relevance'), reverse=True)
         filtered_stories_for_mobile = MobileTransformer.database_list_of_stories_with_relevance_to_mobile(filtered_stories)
@@ -206,3 +207,20 @@ class StoryService(object):
         title = user_name + ' ha reaccionado con un ' + reaction + ' a tu historia'
 
         StoryService.__send_notification_to_friends(facebook_user_id, title, body)
+
+    @staticmethod
+    def __add_profile_picture_to_stories(filtered_stories):
+        stories_with_profile_picture = []
+        all_users = UserRepository.get_all()
+
+        for story in filtered_stories:
+            profile_picture_id = StoryService.__search_dictionaries('facebookUserId', story['facebook_user_id'], all_users)
+            story.update({'profile_picture_id': profile_picture_id})
+
+            stories_with_profile_picture.append(story)
+
+        return stories_with_profile_picture
+
+    @staticmethod
+    def __search_dictionaries(key, value, list_of_dictionaries):
+        return [element for element in list_of_dictionaries if element[key] == value][0]['profile_picture_id']

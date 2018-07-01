@@ -17,39 +17,39 @@ class SharedServer(object):
 
     @staticmethod
     def authenticate_user(request_json):
-        LOGGER.info("Authenticating user against sharedServer")
+        LOGGER.info('Authenticating user against sharedServer')
         data = {
-            "facebook_id": request_json['facebookUserId'],
+            'facebook_id': request_json['facebookUserId'],
         }
         response = SharedServer.__post_json_shared_server(json=data, path=HOST + AUTH_PATH)
         return response.json()
 
     @staticmethod
     def register_user(request_json):
-        LOGGER.info("Sending request to shared server: " + HOST + USER_PATH)
+        LOGGER.info('Sending request to shared server: ' + HOST + USER_PATH)
         data = {
-            "id": None,
-            "_rev": None,
-            "nombre": request_json["first_name"],
-            "apellido": request_json['last_name'],
-            "facebook_id": request_json['facebookUserId'],
-            "facebookAuthToken": request_json['facebookAuthToken']
+            'id': None,
+            '_rev': None,
+            'nombre': request_json['first_name'],
+            'apellido': request_json['last_name'],
+            'facebook_id': request_json['facebookUserId'],
+            'facebookAuthToken': request_json['facebookAuthToken']
         }
         return SharedServer.__post_json_shared_server(json=data, path=HOST + USER_PATH)
 
     @staticmethod
     def get_token():
-        LOGGER.info("Retrieving token from memory")
+        LOGGER.info('Retrieving token from memory')
         token = app.memory_database.get('token')
 
         if token is None:
-            LOGGER.info("Token not found in memory, requesting to shared server")
+            LOGGER.info('Token not found in memory, requesting to shared server')
             data = {
                 'username': SERVER_USER,
                 'password': SEVER_PASSWORD
             }
             response = requests.post(HOST + TOKEN_PATH, json=data)
-            LOGGER.info("Got token from shared server: " + response.text)
+            LOGGER.info('Got token from shared server: ' + response.text)
             app.memory_database.set('app_token', response.json()['token']['token'])
             token = response.json()['token']['token']
         return token
@@ -60,13 +60,13 @@ class SharedServer(object):
 
     @staticmethod
     def upload_file(file):
-        LOGGER.info("Sending file to shared server: " + HOST + FILES_PATH)
+        LOGGER.info('Sending file to shared server: ' + HOST + FILES_PATH)
 
         return SharedServer.__post_file_shared_server(file=file, path=HOST + FILES_PATH)
 
     @staticmethod
     def get_file(file_id):
-        LOGGER.info("Sending file to shared server: " + HOST + FILES_PATH + str(file_id))
+        LOGGER.info('Sending file to shared server: ' + HOST + FILES_PATH + str(file_id))
         url_of_image = HOST + FILES_PATH + '/' + str(file_id)
 
         return requests.get(url_of_image, headers={'Authorization': SharedServer.get_token()})

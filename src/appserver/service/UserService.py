@@ -21,13 +21,13 @@ class UserService(object):
         validation_response = JsonValidator.validate_user_register(request_json)
         if validation_response.hasErrors:
             return ApplicationResponse.bad_request(message=validation_response.message)
-        LOGGER.info("Register user Json is valid")
+        LOGGER.info('Register user Json is valid')
 
         try:
             facebook_token_is_valid = Facebook.user_token_is_valid(request_json)
             if not facebook_token_is_valid:
                 return ApplicationResponse.bad_request(message='Invalid Facebook credentials')
-            LOGGER.info("Facebook user token is valid")
+            LOGGER.info('Facebook user token is valid')
 
             Facebook.get_user_identification(request_json)
         except Exception as e:
@@ -40,7 +40,7 @@ class UserService(object):
 
         try:
             shared_server_response = SharedServer.register_user(request_json)
-            LOGGER.info("Response from shared server: " + str(shared_server_response))
+            LOGGER.info('Response from shared server: ' + str(shared_server_response))
             shared_server_response_validation = JsonValidator.validate_shared_server_register_user(
                 shared_server_response)
             if shared_server_response_validation.hasErrors:
@@ -49,7 +49,7 @@ class UserService(object):
             LOGGER.error('There was error while getting registering user into shared server. Reason:' + str(e))
             return ApplicationResponse.service_unavailable(message='Could not register user to Shared Server')
 
-        request_json.update({'friendshipList': [request_json['facebookUserId']]})
+        request_json.update({'friendshipList': [request_json['facebookUserId']], 'profile_picture_id': None})
         UserRepository.insert(request_json)
 
         return ApplicationResponse.created(message='Created user successfully')
@@ -64,14 +64,14 @@ class UserService(object):
             facebook_token_is_valid = Facebook.user_token_is_valid(request_json)
             if not facebook_token_is_valid:
                 return ApplicationResponse.bad_request(message='Invalid Facebook credentials')
-            LOGGER.info("Facebook user token is valid")
+            LOGGER.info('Facebook user token is valid')
         except Exception as e:
             LOGGER.error('There was error while authenticating user with Facebook. Reason:' + str(e))
             return ApplicationResponse.service_unavailable(message='Could not get authenticated by Facebook')
 
         try:
             response = SharedServer.authenticate_user(request_json)
-            LOGGER.info("Response gotten from server: " + str(response))
+            LOGGER.info('Response gotten from server: ' + str(response))
             shared_server_response_validation = JsonValidator.validate_shared_server_authorization(response)
             if shared_server_response_validation.hasErrors:
                 return ApplicationResponse.bad_request(message=shared_server_response_validation.message)
@@ -79,10 +79,10 @@ class UserService(object):
             LOGGER.error('There was error while getting authenticating user by shared server. Reason:' + str(e))
             return ApplicationResponse.service_unavailable(message='Could not authenticate user by Shared Server')
 
-        data = response["data"]
-        facebook_id = data["facebook_id"]
-        token = data["token"]
-        expires_at = data["expires_at"]
+        data = response['data']
+        facebook_id = data['facebook_id']
+        token = data['token']
+        expires_at = data['expires_at']
         UserRepository.update_user_token(facebook_id, token, expires_at)
         firebase_id = request_json['firebaseId']
         UserRepository.update_firebase_id(facebook_id, firebase_id)
@@ -100,7 +100,7 @@ class UserService(object):
         if validation_response.hasErrors:
             return ApplicationResponse.bad_request(message=validation_response.message)
 
-        target = request_json["mTargetUsername"]
+        target = request_json['mTargetUsername']
         if UserRepository.username_exists(target):
             requester = request_header['facebookUserId']
             message = request_json['mDescription']
@@ -217,7 +217,7 @@ class UserService(object):
             LOGGER.info('FILE ' + str(request.files))
             LOGGER.info('Sending file to shared server ' + str(file))
             upload_file_response = SharedServer.upload_file(file)
-            LOGGER.info("Response from shared server: " + str(upload_file_response))
+            LOGGER.info('Response from shared server: ' + str(upload_file_response))
             shared_server_response_validation = JsonValidator.validate_shared_server_register_user(upload_file_response)
 
             if shared_server_response_validation.hasErrors:

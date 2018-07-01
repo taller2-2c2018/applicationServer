@@ -10,7 +10,7 @@ LOGGER = LoggerFactory().get_logger('userController')
 userEndpoint = Blueprint('userEndpoint', __name__)
 
 
-@userEndpoint.route("/register", methods=['POST'])
+@userEndpoint.route('/register', methods=['POST'])
 @monitor
 @controller_auditory
 def register_user():
@@ -20,7 +20,7 @@ def register_user():
     return return_value
 
 
-@userEndpoint.route("/authenticate", methods=['POST'])
+@userEndpoint.route('/authenticate', methods=['POST'])
 @monitor
 @controller_auditory
 def authenticate_user():
@@ -30,7 +30,7 @@ def authenticate_user():
     return return_value
 
 
-@userEndpoint.route("/friendship", methods=['POST'])
+@userEndpoint.route('/friendship', methods=['POST'])
 @monitor
 @secure
 @controller_auditory
@@ -42,7 +42,7 @@ def send_friendship():
     return return_value
 
 
-@userEndpoint.route("/friendship", methods=['GET'])
+@userEndpoint.route('/friendship', methods=['GET'])
 @monitor
 @secure
 @controller_auditory
@@ -53,7 +53,7 @@ def get_friendship_requests_for_user():
     return return_value
 
 
-@userEndpoint.route("/friends", methods=['GET'])
+@userEndpoint.route('/friends', methods=['GET'])
 @monitor
 @secure
 @controller_auditory
@@ -64,7 +64,7 @@ def get_user_friends():
     return return_value
 
 
-@userEndpoint.route("/friendship/accept/<facebook_user_id>", methods=['POST'])
+@userEndpoint.route('/friendship/accept/<facebook_user_id>', methods=['POST'])
 @monitor
 @secure
 @controller_auditory
@@ -75,7 +75,7 @@ def accept_user_friendship(facebook_user_id):
     return return_value
 
 
-@userEndpoint.route("/profile", methods=['POST', 'PUT'])
+@userEndpoint.route('/profile', methods=['POST', 'PUT'])
 @monitor
 @secure
 @controller_auditory
@@ -87,7 +87,7 @@ def modify_user_profile():
     return return_value
 
 
-@userEndpoint.route("/profilePicture", methods=['POST', 'PUT'])
+@userEndpoint.route('/profilePicture', methods=['POST', 'PUT'])
 @monitor
 @secure
 @controller_auditory
@@ -97,7 +97,7 @@ def modify_user_profile_picture():
     return return_value
 
 
-@userEndpoint.route("/profile/<facebook_user_id>", methods=['GET'])
+@userEndpoint.route('/profile/<facebook_user_id>', methods=['GET'])
 @monitor
 @secure
 @controller_auditory
@@ -107,7 +107,7 @@ def get_user_profile(facebook_user_id):
     return return_value
 
 
-@userEndpoint.route("/list", methods=['GET'])
+@userEndpoint.route('/list', methods=['GET'])
 @monitor
 @secure
 @controller_auditory
