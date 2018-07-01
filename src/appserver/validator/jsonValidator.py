@@ -95,13 +95,6 @@ class JsonValidator(object):
         return JsonValidator.__check_validity(header, field_name, validation_response, 'Header')
 
     @staticmethod
-    def __check_validity_file(request_map, field_name, validation_response):
-        if field_name not in request_map:
-            validation_response.message += ' You must include a file in your post. '
-            validation_response.hasErrors = True
-        return validation_response
-
-    @staticmethod
     def __check_type_boolean(data, field_name, validation_response):
         if field_name in data and (not isinstance(data[field_name], bool)):
             if 'false' == data[field_name].lower() or 'true' == data[field_name].lower():

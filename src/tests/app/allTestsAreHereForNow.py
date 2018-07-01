@@ -108,6 +108,11 @@ class Tests(BaseTestCase):
 
         self.assertEqual(response_register_user.status_code, 400)
 
+    def test_register_user_no_json(self):
+        response_register_user = UserService.register_new_user(None)
+
+        self.assertEqual(response_register_user.status_code, 400)
+
     def test_register_user_unavailable_facebook_service(self):
         with patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', mock_raise_exception):
             response_register_user = Tests.__create_default_user()
@@ -158,6 +163,12 @@ class Tests(BaseTestCase):
         self.assertEqual(inserted_profile['mail'], 'mail@email.com')
         self.assertEqual(inserted_profile['sex'], 'male')
 
+    def test_create_user_profile_no_json(self):
+        Tests.__create_default_user()
+        response_update_profile = UserService.modify_user_profile(None, {'facebookUserId': 'facebookUserId'})
+
+        self.assertEqual(response_update_profile.status_code, 400)
+
     @patch('appserver.externalcommunication.sharedServer.SharedServer.authenticate_user', mock_authenticate_user)
     def test_authenticate_user(self):
         response_authenticate = UserService.authenticate_user({'facebookUserId': 'facebookUserId',
@@ -169,6 +180,11 @@ class Tests(BaseTestCase):
         response_json = response_authenticate.get_json()['data']
 
         self.assertEqual(response_json['token'], 'token')
+
+    def test_authenticate_user_no_json(self):
+        response_authenticate = UserService.authenticate_user(None)
+
+        self.assertEqual(response_authenticate.status_code, 400)
 
     def test_authenticate_user_bad_request(self):
         response_authenticate = UserService.authenticate_user({})
@@ -257,6 +273,12 @@ class Tests(BaseTestCase):
         self.assertEqual(inserted_friendship['requester'], 'facebookUserId')
         self.assertEqual(inserted_friendship['target'], 'target')
         self.assertEqual(inserted_friendship['message'], 'Add me to your friend list')
+
+    def test_send_friendship_request_no_json(self):
+        Tests.__create_default_user()
+        response_send_friendship_request = UserService.send_user_friendship_request(None, None)
+
+        self.assertEqual(response_send_friendship_request.status_code, 400)
 
     def test_get_friendship_requests(self):
         Tests.__create_default_user()
@@ -417,7 +439,7 @@ class Tests(BaseTestCase):
 
     def test_get_all_stories_for_requester_gets_permanent_story(self):
         Tests.__create_default_user()
-        Tests.__create_default_story()
+        Tests.__create_default_story(is_flash='False')
 
         response_stories = StoryService.get_all_stories_for_requester(Tests.__default_header())
         self.assertEqual(response_stories.status_code, 200)
