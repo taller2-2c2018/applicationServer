@@ -63,7 +63,7 @@ def bad_request_json(*args, **kwargs):
 
 def mock_get_file(file_id):
     file = Object()
-    file.content = 'file'
+    file.content = b'file'
 
     return file
 
