@@ -25,7 +25,9 @@ class FileService(object):
             file_response = SharedServer.get_file(file_id)
             LOGGER.info('response from shared server is' + str(file_response))
 
-            data = {'mFile': file_response.content}
+            decoded_content = file_response.content.decode('utf-8', 'ignore')
+
+            data = {'mFile': decoded_content}
         except Exception as e:
             LOGGER.error('There was error while getting file from shared server. Reason:' + str(e))
             return ApplicationResponse.service_unavailable(message='Could not get file from Shared Server')
