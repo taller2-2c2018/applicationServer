@@ -6,7 +6,6 @@ class MobileTransformer(object):
         for story in stories:
             story_for_mobile = MobileTransformer.database_story_to_mobile(story)
             story_for_mobile['mRelevance'] = story['relevance']
-            story_for_mobile['mProfilePictureId'] = story['profile_picture_id']
             list_of_stories.append(story_for_mobile)
 
         return list_of_stories
@@ -25,7 +24,10 @@ class MobileTransformer(object):
                 'mFlash': story['is_flash'],
                 'mLocation': story['location'],
                 'mComments': MobileTransformer.__database_comments_to_mobile(story['comments']),
-                'mReactions': MobileTransformer.__database_reactions_to_mobile(story['reactions'])
+                'mReactions': MobileTransformer.__database_reactions_to_mobile(story['reactions']),
+                'mProfilePictureId': story['profile_picture_id'],
+                'mFirstName': story['first_name'],
+                'mLastName': story['last_name']
             }
 
     @staticmethod
