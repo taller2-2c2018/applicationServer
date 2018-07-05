@@ -17,9 +17,7 @@ class FriendshipRepository(object):
     @staticmethod
     def get_friendship_requests_of_username(username):
         LOGGER.info('Getting all friendship requests of ' + username)
-        friendship_list = friendship_collection.find({'target': username})
-
-        return json_util.dumps(friendship_list)
+        return list(friendship_collection.find({'target': username}))
 
     @staticmethod
     def friendship_exists(user_that_accepts_friendship, target_user):

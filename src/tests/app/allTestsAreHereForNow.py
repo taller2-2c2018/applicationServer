@@ -349,12 +349,15 @@ class Tests(BaseTestCase):
         self.assertEqual(friendship_response.status_code, 200)
 
         friendship_list = friendship_response.get_json()['data']
-        friendship_list = json.loads(friendship_list)
 
         self.assertEqual(len(friendship_list), 1)
-        self.assertEqual(friendship_list[0]['requester'], 'facebookUserId')
-        self.assertEqual(friendship_list[0]['target'], 'target')
-        self.assertEqual(friendship_list[0]['message'], 'Add me to your friend list')
+        friendship_request = friendship_list[0]
+        self.assertEqual(friendship_request['requester'], 'facebookUserId')
+        self.assertEqual(friendship_request['target'], 'target')
+        self.assertEqual(friendship_request['message'], 'Add me to your friend list')
+        self.assertTrue('mProfilePictureId' in friendship_request)
+        self.assertTrue('mFirstName' in friendship_request)
+        self.assertTrue('mLastName' in friendship_request)
 
     def test_get_friendship_requests_no_json(self):
         friendship_response = UserService.get_friendship_requests(None)
@@ -377,7 +380,6 @@ class Tests(BaseTestCase):
         self.assertEqual(friendship_response.status_code, 200)
 
         friendship_list = friendship_response.get_json()['data']
-        friendship_list = json.loads(friendship_list)
 
         self.assertEqual(len(friendship_list), 0)
 
@@ -405,7 +407,6 @@ class Tests(BaseTestCase):
             self.assertEqual(friendship_response.status_code, 200)
 
             friendship_list = friendship_response.get_json()['data']
-            friendship_list = json.loads(friendship_list)
 
             self.assertEqual(len(friendship_list), 0)
 
