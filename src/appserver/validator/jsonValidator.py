@@ -219,3 +219,18 @@ class JsonValidator(object):
         validation_response = JsonValidator.__check_validity_form(form, "mLongitude", validation_response)
 
         return validation_response
+
+    @staticmethod
+    def validate_modify_profile_picture_json(headers, json):
+        validate_header = JsonValidator.validate_header_has_facebook_user_id(headers)
+        if validate_header.hasErrors:
+            return validate_header
+
+        if json is None:
+            return ValidationResponse(True, 'Content-Type: is not application/json, or missing json data.')
+        validation_response = ValidationResponse(False, '')
+        validation_response = JsonValidator.__check_validity_json(json, 'mFileType', validation_response)
+        validation_response = JsonValidator.__check_validity_json(json, 'file', validation_response)
+        validation_response = JsonValidator.__check_valid_profile_picture_filetype(json, 'mFileType', validation_response)
+
+        return validation_response

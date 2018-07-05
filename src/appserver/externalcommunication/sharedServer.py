@@ -1,6 +1,8 @@
 import requests
 from appserver import app
 from appserver.logger import LoggerFactory
+from werkzeug.datastructures import MultiDict
+
 
 LOGGER = LoggerFactory().get_logger('SharedServerClient')
 TOKEN_PATH = '/token'
@@ -83,3 +85,8 @@ class SharedServer(object):
             'size': ''
         }
         return requests.post(path, files=file, data=data_for_shared_server, headers={'Authorization': SharedServer.get_token()})
+
+    @staticmethod
+    def upload_file_as_json(file_content):
+        multi_dict = MultiDict([('file', file_content)])
+        return SharedServer.upload_file(multi_dict)
