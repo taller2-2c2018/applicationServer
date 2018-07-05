@@ -75,6 +75,17 @@ def accept_user_friendship(facebook_user_id):
     return return_value
 
 
+@userEndpoint.route('/friendship/reject/<facebook_user_id>', methods=['POST'])
+@monitor
+@secure
+@controller_auditory
+def reject_user_friendship(facebook_user_id):
+    LOGGER.info('Rejecting friendship request')
+    request_header = request.headers
+    return_value = UserService().reject_friendship_request(request_header, facebook_user_id)
+    return return_value
+
+
 @userEndpoint.route('/profile', methods=['POST', 'PUT'])
 @monitor
 @secure
