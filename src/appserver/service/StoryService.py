@@ -126,7 +126,7 @@ class StoryService(object):
 
         filtered_stories = StoryService.__get_all_public_and_friends_private_stories(permanent_stories, friendship_list)
         filtered_stories.extend(list(flash_stories))
-        filtered_stories = StoryService.__add_profile_picture_to_stories(filtered_stories)
+        filtered_stories = StoryService.__add_profile_data_to_stories(filtered_stories)
         filtered_stories = StoryService.__calculate_relevance_of_story(filtered_stories)
         filtered_stories = sorted(filtered_stories, key=itemgetter('relevance'), reverse=True)
         filtered_stories_for_mobile = MobileTransformer.database_list_of_stories_with_relevance_to_mobile(filtered_stories)
@@ -190,6 +190,7 @@ class StoryService(object):
         StoryRepository.update_story_by_id(story_id, story)
         story = StoryRepository.get_story_by_id(story_id)
         LOGGER.info('Added comment to story')
+        story = StoryService.__add_profile_data_to_story(story)
         story_for_mobile = MobileTransformer.database_story_to_mobile(story)
         StoryService.__send_new_comment_notification(facebook_user_id, body=story_for_mobile)
 
@@ -237,6 +238,7 @@ class StoryService(object):
         StoryRepository.update_story_by_id(story_id, story)
         story = StoryRepository.get_story_by_id(story_id)
         LOGGER.info('Added reaction to story')
+        story = StoryService.__add_profile_data_to_story(story)
         story_for_mobile = MobileTransformer.database_story_to_mobile(story)
         StoryService.__send_new_reaction_notification(facebook_user_id, reaction, body=story_for_mobile)
 
@@ -252,18 +254,34 @@ class StoryService(object):
         StoryService.__send_notification_to_friends(facebook_user_id, title, body)
 
     @staticmethod
-    def __add_profile_picture_to_stories(filtered_stories):
+    def __add_profile_data_to_stories(filtered_stories):
         stories_with_profile_picture = []
         all_users = UserRepository.get_all()
 
         for story in filtered_stories:
-            profile_picture_id = StoryService.__search_dictionaries('facebookUserId', story['facebook_user_id'],
-                                                                    all_users)[0]['profile_picture_id']
-            story.update({'profile_picture_id': profile_picture_id})
+            user = StoryService.__search_dictionaries('facebookUserId', story['facebook_user_id'], all_users)[0]
+
+            profile_picture_id = user['profile_picture_id']
+            first_name = user['first_name']
+            last_name = user['last_name']
+            story.update({'profile_picture_id': profile_picture_id, 'first_name': first_name, 'last_name': last_name})
 
             stories_with_profile_picture.append(story)
 
         return stories_with_profile_picture
+
+    @staticmethod
+    def __add_profile_data_to_story(story):
+        all_users = UserRepository.get_all()
+
+        user = StoryService.__search_dictionaries('facebookUserId', story['facebook_user_id'], all_users)[0]
+
+        profile_picture_id = user['profile_picture_id']
+        first_name = user['first_name']
+        last_name = user['last_name']
+        story.update({'profile_picture_id': profile_picture_id, 'first_name': first_name, 'last_name': last_name})
+
+        return story
 
     @staticmethod
     def __search_dictionaries(key, value, list_of_dictionaries):
