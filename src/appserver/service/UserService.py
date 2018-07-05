@@ -238,6 +238,32 @@ class UserService(object):
         return ApplicationResponse.success(message='Profile picture updated')
 
     @staticmethod
+    def modify_user_profile_picture_json(headers, file_json):
+        validation_response = JsonValidator.validate_modify_profile_picture_json(headers, file_json)
+        if validation_response.hasErrors:
+            return ApplicationResponse.bad_request(message=validation_response.message)
+
+        try:
+            file_content = file_json['file']
+            upload_file_response = SharedServer.upload_file_as_json(file_content)
+            LOGGER.info('Response from shared server: ' + str(upload_file_response))
+        except Exception as e:
+            LOGGER.error('There was error while getting file from shared server. Reason:' + str(e))
+            return ApplicationResponse.service_unavailable(message='Could not upload file to Shared Server')
+
+        shared_server_response_validation = JsonValidator.validate_shared_server_register_user(upload_file_response)
+        if shared_server_response_validation.hasErrors:
+            return ApplicationResponse.bad_request(message=shared_server_response_validation.message)
+
+        response_json = json.loads(upload_file_response.text)
+        file_type = file_json['mFileType']
+        profile_update = {'profile_picture_id': response_json['data']['id'],
+                          'file_type_profile_picture': file_type}
+        UserRepository.modify_profile(headers['facebookUserId'], profile_update)
+
+        return ApplicationResponse.success(message='Profile picture updated')
+
+    @staticmethod
     def get_user_list(request_header):
         validation_header = JsonValidator.validate_header_has_facebook_user_id(request_header)
         if validation_header.hasErrors:

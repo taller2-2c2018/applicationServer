@@ -87,13 +87,25 @@ def modify_user_profile():
     return return_value
 
 
-@userEndpoint.route('/profilePicture', methods=['POST', 'PUT'])
+@userEndpoint.route('/profilePictureStream', methods=['POST', 'PUT'])
 @monitor
 @secure
 @controller_auditory
 def modify_user_profile_picture():
-    LOGGER.info('Adding new profile picture to user')
+    LOGGER.info('Adding new profile picture to user by stream')
     return_value = UserService().modify_user_profile_picture(request)
+    return return_value
+
+
+@userEndpoint.route('/profilePicture', methods=['POST', 'PUT'])
+@monitor
+@secure
+@controller_auditory
+def modify_user_profile_picture_json():
+    LOGGER.info('Adding new profile picture to user')
+    headers = request.headers
+    file_json = request.get_json()
+    return_value = UserService().modify_user_profile_picture_json(headers, file_json)
     return return_value
 
 

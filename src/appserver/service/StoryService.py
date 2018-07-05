@@ -1,6 +1,5 @@
 import json
 
-from werkzeug.datastructures import MultiDict
 from operator import itemgetter
 
 from appserver.datastructure.ApplicationResponse import ApplicationResponse
@@ -27,11 +26,8 @@ class StoryService(object):
             return ApplicationResponse.bad_request(message=validation_response.message)
 
         try:
-            LOGGER.info('Getting file for story')
             file_content = story_json['file']
-            multi_dict = MultiDict([('file', file_content)])
-            LOGGER.info('This is what multi dict has ' + str(multi_dict))
-            upload_file_response = SharedServer.upload_file(multi_dict)
+            upload_file_response = SharedServer.upload_file_as_json(file_content)
             LOGGER.info('Response from shared server: ' + str(upload_file_response))
         except Exception as e:
             LOGGER.error('There was error while getting file from shared server. Reason:' + str(e))
