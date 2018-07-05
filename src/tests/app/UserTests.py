@@ -107,7 +107,8 @@ class UserTests(BaseTestCase):
             self.assertEqual(response_register_user.status_code, 503)
 
     def test_register_user_facebook_token_invalid(self):
-        with patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=False)):
+        with patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid',
+                   MagicMock(return_value=False)):
             response_register_user = TestsCommons.create_default_user()
 
             self.assertEqual(response_register_user.status_code, 400)
@@ -206,8 +207,8 @@ class UserTests(BaseTestCase):
     @patch('appserver.externalcommunication.sharedServer.SharedServer.authenticate_user', mock_raise_exception)
     def test_authenticate_user_unavailable_shared_service(self):
         response_authenticate = UserService.authenticate_user({'facebookUserId': 'facebookUserId',
-                                                                   'facebookAuthToken': 'facebookAuthToken',
-                                                                   'firebaseId': 'firebaseId'})
+                                                               'facebookAuthToken': 'facebookAuthToken',
+                                                               'firebaseId': 'firebaseId'})
 
         self.assertEqual(response_authenticate.status_code, 503)
 
@@ -254,8 +255,21 @@ class UserTests(BaseTestCase):
         self.assertEqual(inserted_friendship['target'], 'target')
         self.assertEqual(inserted_friendship['message'], 'Add me to your friend list')
 
+    def test_send_friendship_request_twice_fails(self):
+        TestsCommons.create_default_user()
+        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
+        UserService.send_user_friendship_request({'mTargetUsername': 'target',
+                                                  'mDescription': 'Add me to your friend list'},
+                                                 {'facebookUserId': 'facebookUserId'})
+        response_send_friendship_request = UserService.send_user_friendship_request(
+            {'mTargetUsername': 'target', 'mDescription': 'Add me to your friend list'},
+            {'facebookUserId': 'facebookUserId'})
+
+        self.assertEqual(response_send_friendship_request.status_code, 400)
+
     def test_send_friendship_request_no_firebase_available(self):
-        with patch('appserver.externalcommunication.FirebaseCloudMessaging.FirebaseCloudMessaging.send_notification', mock_raise_exception):
+        with patch('appserver.externalcommunication.FirebaseCloudMessaging.FirebaseCloudMessaging.send_notification',
+                   mock_raise_exception):
             TestsCommons.create_default_user()
             UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
             response_send_friendship_request = UserService.send_user_friendship_request(
@@ -278,7 +292,8 @@ class UserTests(BaseTestCase):
 
     def test_send_friendship_request_no_json(self):
         TestsCommons.create_default_user()
-        response_send_friendship_request = UserService.send_user_friendship_request(None, {'facebookUserId': 'facebookUserId'})
+        response_send_friendship_request = UserService.send_user_friendship_request(None, {
+            'facebookUserId': 'facebookUserId'})
 
         self.assertEqual(response_send_friendship_request.status_code, 400)
 
@@ -367,6 +382,20 @@ class UserTests(BaseTestCase):
 
             friends_of_target = database.user.find_one({'facebookUserId': 'target'})['friendshipList']
             self.assertTrue('requester' in friends_of_target)
+
+    def test_send_friendship_request_with_an_existing_friendship(self):
+        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
+        UserService.register_new_user({'facebookUserId': 'requester', 'facebookAuthToken': 'facebookAuthToken'})
+        UserService.send_user_friendship_request(
+            {'mTargetUsername': 'target', 'mDescription': 'Add me to your friend list'},
+            {'facebookUserId': 'requester'})
+
+        UserService.accept_friendship_request({'facebookUserId': 'target'}, 'requester')
+        response_send_request = UserService.send_user_friendship_request(
+            {'mTargetUsername': 'target', 'mDescription': 'Add me to your friend list'},
+            {'facebookUserId': 'requester'})
+
+        self.assertEqual(response_send_request.status_code, 400)
 
     def test_accept_friendship_request_no_json(self):
         accept_response = UserService.accept_friendship_request(None, 'requester')
@@ -509,10 +538,12 @@ class UserTests(BaseTestCase):
         self.assertEqual(modify_profile_response.status_code, 400)
 
     def test_modify_profile_picture_json_shared_server_unavailable(self):
-        with patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file_as_json', mock_raise_exception):
+        with patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file_as_json',
+                   mock_raise_exception):
             TestsCommons.create_default_user()
             file_json = {'file': 'data', 'mFileType': 'jpg'}
-            modify_profile_response = UserService.modify_user_profile_picture_json(TestsCommons.default_header(), file_json)
+            modify_profile_response = UserService.modify_user_profile_picture_json(TestsCommons.default_header(),
+                                                                                   file_json)
 
             self.assertEqual(modify_profile_response.status_code, 503)
 
@@ -520,7 +551,8 @@ class UserTests(BaseTestCase):
         with patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', bad_request):
             TestsCommons.create_default_user()
             file_json = {'file': 'data', 'mFileType': 'jpg'}
-            modify_profile_response = UserService.modify_user_profile_picture_json(TestsCommons.default_header(), file_json)
+            modify_profile_response = UserService.modify_user_profile_picture_json(TestsCommons.default_header(),
+                                                                                   file_json)
 
             self.assertEqual(modify_profile_response.status_code, 400)
 
@@ -573,5 +605,3 @@ class UserTests(BaseTestCase):
         user_list_response = UserService.get_user_list({})
 
         self.assertEqual(user_list_response.status_code, 400)
-
-

@@ -1,6 +1,5 @@
-from appserver.logger import LoggerFactory
 from appserver import app
-from bson import json_util
+from appserver.logger import LoggerFactory
 
 LOGGER = LoggerFactory.get_logger(__name__)
 
@@ -11,7 +10,7 @@ class FriendshipRepository(object):
     @staticmethod
     def insert(friendship):
         LOGGER.info('Inserting new vale into user_table')
-        friendship_id = friendship_collection.insert(friendship)
+        friendship_id = friendship_collection.insert_one(friendship)
         return friendship_id
 
     @staticmethod
@@ -20,13 +19,12 @@ class FriendshipRepository(object):
         return list(friendship_collection.find({'target': username}))
 
     @staticmethod
-    def friendship_exists(user_that_accepts_friendship, target_user):
+    def friendship_request_exists(target_facebook_id, requester_facebook_id):
         LOGGER.info('Seeing if friendship exists')
         return friendship_collection.find(
-            {'requester': target_user, 'target': user_that_accepts_friendship}).count() > 0
+            {'requester': requester_facebook_id, 'target': target_facebook_id}).count() > 0
 
     @staticmethod
     def remove_friendship(user_that_accepts_friendship, target_user):
         LOGGER.info('Removing friendship request from database')
         friendship_collection.remove({'requester': target_user, 'target': user_that_accepts_friendship})
-
