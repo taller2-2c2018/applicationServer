@@ -180,12 +180,26 @@ class UserService(object):
 
         user_that_accepts_friendship = request_header['facebookUserId']
         if FriendshipRepository.friendship_exists(user_that_accepts_friendship, target_user):
-            FriendshipRepository.accept_friendship(user_that_accepts_friendship, target_user)
+            FriendshipRepository.remove_friendship(user_that_accepts_friendship, target_user)
             UserRepository.add_friendship(user_that_accepts_friendship, target_user)
             UserService.__send_notification_of_friendship_accepted(facebook_id_acceptor=user_that_accepts_friendship,
                                                                    facebook_id_target=target_user)
 
             return ApplicationResponse.success(message='Friendship was accepted successfully')
+
+        return ApplicationResponse.bad_request(message='Friendship request couldn\'t be found')
+
+    @staticmethod
+    def reject_friendship_request(request_header, target_user):
+        validation_response = JsonValidator.validate_header_has_facebook_user_id(request_header)
+        if validation_response.hasErrors:
+            return ApplicationResponse.bad_request(message=validation_response.message)
+
+        user_that_rejects_friendship = request_header['facebookUserId']
+        if FriendshipRepository.friendship_exists(user_that_rejects_friendship, target_user):
+            FriendshipRepository.remove_friendship(user_that_rejects_friendship, target_user)
+
+            return ApplicationResponse.success(message='Friendship was rejected successfully')
 
         return ApplicationResponse.bad_request(message='Friendship request couldn\'t be found')
 

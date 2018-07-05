@@ -26,7 +26,7 @@ class FriendshipRepository(object):
             {'requester': target_user, 'target': user_that_accepts_friendship}).count() > 0
 
     @staticmethod
-    def accept_friendship(user_that_accepts_friendship, target_user):
+    def remove_friendship(user_that_accepts_friendship, target_user):
         LOGGER.info('Removing friendship request from database')
         friendship_collection.remove({'requester': target_user, 'target': user_that_accepts_friendship})
 

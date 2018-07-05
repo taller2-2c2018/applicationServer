@@ -381,6 +381,38 @@ class UserTests(BaseTestCase):
 
         self.assertEqual(accept_response.status_code, 400)
 
+    def test_reject_friendship_request(self):
+        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
+        UserService.register_new_user({'facebookUserId': 'requester', 'facebookAuthToken': 'facebookAuthToken'})
+        UserService.send_user_friendship_request(
+            {'mTargetUsername': 'target', 'mDescription': 'Add me to your friend list'},
+            {'facebookUserId': 'requester'})
+
+        reject_response = UserService.reject_friendship_request({'facebookUserId': 'target'}, 'requester')
+
+        self.assertEqual(reject_response.status_code, 200)
+
+        friendship_response = UserService.get_friendship_requests({'facebookUserId': 'target'})
+
+        self.assertEqual(friendship_response.status_code, 200)
+
+        friendship_list = friendship_response.get_json()['data']
+
+        self.assertEqual(len(friendship_list), 0)
+
+    def test_reject_friendship_request_no_json(self):
+        reject_response = UserService.reject_friendship_request(None, 'requester')
+
+        self.assertEqual(reject_response.status_code, 400)
+
+    def test_reject_friendship_request_without_request(self):
+        UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
+        UserService.register_new_user({'facebookUserId': 'requester', 'facebookAuthToken': 'facebookAuthToken'})
+
+        reject_response = UserService.reject_friendship_request({'facebookUserId': 'target'}, 'requester')
+
+        self.assertEqual(reject_response.status_code, 400)
+
     def test_get_friends(self):
         UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken',
                                        'birth_date': '10/02/1992', 'firebase_id': '1234'})
