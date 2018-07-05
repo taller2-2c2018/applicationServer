@@ -49,7 +49,8 @@ class UserService(object):
             LOGGER.error('There was error while getting registering user into shared server. Reason:' + str(e))
             return ApplicationResponse.service_unavailable(message='Could not register user to Shared Server')
 
-        request_json.update({'friendshipList': [request_json['facebookUserId']], 'profile_picture_id': None})
+        request_json.update({'friendshipList': [request_json['facebookUserId']], 'profile_picture_id': None,
+                             'birth_date': None})
         if 'firebase_id' not in request_json:
             request_json.update({'firebase_id': None})
 
