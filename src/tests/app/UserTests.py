@@ -444,9 +444,9 @@ class UserTests(BaseTestCase):
 
     def test_get_friends(self):
         UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken',
-                                       'birth_date': '10/02/1992', 'firebase_id': '1234'})
+                                       'firebase_id': '1234'})
         UserService.register_new_user({'facebookUserId': 'requester', 'facebookAuthToken': 'facebookAuthToken',
-                                       'birth_date': '11/02/1992', 'firebase_id': '5678'})
+                                       'firebase_id': '5678'})
         UserService.send_user_friendship_request(
             {'mTargetUsername': 'target', 'mDescription': 'Add me to your friend list'},
             {'facebookUserId': 'requester'})
@@ -464,7 +464,6 @@ class UserTests(BaseTestCase):
         self.assertEqual(len(friends_list), 1)
         friend = friends_list[0]
         self.assertEqual(friend['mFirebaseId'], '5678')
-        self.assertEqual(friend['mBirthDate'], '11/02/1992')
         self.assertEqual(friend['mFacebookUserId'], 'requester')
 
     def test_modify_profile_picture_stream(self):

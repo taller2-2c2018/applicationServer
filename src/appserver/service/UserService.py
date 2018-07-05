@@ -49,12 +49,9 @@ class UserService(object):
             LOGGER.error('There was error while getting registering user into shared server. Reason:' + str(e))
             return ApplicationResponse.service_unavailable(message='Could not register user to Shared Server')
 
-        request_json.update({'friendshipList': [request_json['facebookUserId']], 'profile_picture_id': None,
-                             'birth_date': None, 'mail': None, 'sex': None})
-        if 'firebase_id' not in request_json:
-            request_json.update({'firebase_id': None})
+        user_registration = MobileTransformer.mobile_register_to_database(request_json)
 
-        UserRepository.insert(request_json)
+        UserRepository.insert(user_registration)
 
         return ApplicationResponse.created(message='Created user successfully')
 
@@ -178,17 +175,17 @@ class UserService(object):
         return ApplicationResponse.success(data=mobile_friend_list)
 
     @staticmethod
-    def accept_friendship_request(request_header, target_user):
+    def accept_friendship_request(request_header, who_i_am_accepting):
         validation_response = JsonValidator.validate_header_has_facebook_user_id(request_header)
         if validation_response.hasErrors:
             return ApplicationResponse.bad_request(message=validation_response.message)
 
         user_that_accepts_friendship = request_header['facebookUserId']
-        if FriendshipRepository.friendship_request_exists(user_that_accepts_friendship, target_user):
-            FriendshipRepository.remove_friendship(user_that_accepts_friendship, target_user)
-            UserRepository.add_friendship(user_that_accepts_friendship, target_user)
+        if UserService.__can_accept_request(requester=who_i_am_accepting, target=user_that_accepts_friendship):
+            FriendshipRepository.remove_friendship(user_that_accepts_friendship, who_i_am_accepting)
+            UserRepository.add_friendship(user_that_accepts_friendship, who_i_am_accepting)
             UserService.__send_notification_of_friendship_accepted(facebook_id_acceptor=user_that_accepts_friendship,
-                                                                   facebook_id_target=target_user)
+                                                                   facebook_id_target=who_i_am_accepting)
 
             return ApplicationResponse.success(message='Friendship was accepted successfully')
 
@@ -317,3 +314,9 @@ class UserService(object):
     def __can_send_request(requester, target):
         return not UserRepository.friendship_exists(target_facebook_id=target, requester_facebook_id=requester) and not \
             FriendshipRepository.friendship_request_exists(target_facebook_id=target, requester_facebook_id=requester)
+
+    @staticmethod
+    def __can_accept_request(requester, target):
+        return not UserRepository.friendship_exists(target_facebook_id=target, requester_facebook_id=requester) and \
+               FriendshipRepository.friendship_request_exists(target_facebook_id=target,
+                                                              requester_facebook_id=requester)
