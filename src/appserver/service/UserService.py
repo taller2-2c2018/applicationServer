@@ -138,8 +138,27 @@ class UserService(object):
 
         username = request_header['facebookUserId']
         friendship_list = FriendshipRepository.get_friendship_requests_of_username(username)
+        friendship_list = UserService.__add_profile_data_to_list_of_users(friendship_list)
 
         return ApplicationResponse.success(data=friendship_list)
+
+    @staticmethod
+    def __add_profile_data_to_list_of_users(friendship_list):
+        all_users = UserRepository.get_all()
+
+        for friendship in friendship_list:
+            user = UserService.__search_dictionaries('facebookUserId', friendship['requester'], all_users)[0]
+
+            profile_picture_id = user['profile_picture_id']
+            first_name = user['first_name']
+            last_name = user['last_name']
+            friendship.update({'mProfilePictureId': profile_picture_id, 'mFirstName': first_name, 'mLastName': last_name})
+
+        return friendship_list
+
+    @staticmethod
+    def __search_dictionaries(key, value, list_of_dictionaries):
+        return [element for element in list_of_dictionaries if element[key] == value]
 
     @staticmethod
     def get_user_friends(request_header):
