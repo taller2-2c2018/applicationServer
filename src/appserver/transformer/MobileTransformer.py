@@ -161,11 +161,11 @@ class MobileTransformer(object):
             'facebookUserId': request_json['facebookUserId'],
             'facebookAuthToken': request_json['facebookAuthToken'],
             'friendshipList': [request_json['facebookUserId']],
-            'profile_picture_id': None,
-            'birth_date': None,
-            'mail': None,
-            'sex': None,
-            'firebase_id': MobileTransformer.__optional_value(request_json, 'firebase_id', None),
+            'profile_picture_id': '',
+            'birth_date': '',
+            'mail': '',
+            'sex': '',
+            'firebase_id': MobileTransformer.__optional_value(request_json, 'firebase_id', ''),
             'first_name': request_json['first_name'],
             'last_name': request_json['last_name']
         }
