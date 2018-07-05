@@ -50,7 +50,7 @@ class UserService(object):
             return ApplicationResponse.service_unavailable(message='Could not register user to Shared Server')
 
         request_json.update({'friendshipList': [request_json['facebookUserId']], 'profile_picture_id': None,
-                             'birth_date': None})
+                             'birth_date': None, 'mail': None, 'sex': None})
         if 'firebase_id' not in request_json:
             request_json.update({'firebase_id': None})
 
@@ -156,7 +156,8 @@ class UserService(object):
             profile_picture_id = user['profile_picture_id']
             first_name = user['first_name']
             last_name = user['last_name']
-            friendship.update({'mProfilePictureId': profile_picture_id, 'mFirstName': first_name, 'mLastName': last_name})
+            friendship.update(
+                {'mProfilePictureId': profile_picture_id, 'mFirstName': first_name, 'mLastName': last_name})
 
         return friendship_list
 
@@ -314,5 +315,5 @@ class UserService(object):
 
     @staticmethod
     def __can_send_request(requester, target):
-        return not UserRepository.friendship_exists(target_facebook_id=target, requester_facebook_id=requester) and not\
+        return not UserRepository.friendship_exists(target_facebook_id=target, requester_facebook_id=requester) and not \
             FriendshipRepository.friendship_request_exists(target_facebook_id=target, requester_facebook_id=requester)
