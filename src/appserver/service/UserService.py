@@ -1,16 +1,16 @@
 import json
 
 from appserver.datastructure.ApplicationResponse import ApplicationResponse
+from appserver.externalcommunication.FirebaseCloudMessaging import FirebaseCloudMessaging
 from appserver.externalcommunication.facebook import Facebook
 from appserver.externalcommunication.sharedServer import SharedServer
-from appserver.externalcommunication.FirebaseCloudMessaging import FirebaseCloudMessaging
 from appserver.logger import LoggerFactory
 from appserver.repository.friendshipRepository import FriendshipRepository
 from appserver.repository.userRepository import UserRepository
 from appserver.service.StoryService import StoryService
+from appserver.transformer.MobileTransformer import MobileTransformer
 from appserver.validator.databaseValidator import DatabaseValidator
 from appserver.validator.jsonValidator import JsonValidator
-from appserver.transformer.MobileTransformer import MobileTransformer
 
 LOGGER = LoggerFactory().get_logger('UserService')
 
@@ -107,13 +107,16 @@ class UserService(object):
         if UserRepository.username_exists(target):
             requester = request_header['facebookUserId']
             message = request_json['mDescription']
-            friendship_to_insert = {'requester': requester, 'target': target, 'message': message}
-            FriendshipRepository.insert(friendship_to_insert)
-            UserService.__send_notification_of_friendship_request(facebook_id_requester=requester,
-                                                                  facebook_id_target=target,
-                                                                  requester_message=message)
+            if UserService.__can_send_request(requester=requester, target=target):
+                friendship_to_insert = {'requester': requester, 'target': target, 'message': message}
+                FriendshipRepository.insert(friendship_to_insert)
+                UserService.__send_notification_of_friendship_request(facebook_id_requester=requester,
+                                                                      facebook_id_target=target,
+                                                                      requester_message=message)
 
-            return ApplicationResponse.success(message='Friendship request sent successfully')
+                return ApplicationResponse.success(message='Friendship request sent successfully')
+            else:
+                return ApplicationResponse.bad_request(message='Friendship request was already sent')
 
         return ApplicationResponse.bad_request(message='Target username doesn\'t exist')
 
@@ -179,7 +182,7 @@ class UserService(object):
             return ApplicationResponse.bad_request(message=validation_response.message)
 
         user_that_accepts_friendship = request_header['facebookUserId']
-        if FriendshipRepository.friendship_exists(user_that_accepts_friendship, target_user):
+        if FriendshipRepository.friendship_request_exists(user_that_accepts_friendship, target_user):
             FriendshipRepository.remove_friendship(user_that_accepts_friendship, target_user)
             UserRepository.add_friendship(user_that_accepts_friendship, target_user)
             UserService.__send_notification_of_friendship_accepted(facebook_id_acceptor=user_that_accepts_friendship,
@@ -196,7 +199,7 @@ class UserService(object):
             return ApplicationResponse.bad_request(message=validation_response.message)
 
         user_that_rejects_friendship = request_header['facebookUserId']
-        if FriendshipRepository.friendship_exists(user_that_rejects_friendship, target_user):
+        if FriendshipRepository.friendship_request_exists(user_that_rejects_friendship, target_user):
             FriendshipRepository.remove_friendship(user_that_rejects_friendship, target_user)
 
             return ApplicationResponse.success(message='Friendship was rejected successfully')
@@ -307,3 +310,8 @@ class UserService(object):
         user_list = MobileTransformer.database_list_of_users_to_mobile(user_list)
 
         return ApplicationResponse.success(data=user_list)
+
+    @staticmethod
+    def __can_send_request(requester, target):
+        return not UserRepository.friendship_exists(target_facebook_id=target, requester_facebook_id=requester) and not\
+            FriendshipRepository.friendship_request_exists(target_facebook_id=target, requester_facebook_id=requester)

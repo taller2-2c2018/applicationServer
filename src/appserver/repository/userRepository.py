@@ -86,3 +86,8 @@ class UserRepository(object):
     @staticmethod
     def get_all():
         return list(user_collection.find())
+
+    @staticmethod
+    def friendship_exists(target_facebook_id, requester_facebook_id):
+        return target_facebook_id in user_collection.find_one({'facebookUserId': requester_facebook_id},
+                                                              {'friendshipList': 1})['friendshipList']
