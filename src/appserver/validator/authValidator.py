@@ -34,7 +34,7 @@ def secure(method):
             return ApplicationResponse.unauthorized('Provided token expired')
 
         firebase_id = request.headers.get('firebaseId')
-        if firebase_id is not None:
+        if firebase_id is not None and firebase_id is not '':
             UserRepository.update_firebase_id(facebook_id, firebase_id)
 
         return method(*args, **kwargs)
