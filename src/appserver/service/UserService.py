@@ -7,6 +7,7 @@ from appserver.externalcommunication.sharedServer import SharedServer
 from appserver.logger import LoggerFactory
 from appserver.repository.friendshipRepository import FriendshipRepository
 from appserver.repository.userRepository import UserRepository
+from appserver.service.FileService import FileService
 from appserver.service.StoryService import StoryService
 from appserver.transformer.MobileTransformer import MobileTransformer
 from appserver.validator.databaseValidator import DatabaseValidator
@@ -41,7 +42,7 @@ class UserService(object):
         try:
             shared_server_response = SharedServer.register_user(request_json)
             LOGGER.info('Response from shared server: ' + str(shared_server_response))
-            shared_server_response_validation = JsonValidator.validate_shared_server_register_user(
+            shared_server_response_validation = JsonValidator.validate_shared_server_response(
                 shared_server_response)
             if shared_server_response_validation.hasErrors:
                 return ApplicationResponse.bad_request(message=shared_server_response_validation.message)
@@ -240,6 +241,7 @@ class UserService(object):
         stories = StoryService.get_permanent_stories_of_given_user(requester_facebook_user_id, facebook_user_id)
 
         profile = UserRepository.get_profile(facebook_user_id)
+        profile = FileService.add_file_to_dictionary_optional(profile, 'profile_picture_id')
         profile_data = MobileTransformer.database_profile_to_mobile(profile, stories)
 
         return ApplicationResponse.success(data=profile_data)
@@ -256,7 +258,7 @@ class UserService(object):
             LOGGER.info('Sending file to shared server ' + str(file))
             upload_file_response = SharedServer.upload_file(file)
             LOGGER.info('Response from shared server: ' + str(upload_file_response))
-            shared_server_response_validation = JsonValidator.validate_shared_server_register_user(upload_file_response)
+            shared_server_response_validation = JsonValidator.validate_shared_server_response(upload_file_response)
 
             if shared_server_response_validation.hasErrors:
                 return ApplicationResponse.bad_request(message=shared_server_response_validation.message)
@@ -286,7 +288,7 @@ class UserService(object):
             LOGGER.error('There was error while getting file from shared server. Reason:' + str(e))
             return ApplicationResponse.service_unavailable(message='Could not upload file to Shared Server')
 
-        shared_server_response_validation = JsonValidator.validate_shared_server_register_user(upload_file_response)
+        shared_server_response_validation = JsonValidator.validate_shared_server_response(upload_file_response)
         if shared_server_response_validation.hasErrors:
             return ApplicationResponse.bad_request(message=shared_server_response_validation.message)
 
@@ -306,6 +308,7 @@ class UserService(object):
 
         user_facebook_id = request_header['facebookUserId']
         user_list = UserRepository.get_all_but(user_facebook_id)
+        user_list = FileService.add_file_to_dictionaries_optional(user_list, 'profile_picture_id')
         user_list = MobileTransformer.database_list_of_users_to_mobile(user_list)
 
         return ApplicationResponse.success(data=user_list)

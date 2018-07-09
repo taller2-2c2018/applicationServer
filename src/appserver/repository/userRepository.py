@@ -45,11 +45,8 @@ class UserRepository(object):
     @staticmethod
     def add_friend_to_list(user, friend_to_add):
         user_entity = user_collection.find_one({'facebookUserId': user})
-        if 'friendshipList' not in user_entity:
-            friendship_list = [friend_to_add]
-        else:
-            friendship_list = user_entity['friendshipList']
-            friendship_list.append(friend_to_add)
+        friendship_list = user_entity['friendshipList']
+        friendship_list.append(friend_to_add)
         user_collection.update_one({'facebookUserId': user}, {'$set': {'friendshipList': friendship_list}},
                                    upsert=False)
 

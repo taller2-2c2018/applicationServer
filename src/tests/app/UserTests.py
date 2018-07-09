@@ -53,17 +53,6 @@ def bad_request_json(*args, **kwargs):
     return {'code': 400}
 
 
-def mock_get_file(file_id):
-    file = Object()
-    file.content = b'file'
-
-    return file
-
-
-def mock_get_file_stream(file_id):
-    return 'file'
-
-
 def mock_raise_exception(*args, **kwargs):
     raise Exception('Test')
 
@@ -76,6 +65,7 @@ class Object(object):
 @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
 @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
 @patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', mock_upload_file)
+@patch('appserver.externalcommunication.sharedServer.SharedServer.get_file', TestsCommons.mock_get_file)
 @patch('appserver.externalcommunication.FirebaseCloudMessaging.FirebaseCloudMessaging.send_notification', MagicMock())
 class UserTests(BaseTestCase):
 
@@ -492,6 +482,16 @@ class UserTests(BaseTestCase):
         updated_user = database.user.find_one({'facebookUserId': 'facebookUserId'})
         self.assertEqual(updated_user['profile_picture_id'], 1)
         self.assertEqual(updated_user['file_type_profile_picture'], 'jpg')
+
+    def test_modify_profile_picture_stream_wrong_header_gives_bad_request(self):
+        TestsCommons.create_default_user()
+        request = Object()
+        request.headers = {}
+        request.files = {'file': 'data'}
+        request.form = {'mFileType': 'jpg'}
+        modify_profile_response = UserService.modify_user_profile_picture(request)
+
+        self.assertEqual(modify_profile_response.status_code, 400)
 
     def test_modify_profile_picture_json(self):
         TestsCommons.create_default_user()

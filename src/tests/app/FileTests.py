@@ -13,17 +13,6 @@ def mock_raise_exception(*args, **kwargs):
     raise Exception('Test')
 
 
-def mock_get_file(file_id):
-    file = Object()
-    file.content = b'file'
-
-    return file
-
-
-class Object(object):
-    pass
-
-
 class FileTests(unittest.TestCase):
 
     @patch('appserver.externalcommunication.sharedServer.SharedServer.get_file', mock_get_file_stream)
@@ -39,7 +28,7 @@ class FileTests(unittest.TestCase):
 
         self.assertEqual(response_file.status_code, 503)
 
-    @patch('appserver.externalcommunication.sharedServer.SharedServer.get_file', mock_get_file)
+    @patch('appserver.externalcommunication.sharedServer.SharedServer.get_file', TestsCommons.mock_get_file)
     def test_get_file_json(self):
         response_file = FileService.get_file_json(1)
 

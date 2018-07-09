@@ -2,6 +2,10 @@ from appserver.service.StoryService import StoryService
 from appserver.service.UserService import UserService
 
 
+class Object(object):
+    pass
+
+
 class TestsCommons(object):
     @staticmethod
     def create_default_user(facebook_user_id='facebookUserId'):
@@ -23,3 +27,28 @@ class TestsCommons(object):
     @staticmethod
     def get_data_from_response(response):
         return response.get_json()['data']
+
+    @staticmethod
+    def mock_get_file(file_id):
+        file = Object()
+        file.content = b'file'
+        file.status_code = 200
+
+        return file
+
+    @staticmethod
+    def mock_get_file_not_found(file_id):
+        file = Object()
+        file.content = None
+        file.status_code = 404
+
+        return file
+
+    @staticmethod
+    def mock_bad_request_response(file_id):
+        response = Object()
+        response.content = None
+        response.text = 'text'
+        response.status_code = 400
+
+        return response
