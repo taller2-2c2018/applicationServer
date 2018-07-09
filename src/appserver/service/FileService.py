@@ -50,17 +50,20 @@ class FileService(object):
 
     @staticmethod
     def add_file_to_dictionary(dictionary, key_dictionary):
-        file_response = SharedServer.get_file(dictionary[key_dictionary])
-        shared_server_response_validation = JsonValidator.validate_file_response(file_response)
+        if dictionary[key_dictionary] is not '':
+            file_response = SharedServer.get_file(dictionary[key_dictionary])
+            shared_server_response_validation = JsonValidator.validate_file_response(file_response)
 
-        if shared_server_response_validation.hasErrors:
-            if shared_server_response_validation.message == 404:
-                StoryRepository.delete_story_by_id(dictionary['_id'])
-            raise Exception
+            if shared_server_response_validation.hasErrors:
+                if shared_server_response_validation.message == 404:
+                    StoryRepository.delete_story_by_id(dictionary['_id'])
+                raise Exception
+            else:
+                decoded_content = file_response.content.decode('utf-8', 'ignore')
+                dictionary.update({'file': decoded_content})
+                return dictionary
         else:
-            decoded_content = file_response.content.decode('utf-8', 'ignore')
-            dictionary.update({'file': decoded_content})
-            return dictionary
+            raise Exception
 
     @staticmethod
     def add_file_to_dictionaries_optional(user_list, key_dictionaries):
@@ -73,23 +76,27 @@ class FileService(object):
 
     @staticmethod
     def add_file_to_dictionary_optional(dictionary, key_dictionary):
-        file_response = SharedServer.get_file(dictionary[key_dictionary])
-        shared_server_response_validation = JsonValidator.validate_file_response(file_response)
+        if dictionary[key_dictionary] is not '':
+            file_response = SharedServer.get_file(dictionary[key_dictionary])
+            shared_server_response_validation = JsonValidator.validate_file_response(file_response)
 
-        if not shared_server_response_validation.hasErrors:
-            decoded_content = file_response.content.decode('utf-8', 'ignore')
-            dictionary.update({'file': decoded_content})
+            if not shared_server_response_validation.hasErrors:
+                decoded_content = file_response.content.decode('utf-8', 'ignore')
+                dictionary.update({'file': decoded_content})
 
         return dictionary
 
     @staticmethod
     def add_file_to_dictionary_default_value(dictionary, file_id, default_insert_key='file', default_insert_value=''):
-        file_response = SharedServer.get_file(file_id)
-        shared_server_response_validation = JsonValidator.validate_file_response(file_response)
+        if file_id is not '':
+            file_response = SharedServer.get_file(file_id)
+            shared_server_response_validation = JsonValidator.validate_file_response(file_response)
 
-        if not shared_server_response_validation.hasErrors:
-            decoded_content = file_response.content.decode('utf-8', 'ignore')
-            dictionary.update({default_insert_key: decoded_content})
+            if not shared_server_response_validation.hasErrors:
+                decoded_content = file_response.content.decode('utf-8', 'ignore')
+                dictionary.update({default_insert_key: decoded_content})
+            else:
+                dictionary.update({default_insert_key: default_insert_value})
         else:
             dictionary.update({default_insert_key: default_insert_value})
 
