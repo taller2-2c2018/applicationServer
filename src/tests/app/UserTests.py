@@ -483,6 +483,16 @@ class UserTests(BaseTestCase):
         self.assertEqual(updated_user['profile_picture_id'], 1)
         self.assertEqual(updated_user['file_type_profile_picture'], 'jpg')
 
+    def test_modify_profile_picture_stream_wrong_header_gives_bad_request(self):
+        TestsCommons.create_default_user()
+        request = Object()
+        request.headers = {}
+        request.files = {'file': 'data'}
+        request.form = {'mFileType': 'jpg'}
+        modify_profile_response = UserService.modify_user_profile_picture(request)
+
+        self.assertEqual(modify_profile_response.status_code, 400)
+
     def test_modify_profile_picture_json(self):
         TestsCommons.create_default_user()
         file_json = {'file': 'data', 'mFileType': 'jpg'}

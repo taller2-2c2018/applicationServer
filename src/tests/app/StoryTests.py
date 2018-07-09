@@ -93,6 +93,12 @@ class StoryTests(BaseTestCase):
             response_post_new_story = TestsCommons.create_default_story()
             self.assertEqual(response_post_new_story.status_code, 400)
 
+    def test_post_new_story_no_header_gives_bad_request(self):
+        TestsCommons.create_default_user()
+
+        response_post_new_story = StoryService.post_new_story(headers={}, story_json=None)
+        self.assertEqual(response_post_new_story.status_code, 400)
+
     def test_post_new_story_no_json(self):
         TestsCommons.create_default_user()
 
@@ -158,6 +164,18 @@ class StoryTests(BaseTestCase):
 
             self.assertEqual(response_post_new_story.status_code, 503)
 
+    def test_post_new_story_with_wrong_flash_type(self):
+        TestsCommons.create_default_user()
+
+        request = Object()
+        request.headers = {'facebookUserId': 'facebookUserId'}
+        request.files = {'file': 'data'}
+        request.form = {'mFileType': 'jpg', 'mFlash': 'wrong', 'mPrivate': False, 'mLatitude': 40.714224,
+                        'mLongitude': -73.961452}
+
+        response_post_new_story = StoryService.post_new_story_multipart(request=request)
+
+        self.assertEqual(response_post_new_story.status_code, 400)
 
     def test_post_new_story_multipart_shared_server_bad_request(self):
         with patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', TestsCommons.mock_bad_request_response):
@@ -356,6 +374,17 @@ class StoryTests(BaseTestCase):
 
         comment_json = {'mComment': 'comment'}
         response_comment = StoryService.post_comment({}, comment_json, story_id)
+
+        self.assertEqual(response_comment.status_code, 400)
+
+    def test_post_new_comment_in_story_with_no_json_gives_bad_request(self):
+        TestsCommons.create_default_user()
+        TestsCommons.create_default_story()
+
+        response_stories = StoryService.get_all_stories_for_requester(TestsCommons.default_header())
+        story_id = response_stories.get_json()['data'][0]['mStoryId']
+
+        response_comment = StoryService.post_comment(TestsCommons.default_header(), {}, story_id)
 
         self.assertEqual(response_comment.status_code, 400)
 
