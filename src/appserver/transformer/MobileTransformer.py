@@ -27,6 +27,7 @@ class MobileTransformer(object):
                 'mComments': MobileTransformer.__database_comments_to_mobile(story['comments']),
                 'mReactions': MobileTransformer.__database_reactions_to_mobile(story['reactions']),
                 'mProfilePictureId': story['profile_picture_id'],
+                'mProfilePicture': story['profile_picture'],
                 'mFirstName': story['first_name'],
                 'mLastName': story['last_name']
             }

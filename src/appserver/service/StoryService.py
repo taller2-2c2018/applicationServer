@@ -293,6 +293,7 @@ class StoryService(object):
         profile_picture_id = user['profile_picture_id']
         first_name = user['first_name']
         last_name = user['last_name']
+        FileService.add_file_to_dictionary_default_value(story, profile_picture_id, 'profile_picture')
         story.update({'profile_picture_id': profile_picture_id, 'first_name': first_name, 'last_name': last_name,
                       'comments': story['comments']})
 
