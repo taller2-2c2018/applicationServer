@@ -73,12 +73,12 @@ class MobileTransformer(object):
         profile_data = {
             'mFirstName': database_profile['first_name'],
             'mLastName': database_profile['last_name'],
-            'mBirthDate': database_profile['birth_date'],
-            'mEmail': database_profile['mail'],
-            'mSex': database_profile['sex'],
-            'mProfilePictureId': MobileTransformer.__optional_value(database_profile, 'profile_picture_id', None),
-            'mProfilePicture': MobileTransformer.__optional_value(database_profile, 'file', None),
-            'mFileTypeProfilePicture': MobileTransformer.__optional_value(database_profile, 'file_type_profile_picture', None),
+            'mBirthDate': MobileTransformer.__optional_value(database_profile, 'birth_date', ""),
+            'mEmail': MobileTransformer.__optional_value(database_profile, 'mail', ""),
+            'mSex': MobileTransformer.__optional_value(database_profile, 'sex', ""),
+            'mProfilePictureId': MobileTransformer.__optional_value(database_profile, 'profile_picture_id', ""),
+            'mProfilePicture': MobileTransformer.__optional_value(database_profile, 'file', ""),
+            'mFileTypeProfilePicture': MobileTransformer.__optional_value(database_profile, 'file_type_profile_picture', ""),
             'mFriendshipList': database_profile['friendshipList'],
             'mStories': stories
         }
