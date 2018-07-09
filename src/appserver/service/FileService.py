@@ -81,3 +81,16 @@ class FileService(object):
             dictionary.update({'file': decoded_content})
 
         return dictionary
+
+    @staticmethod
+    def add_file_to_dictionary_default_value(dictionary, file_id, default_insert_key='file', default_insert_value=''):
+        file_response = SharedServer.get_file(file_id)
+        shared_server_response_validation = JsonValidator.validate_file_response(file_response)
+
+        if not shared_server_response_validation.hasErrors:
+            decoded_content = file_response.content.decode('utf-8', 'ignore')
+            dictionary.update({default_insert_key: decoded_content})
+        else:
+            dictionary.update({default_insert_key: default_insert_value})
+
+        return dictionary
