@@ -69,22 +69,10 @@ class FileService(object):
     def add_file_to_dictionaries_optional(user_list, key_dictionaries):
         user_with_image_list = []
         for user in user_list:
-            user = FileService.add_file_to_dictionary_optional(user, key_dictionaries)
+            user = FileService.add_file_to_dictionary_default_value(user, user[key_dictionaries])
             user_with_image_list.append(user)
 
         return user_with_image_list
-
-    @staticmethod
-    def add_file_to_dictionary_optional(dictionary, key_dictionary):
-        if dictionary[key_dictionary] is not '':
-            file_response = SharedServer.get_file(dictionary[key_dictionary])
-            shared_server_response_validation = JsonValidator.validate_file_response(file_response)
-
-            if not shared_server_response_validation.hasErrors:
-                decoded_content = file_response.content.decode('utf-8', 'ignore')
-                dictionary.update({'file': decoded_content})
-
-        return dictionary
 
     @staticmethod
     def add_file_to_dictionary_default_value(dictionary, file_id, default_insert_key='file', default_insert_value=''):
