@@ -241,7 +241,7 @@ class UserService(object):
         stories = StoryService.get_permanent_stories_of_given_user(requester_facebook_user_id, facebook_user_id)
 
         profile = UserRepository.get_profile(facebook_user_id)
-        profile = FileService.add_file_to_dictionary_optional(profile, 'profile_picture_id')
+        profile = FileService.add_file_to_dictionary_default_value(profile, profile['profile_picture_id'])
         profile_data = MobileTransformer.database_profile_to_mobile(profile, stories)
 
         return ApplicationResponse.success(data=profile_data)
