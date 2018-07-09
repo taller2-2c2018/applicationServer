@@ -14,7 +14,7 @@ class GoogleMapsApi(object):
             LOGGER.info('Getting location info from GoogleMaps API')
             complete_url = URL + str(latitude) + ',' + str(longitude)
             response = requests.get(complete_url)
-            location = response.json()['results'][2]['formatted_address']
+            location = response.json()['results'][0]['formatted_address']
 
             return location
         except Exception as e:
