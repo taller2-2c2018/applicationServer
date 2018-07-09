@@ -9,11 +9,11 @@ from appserver.externalcommunication.sharedServer import SharedServer
 from appserver.logger import LoggerFactory
 from appserver.repository.storyRepository import StoryRepository
 from appserver.repository.userRepository import UserRepository
+from appserver.rules.RelevanceEngine import RelevanceEngine
+from appserver.rules.StoryRelevance import StoryRelevance
 from appserver.time.Time import Time
 from appserver.transformer.MobileTransformer import MobileTransformer
 from appserver.validator.jsonValidator import JsonValidator
-from appserver.rules.StoryRelevance import StoryRelevance
-from appserver.rules.RelevanceEngine import RelevanceEngine
 
 LOGGER = LoggerFactory().get_logger(__name__)
 
@@ -134,6 +134,19 @@ class StoryService(object):
         return ApplicationResponse.success(data=filtered_stories_for_mobile)
 
     @staticmethod
+    def get_permanent_stories_of_given_user(requester_facebook_user_id, target_facebook_user_id):
+        friendship_list = UserRepository.get_friendship_list(requester_facebook_user_id)
+        stories = StoryRepository.get_permanent_stories_from_user(target_facebook_user_id)
+        filtered_stories = StoryService.__get_all_public_and_friends_private_stories(stories=stories, friendship_list=friendship_list)
+        filtered_stories = StoryService.__add_profile_data_to_stories(filtered_stories)
+        filtered_stories = StoryService.__calculate_relevance_of_story(filtered_stories)
+        filtered_stories = sorted(filtered_stories, key=itemgetter('relevance'), reverse=True)
+        filtered_stories_for_mobile = MobileTransformer.database_list_of_stories_with_relevance_to_mobile(
+            filtered_stories)
+
+        return filtered_stories_for_mobile
+
+    @staticmethod
     def __get_all_public_and_friends_private_stories(stories, friendship_list):
         stories_list = []
         LOGGER.info('Fetched ' + str(stories.count()) + ' stories')
@@ -164,12 +177,6 @@ class StoryService(object):
             rated_stories.append(story)
 
         return rated_stories
-
-    @staticmethod
-    def get_permanent_stories_of_given_user(requester_facebook_user_id, target_facebook_user_id):
-        friendship_list = UserRepository.get_friendship_list(requester_facebook_user_id)
-        stories = StoryRepository.get_permanent_stories_from_user(target_facebook_user_id)
-        return StoryService.__get_all_public_and_friends_private_stories(stories=stories, friendship_list=friendship_list)
 
     @staticmethod
     def post_comment(header, json_comment, story_id):
@@ -220,7 +227,7 @@ class StoryService(object):
         reaction = json_reaction['mReaction']
         facebook_user_id = header['facebookUserId']
         date = Time.now()
-        user_reactions_to_story = StoryService.__search_dictionaries('facebook_user_id', poster_facebook_id, story['reactions'])
+        user_reactions_to_story = StoryService.__search_in_dictionarie_with_key_value('facebook_user_id', poster_facebook_id, story['reactions'])
         if len(user_reactions_to_story) > 0:
             story['reactions'] = StoryService.__remove_dictionary_entry_from_list('facebook_user_id',
                                                                                   poster_facebook_id,
@@ -259,32 +266,34 @@ class StoryService(object):
         all_users = UserRepository.get_all()
 
         for story in filtered_stories:
-            user = StoryService.__search_dictionaries('facebookUserId', story['facebook_user_id'], all_users)[0]
-
-            profile_picture_id = user['profile_picture_id']
-            first_name = user['first_name']
-            last_name = user['last_name']
-            story.update({'profile_picture_id': profile_picture_id, 'first_name': first_name, 'last_name': last_name})
+            story = StoryService.__add_profile_data_to_story(story, all_users)
 
             stories_with_profile_picture.append(story)
 
         return stories_with_profile_picture
 
     @staticmethod
-    def __add_profile_data_to_story(story):
-        all_users = UserRepository.get_all()
+    def __add_profile_data_to_story(story, all_users=None):
+        if all_users is None:
+            all_users = UserRepository.get_all()
 
-        user = StoryService.__search_dictionaries('facebookUserId', story['facebook_user_id'], all_users)[0]
+        for comment in story['comments']:
+            commentor_facebook_user_id = comment['facebook_user_id']
+            commentor_user = StoryService.__search_in_dictionarie_with_key_value('facebookUserId', commentor_facebook_user_id, all_users)[0]
+            comment.update({'first_name': commentor_user['first_name'], 'last_name': commentor_user['last_name']})
+
+        user = StoryService.__search_in_dictionarie_with_key_value('facebookUserId', story['facebook_user_id'], all_users)[0]
 
         profile_picture_id = user['profile_picture_id']
         first_name = user['first_name']
         last_name = user['last_name']
-        story.update({'profile_picture_id': profile_picture_id, 'first_name': first_name, 'last_name': last_name})
+        story.update({'profile_picture_id': profile_picture_id, 'first_name': first_name, 'last_name': last_name,
+                      'comments': story['comments']})
 
         return story
 
     @staticmethod
-    def __search_dictionaries(key, value, list_of_dictionaries):
+    def __search_in_dictionarie_with_key_value(key, value, list_of_dictionaries):
         return [element for element in list_of_dictionaries if element[key] == value]
 
     @staticmethod

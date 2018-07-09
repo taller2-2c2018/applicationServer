@@ -237,7 +237,7 @@ class UserService(object):
     @staticmethod
     def get_user_profile(request, facebook_user_id):
         requester_facebook_user_id = request.headers['facebookUserId']
-        stories = StoryService().get_permanent_stories_of_given_user(requester_facebook_user_id, facebook_user_id)
+        stories = StoryService.get_permanent_stories_of_given_user(requester_facebook_user_id, facebook_user_id)
 
         profile = UserRepository.get_profile(facebook_user_id)
         profile_data = MobileTransformer.database_profile_to_mobile(profile, stories)

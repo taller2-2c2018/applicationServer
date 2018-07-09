@@ -1,8 +1,8 @@
 from flask_restful import Api
 
+from appserver.controller.fileController import filesEndpoint
 from appserver.controller.storyController import storiesEndpoint
 from appserver.controller.userController import userEndpoint
-from appserver.controller.fileController import filesEndpoint
 from appserver.logger import LoggerFactory
 from appserver.monitor.monitor import monitor_controller
 from . import app

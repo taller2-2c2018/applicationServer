@@ -1,4 +1,3 @@
-import operator
 from appserver import app
 from appserver.logger import LoggerFactory
 
