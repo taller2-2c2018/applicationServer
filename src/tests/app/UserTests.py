@@ -53,17 +53,6 @@ def bad_request_json(*args, **kwargs):
     return {'code': 400}
 
 
-def mock_get_file(file_id):
-    file = Object()
-    file.content = b'file'
-
-    return file
-
-
-def mock_get_file_stream(file_id):
-    return 'file'
-
-
 def mock_raise_exception(*args, **kwargs):
     raise Exception('Test')
 

@@ -58,4 +58,4 @@ class StoryRepository(object):
 
     @staticmethod
     def delete_story_by_id(story_id):
-        story_collection.remove({'__id': story_id})
+        story_collection.remove({'_id': story_id})

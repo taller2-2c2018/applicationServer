@@ -55,7 +55,7 @@ class FileService(object):
 
         if shared_server_response_validation.hasErrors:
             if shared_server_response_validation.message == 404:
-                StoryRepository.delete_story_by_id(dictionary['__id'])
+                StoryRepository.delete_story_by_id(dictionary['_id'])
             raise Exception
         else:
             decoded_content = file_response.content.decode('utf-8', 'ignore')

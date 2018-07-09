@@ -34,7 +34,7 @@ class StoryService(object):
             LOGGER.error('There was error while getting file from shared server. Reason:' + str(e))
             return ApplicationResponse.service_unavailable(message='Could not upload file to Shared Server')
 
-        shared_server_response_validation = JsonValidator.validate_shared_server_register_user(upload_file_response)
+        shared_server_response_validation = JsonValidator.validate_shared_server_response(upload_file_response)
         if shared_server_response_validation.hasErrors:
             return ApplicationResponse.bad_request(message=shared_server_response_validation.message)
 
@@ -69,7 +69,7 @@ class StoryService(object):
             LOGGER.error('There was error while getting file from shared server. Reason:' + str(e))
             return ApplicationResponse.service_unavailable(message='Could not upload file to Shared Server')
 
-        shared_server_response_validation = JsonValidator.validate_shared_server_register_user(upload_file_response)
+        shared_server_response_validation = JsonValidator.validate_shared_server_response(upload_file_response)
         if shared_server_response_validation.hasErrors:
             return ApplicationResponse.bad_request(message=shared_server_response_validation.message)
 
@@ -200,10 +200,8 @@ class StoryService(object):
         StoryRepository.update_story_by_id(story_id, story)
         story = StoryRepository.get_story_by_id(story_id)
         LOGGER.info('Added comment to story')
-        try:
-            story = FileService.add_file_to_dictionary(story, 'file_id')
-        except:
-            return ApplicationResponse.bad_request('The story no longer exists')
+
+        story = FileService.add_file_to_dictionary(story, 'file_id')
         story = StoryService.__add_profile_data_to_story(story)
         story_for_mobile = MobileTransformer.database_story_to_mobile(story)
         StoryService.__send_new_comment_notification(facebook_user_id, body=story_for_mobile)
@@ -252,10 +250,7 @@ class StoryService(object):
         StoryRepository.update_story_by_id(story_id, story)
         story = StoryRepository.get_story_by_id(story_id)
         LOGGER.info('Added reaction to story')
-        try:
-            story = FileService.add_file_to_dictionary(story, 'file_id')
-        except:
-            return ApplicationResponse.bad_request('The story no longer exists')
+        story = FileService.add_file_to_dictionary(story, 'file_id')
         story = StoryService.__add_profile_data_to_story(story)
         story_for_mobile = MobileTransformer.database_story_to_mobile(story)
         StoryService.__send_new_reaction_notification(facebook_user_id, reaction, body=story_for_mobile)

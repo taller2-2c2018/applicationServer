@@ -32,42 +32,6 @@ def mock_upload_file(file):
     return shared_server_response
 
 
-def mock_authenticate_user(request_json):
-    shared_server_response = {
-        'code': 200,
-        'data': {
-            'facebook_id': 'facebookId',
-            'token': 'token',
-            'expires_at': 'expires_at'
-        }
-    }
-
-    return shared_server_response
-
-
-def bad_request(*args, **kwargs):
-    shared_server_response = Mock()
-    shared_server_response.text = 'text'
-    shared_server_response.status_code = 400
-
-    return shared_server_response
-
-
-def bad_request_json(*args, **kwargs):
-    return {'code': 400}
-
-
-def mock_get_file(file_id):
-    file = Object()
-    file.content = b'file'
-
-    return file
-
-
-def mock_get_file_stream(file_id):
-    return 'file'
-
-
 def mock_raise_exception(*args, **kwargs):
     raise Exception('Test')
 
@@ -122,6 +86,13 @@ class StoryTests(BaseTestCase):
         self.assertEqual(story['total_friends'], 1)
         self.assertEqual(story['stories_posted_today'], 0)
 
+    def test_post_new_story_shared_server_gives_wrong_response(self):
+        TestsCommons.create_default_user()
+
+        with patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file_as_json', TestsCommons.mock_bad_request_response):
+            response_post_new_story = TestsCommons.create_default_story()
+            self.assertEqual(response_post_new_story.status_code, 400)
+
     def test_post_new_story_no_json(self):
         TestsCommons.create_default_user()
 
@@ -173,7 +144,7 @@ class StoryTests(BaseTestCase):
 
         self.assertEqual(response_post_new_story.status_code, 400)
 
-    def test_post_new_story_multipart_shared_server_unavailable(self):
+    def test_post_new_story_multipart_shared_server_exception(self):
         with patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', mock_raise_exception):
             TestsCommons.create_default_user()
 
@@ -186,6 +157,21 @@ class StoryTests(BaseTestCase):
             response_post_new_story = StoryService.post_new_story_multipart(request=request)
 
             self.assertEqual(response_post_new_story.status_code, 503)
+
+
+    def test_post_new_story_multipart_shared_server_bad_request(self):
+        with patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', TestsCommons.mock_bad_request_response):
+            TestsCommons.create_default_user()
+
+            request = Object()
+            request.headers = {'facebookUserId': 'facebookUserId'}
+            request.files = {'file': 'data'}
+            request.form = {'mFileType': 'jpg', 'mFlash': False, 'mPrivate': False, 'mLatitude': 40.714224,
+                            'mLongitude': -73.961452}
+
+            response_post_new_story = StoryService.post_new_story_multipart(request=request)
+
+            self.assertEqual(response_post_new_story.status_code, 400)
 
     def test_get_all_stories_for_requester_gets_permanent_story(self):
         TestsCommons.create_default_user()
@@ -212,6 +198,24 @@ class StoryTests(BaseTestCase):
         self.assertTrue('mProfilePictureId' in story)
         self.assertTrue('mFirstName' in story)
         self.assertTrue('mLastName' in story)
+
+    def test_get_all_stories_for_requester_with_no_facebook_user_id_in_header_gives_bad_request(self):
+        TestsCommons.create_default_user()
+        TestsCommons.create_default_story(is_flash='False')
+        response_stories = StoryService.get_all_stories_for_requester({})
+
+        self.assertEqual(response_stories.status_code, 400)
+
+    def test_get_all_stories_for_requester_gets_with_file_not_found(self):
+        TestsCommons.create_default_user()
+        TestsCommons.create_default_story(is_flash='False')
+
+        with patch('appserver.externalcommunication.sharedServer.SharedServer.get_file', TestsCommons.mock_get_file_not_found):
+            response_stories = StoryService.get_all_stories_for_requester(TestsCommons.default_header())
+            self.assertEqual(response_stories.status_code, 200)
+
+            stories_list = response_stories.get_json()['data']
+            self.assertEqual(len(stories_list), 0)
 
     def test_get_all_stories_for_requester_gets_flash_story(self):
         TestsCommons.create_default_user()
@@ -328,6 +332,32 @@ class StoryTests(BaseTestCase):
         self.assertEqual(comment_data['mFacebookUserId'], 'facebookUserId')
         self.assertEqual(comment_data['mFirstName'], 'first_name')
         self.assertEqual(comment_data['mLastName'], 'last_name')
+
+    def test_post_new_comment_in_story_with_deleted_story_is_bad_request(self):
+        TestsCommons.create_default_user()
+        TestsCommons.create_default_story()
+
+        response_stories = StoryService.get_all_stories_for_requester(TestsCommons.default_header())
+        story_id = response_stories.get_json()['data'][0]['mStoryId']
+        with patch('appserver.externalcommunication.sharedServer.SharedServer.get_file', TestsCommons.mock_get_file_not_found):
+            StoryService.get_all_stories_for_requester(TestsCommons.default_header())
+
+        comment_json = {'mComment': 'comment'}
+        response_comment = StoryService.post_comment(TestsCommons.default_header(), comment_json, story_id)
+
+        self.assertEqual(response_comment.status_code, 400)
+
+    def test_post_new_comment_in_story_with_no_facebook_user_id_in_header_gives_bad_request(self):
+        TestsCommons.create_default_user()
+        TestsCommons.create_default_story()
+
+        response_stories = StoryService.get_all_stories_for_requester(TestsCommons.default_header())
+        story_id = response_stories.get_json()['data'][0]['mStoryId']
+
+        comment_json = {'mComment': 'comment'}
+        response_comment = StoryService.post_comment({}, comment_json, story_id)
+
+        self.assertEqual(response_comment.status_code, 400)
 
     def test_post_new_reaction_in_story(self):
         TestsCommons.create_default_user()

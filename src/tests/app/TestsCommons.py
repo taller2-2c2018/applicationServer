@@ -35,3 +35,20 @@ class TestsCommons(object):
         file.status_code = 200
 
         return file
+
+    @staticmethod
+    def mock_get_file_not_found(file_id):
+        file = Object()
+        file.content = None
+        file.status_code = 404
+
+        return file
+
+    @staticmethod
+    def mock_bad_request_response(file_id):
+        response = Object()
+        response.content = None
+        response.text = 'text'
+        response.status_code = 400
+
+        return response

@@ -111,7 +111,7 @@ class JsonValidator(object):
         return validation_response
 
     @staticmethod
-    def validate_shared_server_register_user(shared_server_response):
+    def validate_shared_server_response(shared_server_response):
         LOGGER.info('Validating shared server response:' + shared_server_response.text)
         status_code = shared_server_response.status_code
         if status_code == 200 or status_code == 201:
