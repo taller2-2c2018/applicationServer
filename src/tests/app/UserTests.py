@@ -1,6 +1,7 @@
 from unittest.mock import *
 
 from appserver.app import database
+from appserver.service.StoryService import StoryService
 from appserver.service.UserService import UserService
 from tests.app.BaseTestCase import BaseTestCase
 from tests.app.TestsCommons import TestsCommons
@@ -222,12 +223,18 @@ class UserTests(BaseTestCase):
 
     def test_get_user_profile(self):
         TestsCommons.create_default_user()
+        TestsCommons.create_default_story()
+        response_stories = StoryService.get_all_stories_for_requester(TestsCommons.default_header())
+        story_id = response_stories.get_json()['data'][0]['mStoryId']
+
+        comment_json = {'mComment': 'comment'}
+        StoryService.post_comment(TestsCommons.default_header(), comment_json, story_id)
+
         UserService.modify_user_profile(
             {'mFirstName': 'name', 'mLastName': 'surname', 'mBirthDate': '01/01/1990', 'mEmail': 'mail@email.com',
-             'mSex': 'male'},
-            {'facebookUserId': 'facebookUserId'})
+             'mSex': 'male'}, TestsCommons.default_header())
         request = Object()
-        request.headers = {'facebookUserId': 'facebookUserId'}
+        request.headers = TestsCommons.default_header()
         response_user_profile = UserService.get_user_profile(request, 'facebookUserId')
 
         self.assertEqual(response_user_profile.status_code, 200)
@@ -239,6 +246,12 @@ class UserTests(BaseTestCase):
         self.assertEqual(response_json['mBirthDate'], '01/01/1990')
         self.assertEqual(response_json['mEmail'], 'mail@email.com')
         self.assertEqual(response_json['mSex'], 'male')
+        self.assertTrue(len(response_json['mStories']) == 1)
+        comment = response_json['mStories'][0]['mComments'][0]
+        self.assertEqual(comment['mComment'], 'comment')
+        self.assertEqual(comment['mFacebookUserId'], 'facebookUserId')
+        self.assertEqual(comment['mFirstName'], 'name')
+        self.assertEqual(comment['mLastName'], 'surname')
 
     def test_send_friendship_request(self):
         TestsCommons.create_default_user()

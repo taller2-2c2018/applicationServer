@@ -1,7 +1,8 @@
 import os
+from dotenv import load_dotenv, find_dotenv
 from flask_pymongo import PyMongo
 from redis import Redis
-from dotenv import load_dotenv, find_dotenv
+
 from appserver.logger import LoggerFactory
 
 LOGGER = LoggerFactory().get_logger(__name__)

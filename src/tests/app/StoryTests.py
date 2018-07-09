@@ -322,8 +322,11 @@ class StoryTests(BaseTestCase):
         response_json = TestsCommons.get_data_from_response(response_stories)[0]
 
         self.assertTrue(len(response_json['mComments']) == 1)
-        self.assertEqual(response_json['mComments'][0]['mComment'], 'comment')
-        self.assertEqual(response_json['mComments'][0]['mFacebookUserId'], 'facebookUserId')
+        comment_data = response_json['mComments'][0]
+        self.assertEqual(comment_data['mComment'], 'comment')
+        self.assertEqual(comment_data['mFacebookUserId'], 'facebookUserId')
+        self.assertEqual(comment_data['mFirstName'], 'first_name')
+        self.assertEqual(comment_data['mLastName'], 'last_name')
 
     def test_post_new_reaction_in_story(self):
         TestsCommons.create_default_user()

@@ -1,8 +1,8 @@
 import requests
-from appserver import app
-from appserver.logger import LoggerFactory
 from werkzeug.datastructures import MultiDict
 
+from appserver import app
+from appserver.logger import LoggerFactory
 
 LOGGER = LoggerFactory().get_logger('SharedServerClient')
 TOKEN_PATH = '/token'

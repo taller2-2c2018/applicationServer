@@ -1,4 +1,5 @@
 import sys
+
 from functools import wraps
 
 from appserver.datastructure.ApplicationResponse import ApplicationResponse

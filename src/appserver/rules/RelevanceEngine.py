@@ -1,7 +1,8 @@
 from business_rules import run_all
-from appserver.rules.StoryRelevanceVariables import StoryRelevanceVariables
-from appserver.rules.StoryRelevanceActions import StoryRelevanceActions
+
 from appserver.rules.RulesDefinitions import RulesDefinitions
+from appserver.rules.StoryRelevanceActions import StoryRelevanceActions
+from appserver.rules.StoryRelevanceVariables import StoryRelevanceVariables
 
 rules = RulesDefinitions.get_rules()
 

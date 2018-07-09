@@ -133,7 +133,9 @@ class MobileTransformer(object):
             mobile_comment = {
                 'mComment': comment['text'],
                 'mFacebookUserId': comment['facebook_user_id'],
-                'mDate': comment['date']
+                'mDate': comment['date'],
+                'mFirstName': comment['first_name'],
+                'mLastName': comment['last_name']
             }
 
             mobile_comment_list.append(mobile_comment)

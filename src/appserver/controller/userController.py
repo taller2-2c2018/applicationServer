@@ -1,10 +1,10 @@
 from flask import request, Blueprint
 
+from appserver.controller.ControllerAuditory import controller_auditory
 from appserver.logger import LoggerFactory
 from appserver.monitor.monitor import monitor
-from appserver.validator.authValidator import secure
 from appserver.service.UserService import UserService
-from appserver.controller.ControllerAuditory import controller_auditory
+from appserver.validator.authValidator import secure
 
 LOGGER = LoggerFactory().get_logger('userController')
 userEndpoint = Blueprint('userEndpoint', __name__)
