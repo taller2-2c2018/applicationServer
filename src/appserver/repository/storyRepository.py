@@ -55,3 +55,7 @@ class StoryRepository(object):
 
         return story_collection.find(
             {'facebook_user_id': facebook_id, 'publication_date': {'$gte': start_of_day}}).count()
+
+    @staticmethod
+    def delete_story_by_id(story_id):
+        story_collection.remove({'__id': story_id})

@@ -76,6 +76,7 @@ class Object(object):
 @patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
 @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
 @patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', mock_upload_file)
+@patch('appserver.externalcommunication.sharedServer.SharedServer.get_file', TestsCommons.mock_get_file)
 @patch('appserver.externalcommunication.FirebaseCloudMessaging.FirebaseCloudMessaging.send_notification', MagicMock())
 class UserTests(BaseTestCase):
 

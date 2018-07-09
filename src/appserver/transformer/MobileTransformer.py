@@ -20,6 +20,7 @@ class MobileTransformer(object):
                 'mLatitude': story['latitude'],
                 'mLongitude': story['longitude'],
                 'mFileId': story['file_id'],
+                'mFile': story['file'],
                 'mFileType': story['file_type'],
                 'mFlash': story['is_flash'],
                 'mLocation': story['location'],
@@ -75,6 +76,7 @@ class MobileTransformer(object):
             'mEmail': database_profile['mail'],
             'mSex': database_profile['sex'],
             'mProfilePictureId': MobileTransformer.__optional_value(database_profile, 'profile_picture_id', None),
+            'mProfilePicture': MobileTransformer.__optional_value(database_profile, 'file', None),
             'mFileTypeProfilePicture': MobileTransformer.__optional_value(database_profile, 'file_type_profile_picture', None),
             'mFriendshipList': database_profile['friendshipList'],
             'mStories': stories
@@ -118,7 +120,8 @@ class MobileTransformer(object):
                 'mFirebaseId': MobileTransformer.__optional_value(user, 'firebase_id', None),
                 'mFirstName': MobileTransformer.__optional_value(user, 'first_name', None),
                 'mLastName': MobileTransformer.__optional_value(user, 'last_name', None),
-                'mProfilePictureId': MobileTransformer.__optional_value(user, 'profile_picture_id', None)
+                'mProfilePictureId': MobileTransformer.__optional_value(user, 'profile_picture_id', None),
+                'mProfilePicture': MobileTransformer.__optional_value(user, 'file', None)
             }
 
             mobile_users.append(mobile_user)

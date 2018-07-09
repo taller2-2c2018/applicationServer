@@ -234,3 +234,11 @@ class JsonValidator(object):
         validation_response = JsonValidator.__check_valid_profile_picture_filetype(json, 'mFileType', validation_response)
 
         return validation_response
+
+    @staticmethod
+    def validate_file_response(file_response):
+        LOGGER.info('Validating shared server response:' + str(file_response))
+        status_code = file_response.status_code
+        if status_code == 200 or status_code == 201:
+            return ValidationResponse(False)
+        return ValidationResponse(True, status_code)

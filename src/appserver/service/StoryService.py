@@ -11,6 +11,7 @@ from appserver.repository.storyRepository import StoryRepository
 from appserver.repository.userRepository import UserRepository
 from appserver.rules.RelevanceEngine import RelevanceEngine
 from appserver.rules.StoryRelevance import StoryRelevance
+from appserver.service.FileService import FileService
 from appserver.time.Time import Time
 from appserver.transformer.MobileTransformer import MobileTransformer
 from appserver.validator.jsonValidator import JsonValidator
@@ -126,6 +127,7 @@ class StoryService(object):
 
         filtered_stories = StoryService.__get_all_public_and_friends_private_stories(permanent_stories, friendship_list)
         filtered_stories.extend(list(flash_stories))
+        filtered_stories = FileService.add_file_to_dictionaries(filtered_stories, 'file_id')
         filtered_stories = StoryService.__add_profile_data_to_stories(filtered_stories)
         filtered_stories = StoryService.__calculate_relevance_of_story(filtered_stories)
         filtered_stories = sorted(filtered_stories, key=itemgetter('relevance'), reverse=True)
@@ -138,6 +140,7 @@ class StoryService(object):
         friendship_list = UserRepository.get_friendship_list(requester_facebook_user_id)
         stories = StoryRepository.get_permanent_stories_from_user(target_facebook_user_id)
         filtered_stories = StoryService.__get_all_public_and_friends_private_stories(stories=stories, friendship_list=friendship_list)
+        filtered_stories = FileService.add_file_to_dictionaries(filtered_stories, 'file_id')
         filtered_stories = StoryService.__add_profile_data_to_stories(filtered_stories)
         filtered_stories = StoryService.__calculate_relevance_of_story(filtered_stories)
         filtered_stories = sorted(filtered_stories, key=itemgetter('relevance'), reverse=True)
@@ -197,6 +200,10 @@ class StoryService(object):
         StoryRepository.update_story_by_id(story_id, story)
         story = StoryRepository.get_story_by_id(story_id)
         LOGGER.info('Added comment to story')
+        try:
+            story = FileService.add_file_to_dictionary(story, 'file_id')
+        except:
+            return ApplicationResponse.bad_request('The story no longer exists')
         story = StoryService.__add_profile_data_to_story(story)
         story_for_mobile = MobileTransformer.database_story_to_mobile(story)
         StoryService.__send_new_comment_notification(facebook_user_id, body=story_for_mobile)
@@ -227,7 +234,7 @@ class StoryService(object):
         reaction = json_reaction['mReaction']
         facebook_user_id = header['facebookUserId']
         date = Time.now()
-        user_reactions_to_story = StoryService.__search_in_dictionarie_with_key_value('facebook_user_id', poster_facebook_id, story['reactions'])
+        user_reactions_to_story = StoryService.__search_in_dictionary_with_key_value('facebook_user_id', poster_facebook_id, story['reactions'])
         if len(user_reactions_to_story) > 0:
             story['reactions'] = StoryService.__remove_dictionary_entry_from_list('facebook_user_id',
                                                                                   poster_facebook_id,
@@ -245,6 +252,10 @@ class StoryService(object):
         StoryRepository.update_story_by_id(story_id, story)
         story = StoryRepository.get_story_by_id(story_id)
         LOGGER.info('Added reaction to story')
+        try:
+            story = FileService.add_file_to_dictionary(story, 'file_id')
+        except:
+            return ApplicationResponse.bad_request('The story no longer exists')
         story = StoryService.__add_profile_data_to_story(story)
         story_for_mobile = MobileTransformer.database_story_to_mobile(story)
         StoryService.__send_new_reaction_notification(facebook_user_id, reaction, body=story_for_mobile)
@@ -279,10 +290,10 @@ class StoryService(object):
 
         for comment in story['comments']:
             commentor_facebook_user_id = comment['facebook_user_id']
-            commentor_user = StoryService.__search_in_dictionarie_with_key_value('facebookUserId', commentor_facebook_user_id, all_users)[0]
+            commentor_user = StoryService.__search_in_dictionary_with_key_value('facebookUserId', commentor_facebook_user_id, all_users)[0]
             comment.update({'first_name': commentor_user['first_name'], 'last_name': commentor_user['last_name']})
 
-        user = StoryService.__search_in_dictionarie_with_key_value('facebookUserId', story['facebook_user_id'], all_users)[0]
+        user = StoryService.__search_in_dictionary_with_key_value('facebookUserId', story['facebook_user_id'], all_users)[0]
 
         profile_picture_id = user['profile_picture_id']
         first_name = user['first_name']
@@ -293,7 +304,7 @@ class StoryService(object):
         return story
 
     @staticmethod
-    def __search_in_dictionarie_with_key_value(key, value, list_of_dictionaries):
+    def __search_in_dictionary_with_key_value(key, value, list_of_dictionaries):
         return [element for element in list_of_dictionaries if element[key] == value]
 
     @staticmethod
