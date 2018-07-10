@@ -14,9 +14,14 @@ class FriendshipRepository(object):
         return friendship_id
 
     @staticmethod
-    def get_friendship_requests_of_username(username):
-        LOGGER.info('Getting all friendship requests of ' + username)
-        return list(friendship_collection.find({'target': username}))
+    def get_friendship_requests_of_user(facebook_user_id):
+        LOGGER.info('Getting all friendship requests of ' + facebook_user_id)
+        return list(friendship_collection.find({'target': facebook_user_id}))
+
+    @staticmethod
+    def get_sent_friendship_requests_of_user(facebook_user_id):
+        LOGGER.info('Getting all friendship requests of ' + facebook_user_id)
+        return list(friendship_collection.find({'requester': facebook_user_id}))
 
     @staticmethod
     def friendship_request_exists(target_facebook_id, requester_facebook_id):

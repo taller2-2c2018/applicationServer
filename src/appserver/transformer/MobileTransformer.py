@@ -76,7 +76,7 @@ class MobileTransformer(object):
         return dictionary[key] if key in dictionary and dictionary[key] is not None else optional_value
 
     @staticmethod
-    def database_profile_to_mobile(database_profile, stories):
+    def database_profile_to_mobile(database_profile, stories, friendship_sent_list):
         profile_data = {
             'mFirstName': database_profile['first_name'],
             'mLastName': database_profile['last_name'],
@@ -87,7 +87,8 @@ class MobileTransformer(object):
             'mProfilePicture': MobileTransformer.__optional_value(database_profile, 'file', DEFAULT_IMAGE),
             'mFileTypeProfilePicture': MobileTransformer.__optional_value(database_profile, 'file_type_profile_picture', DEFAULT_IMAGE_TYPE),
             'mFriendshipList': database_profile['friendshipList'],
-            'mStories': stories
+            'mStories': stories,
+            'mFriendshipSent': friendship_sent_list
         }
 
         return profile_data
