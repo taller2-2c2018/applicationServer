@@ -16,7 +16,7 @@ userEndpoint = Blueprint('userEndpoint', __name__)
 def register_user():
     LOGGER.info('Registering a new user')
     request_json = request.get_json()
-    return_value = UserService().register_new_user(request_json)
+    return_value = UserService.register_new_user(request_json)
     return return_value
 
 
@@ -26,7 +26,7 @@ def register_user():
 def authenticate_user():
     LOGGER.info('Authenticating user')
     request_json = request.get_json()
-    return_value = UserService().authenticate_user(request_json)
+    return_value = UserService.authenticate_user(request_json)
     return return_value
 
 
@@ -38,7 +38,7 @@ def send_friendship():
     LOGGER.info('Sending new friendship request')
     request_json = request.get_json()
     request_header = request.headers
-    return_value = UserService().send_user_friendship_request(request_json, request_header)
+    return_value = UserService.send_user_friendship_request(request_json, request_header)
     return return_value
 
 
@@ -49,7 +49,7 @@ def send_friendship():
 def get_friendship_requests_for_user():
     LOGGER.info('Getting all requests for given user')
     request_header = request.headers
-    return_value = UserService().get_friendship_requests(request_header)
+    return_value = UserService.get_friendship_requests(request_header)
     return return_value
 
 
@@ -60,7 +60,7 @@ def get_friendship_requests_for_user():
 def get_user_friends():
     LOGGER.info('Getting all friends of given user')
     request_header = request.headers
-    return_value = UserService().get_user_friends(request_header)
+    return_value = UserService.get_user_friends(request_header)
     return return_value
 
 
@@ -71,7 +71,7 @@ def get_user_friends():
 def accept_user_friendship(facebook_user_id):
     LOGGER.info('Accepting friendship request')
     request_header = request.headers
-    return_value = UserService().accept_friendship_request(request_header, facebook_user_id)
+    return_value = UserService.accept_friendship_request(request_header, facebook_user_id)
     return return_value
 
 
@@ -82,7 +82,7 @@ def accept_user_friendship(facebook_user_id):
 def reject_user_friendship(facebook_user_id):
     LOGGER.info('Rejecting friendship request')
     request_header = request.headers
-    return_value = UserService().reject_friendship_request(request_header, facebook_user_id)
+    return_value = UserService.reject_friendship_request(request_header, facebook_user_id)
     return return_value
 
 
@@ -94,7 +94,7 @@ def modify_user_profile():
     LOGGER.info('Adding new profile to user')
     request_json = request.get_json()
     request_header = request.headers
-    return_value = UserService().modify_user_profile(request_json, request_header)
+    return_value = UserService.modify_user_profile(request_json, request_header)
     return return_value
 
 
@@ -104,7 +104,7 @@ def modify_user_profile():
 @controller_auditory
 def modify_user_profile_picture():
     LOGGER.info('Adding new profile picture to user by stream')
-    return_value = UserService().modify_user_profile_picture(request)
+    return_value = UserService.modify_user_profile_picture(request)
     return return_value
 
 
@@ -116,7 +116,7 @@ def modify_user_profile_picture_json():
     LOGGER.info('Adding new profile picture to user')
     headers = request.headers
     file_json = request.get_json()
-    return_value = UserService().modify_user_profile_picture_json(headers, file_json)
+    return_value = UserService.modify_user_profile_picture_json(headers, file_json)
     return return_value
 
 
@@ -126,7 +126,7 @@ def modify_user_profile_picture_json():
 @controller_auditory
 def get_user_profile(facebook_user_id):
     LOGGER.info('Getting profile of ' + facebook_user_id)
-    return_value = UserService().get_user_profile(request, facebook_user_id)
+    return_value = UserService.get_user_profile(request, facebook_user_id)
     return return_value
 
 
@@ -136,5 +136,5 @@ def get_user_profile(facebook_user_id):
 @controller_auditory
 def get_user_list():
     LOGGER.info('Getting all users')
-    return_value = UserService().get_user_list(request.headers)
+    return_value = UserService.get_user_list(request.headers)
     return return_value

@@ -76,7 +76,7 @@ class MobileTransformer(object):
         return dictionary[key] if key in dictionary and dictionary[key] is not None else optional_value
 
     @staticmethod
-    def database_profile_to_mobile(database_profile, stories):
+    def database_profile_to_mobile(database_profile, stories, friendship_sent_list):
         profile_data = {
             'mFirstName': database_profile['first_name'],
             'mLastName': database_profile['last_name'],
@@ -84,10 +84,11 @@ class MobileTransformer(object):
             'mEmail': MobileTransformer.__optional_value(database_profile, 'mail', ""),
             'mSex': MobileTransformer.__optional_value(database_profile, 'sex', ""),
             'mProfilePictureId': MobileTransformer.__optional_value(database_profile, 'profile_picture_id', ""),
-            'mProfilePicture': MobileTransformer.__optional_value(database_profile, 'profile_picture', DEFAULT_IMAGE),
+            'mProfilePicture': MobileTransformer.__optional_value(database_profile, 'file', DEFAULT_IMAGE),
             'mFileTypeProfilePicture': MobileTransformer.__optional_value(database_profile, 'file_type_profile_picture', DEFAULT_IMAGE_TYPE),
             'mFriendshipList': database_profile['friendshipList'],
-            'mStories': stories
+            'mStories': stories,
+            'mFriendshipSent': friendship_sent_list
         }
 
         return profile_data
@@ -183,3 +184,19 @@ class MobileTransformer(object):
             'first_name': request_json['first_name'],
             'last_name': request_json['last_name']
         }
+
+    @staticmethod
+    def custom_friendship_request_to_mobile(friendship_list):
+        friendship_request_list = []
+
+        for friendship in friendship_list:
+            friendship_mobile = {
+                'mProfilePicture': MobileTransformer.__optional_value(friendship, 'mProfilePicture', DEFAULT_IMAGE),
+                'mFileTypeProfilePicture': MobileTransformer.__optional_value(friendship, 'mFileTypeProfilePicture', DEFAULT_IMAGE_TYPE),
+            }
+
+            friendship.update(friendship_mobile)
+
+            friendship_request_list.append(friendship)
+
+        return friendship_request_list

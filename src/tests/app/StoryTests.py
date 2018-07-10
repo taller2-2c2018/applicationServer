@@ -11,11 +11,6 @@ from tests.app.BaseTestCase import BaseTestCase
 from tests.app.TestsCommons import TestsCommons
 
 
-def mock_user_identification(request_json):
-    request_json['last_name'] = 'last_name'
-    request_json['first_name'] = 'first_name'
-
-
 def mock_register_user(request_json):
     shared_server_response = Mock()
     shared_server_response.text = 'text'
@@ -50,7 +45,7 @@ class Object(object):
 
 
 @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
-@patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
+@patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', TestsCommons.mock_user_identification)
 @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
 @patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', mock_upload_file)
 @patch('appserver.externalcommunication.sharedServer.SharedServer.get_file', TestsCommons.mock_get_file)

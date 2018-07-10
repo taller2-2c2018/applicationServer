@@ -139,8 +139,10 @@ class UserService(object):
             return ApplicationResponse.bad_request(message=validation_response.message)
 
         username = request_header['facebookUserId']
-        friendship_list = FriendshipRepository.get_friendship_requests_of_username(username)
+        friendship_list = FriendshipRepository.get_friendship_requests_of_user(username)
+        friendship_list = FileService.add_file_to_dictionaries_optional(friendship_list, 'requester')
         friendship_list = UserService.__add_profile_data_to_list_of_users(friendship_list)
+        friendship_list = MobileTransformer.custom_friendship_request_to_mobile(friendship_list)
 
         return ApplicationResponse.success(data=friendship_list)
 
@@ -154,8 +156,12 @@ class UserService(object):
             profile_picture_id = user['profile_picture_id']
             first_name = user['first_name']
             last_name = user['last_name']
+            friendship = FileService.add_file_to_dictionary_default_value(friendship, profile_picture_id)
+            profile_picture = friendship['file']
+            profile_picture_type = friendship['file_type_profile_picture']
             friendship.update(
-                {'mProfilePictureId': profile_picture_id, 'mFirstName': first_name, 'mLastName': last_name})
+                {'mProfilePictureId': profile_picture_id, 'mFirstName': first_name, 'mLastName': last_name,
+                    'mProfilePicture': profile_picture, 'mFileTypeProfilePicture': profile_picture_type})
 
         return friendship_list
 
@@ -242,7 +248,8 @@ class UserService(object):
 
         profile = UserRepository.get_profile(facebook_user_id)
         profile = FileService.add_file_to_dictionary_default_value(profile, profile['profile_picture_id'])
-        profile_data = MobileTransformer.database_profile_to_mobile(profile, stories)
+        friendship_sent_list = FriendshipRepository.get_sent_friendship_requests_of_user(facebook_user_id)
+        profile_data = MobileTransformer.database_profile_to_mobile(profile, stories, friendship_sent_list)
 
         return ApplicationResponse.success(data=profile_data)
 

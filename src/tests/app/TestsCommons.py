@@ -52,3 +52,8 @@ class TestsCommons(object):
         response.status_code = 400
 
         return response
+
+    @staticmethod
+    def mock_user_identification(request_json):
+        request_json['last_name'] = 'last_name'
+        request_json['first_name'] = 'first_name'

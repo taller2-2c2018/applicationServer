@@ -7,11 +7,6 @@ from tests.app.BaseTestCase import BaseTestCase
 from tests.app.TestsCommons import TestsCommons
 
 
-def mock_user_identification(request_json):
-    request_json['last_name'] = 'last_name'
-    request_json['first_name'] = 'first_name'
-
-
 def mock_register_user(request_json):
     shared_server_response = Mock()
     shared_server_response.text = 'text'
@@ -62,7 +57,7 @@ class Object(object):
 
 
 @patch('appserver.externalcommunication.facebook.Facebook.user_token_is_valid', MagicMock(return_value=True))
-@patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', mock_user_identification)
+@patch('appserver.externalcommunication.facebook.Facebook.get_user_identification', TestsCommons.mock_user_identification)
 @patch('appserver.externalcommunication.sharedServer.SharedServer.register_user', mock_register_user)
 @patch('appserver.externalcommunication.sharedServer.SharedServer.upload_file', mock_upload_file)
 @patch('appserver.externalcommunication.sharedServer.SharedServer.get_file', TestsCommons.mock_get_file)
@@ -343,8 +338,10 @@ class UserTests(BaseTestCase):
         self.assertEqual(friendship_request['target'], 'target')
         self.assertEqual(friendship_request['message'], 'Add me to your friend list')
         self.assertTrue('mProfilePictureId' in friendship_request)
-        self.assertTrue('mFirstName' in friendship_request)
-        self.assertTrue('mLastName' in friendship_request)
+        self.assertEqual(friendship_request['mFirstName'], 'first_name')
+        self.assertEqual(friendship_request['mLastName'], 'last_name')
+        self.assertEqual(friendship_request['mProfilePicture'], 'defaultImage')
+        self.assertEqual(friendship_request['mFileTypeProfilePicture'], 'jpg')
 
     def test_get_friendship_requests_no_json(self):
         friendship_response = UserService.get_friendship_requests(None)
