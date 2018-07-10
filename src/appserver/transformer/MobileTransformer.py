@@ -28,6 +28,7 @@ class MobileTransformer(object):
                 'mReactions': MobileTransformer.__database_reactions_to_mobile(story['reactions']),
                 'mProfilePictureId': story['profile_picture_id'],
                 'mProfilePicture': story['profile_picture'],
+                'mFileTypeProfilePicture': MobileTransformer.__optional_value(story, 'file_type_profile_picture', ""),
                 'mFirstName': story['first_name'],
                 'mLastName': story['last_name']
             }
@@ -118,11 +119,12 @@ class MobileTransformer(object):
         for user in user_list:
             mobile_user = {
                 'mFacebookUserId': user['facebookUserId'],
-                'mFirebaseId': MobileTransformer.__optional_value(user, 'firebase_id', None),
-                'mFirstName': MobileTransformer.__optional_value(user, 'first_name', None),
-                'mLastName': MobileTransformer.__optional_value(user, 'last_name', None),
-                'mProfilePictureId': MobileTransformer.__optional_value(user, 'profile_picture_id', None),
-                'mProfilePicture': MobileTransformer.__optional_value(user, 'file', None)
+                'mFirebaseId': MobileTransformer.__optional_value(user, 'firebase_id', ''),
+                'mFirstName': MobileTransformer.__optional_value(user, 'first_name', ''),
+                'mLastName': MobileTransformer.__optional_value(user, 'last_name', ''),
+                'mProfilePictureId': MobileTransformer.__optional_value(user, 'profile_picture_id', ''),
+                'mProfilePicture': MobileTransformer.__optional_value(user, 'file', ''),
+                'mFileTypeProfilePicture': MobileTransformer.__optional_value(user, 'file_type_profile_picture', '')
             }
 
             mobile_users.append(mobile_user)
