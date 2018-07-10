@@ -1,3 +1,9 @@
+import os
+
+DEFAULT_IMAGE = os.environ.get('DEFAULT_IMAGE', 'https://firebasestorage.googleapis.com/v0/b/taller2-199117.appspot.com/o/default_image.jpeg?alt=media&token=d5147918-820e-44c6-8ef2-7ba3ef625891')
+DEFAULT_IMAGE_TYPE = os.environ.get('DEFAULT_IMAGE_TYPE', 'jpeg')
+
+
 class MobileTransformer(object):
 
     @staticmethod
@@ -27,7 +33,8 @@ class MobileTransformer(object):
                 'mComments': MobileTransformer.__database_comments_to_mobile(story['comments']),
                 'mReactions': MobileTransformer.__database_reactions_to_mobile(story['reactions']),
                 'mProfilePictureId': story['profile_picture_id'],
-                'mProfilePicture': story['profile_picture'],
+                'mProfilePicture': MobileTransformer.__optional_value(story, 'profile_picture', DEFAULT_IMAGE),
+                'mFileTypeProfilePicture': MobileTransformer.__optional_value(story, 'file_type_profile_picture', DEFAULT_IMAGE_TYPE),
                 'mFirstName': story['first_name'],
                 'mLastName': story['last_name']
             }
@@ -66,7 +73,7 @@ class MobileTransformer(object):
 
     @staticmethod
     def __optional_value(dictionary, key, optional_value=''):
-        return dictionary[key] if key in dictionary else optional_value
+        return dictionary[key] if key in dictionary and dictionary[key] is not None else optional_value
 
     @staticmethod
     def database_profile_to_mobile(database_profile, stories):
@@ -77,8 +84,8 @@ class MobileTransformer(object):
             'mEmail': MobileTransformer.__optional_value(database_profile, 'mail', ""),
             'mSex': MobileTransformer.__optional_value(database_profile, 'sex', ""),
             'mProfilePictureId': MobileTransformer.__optional_value(database_profile, 'profile_picture_id', ""),
-            'mProfilePicture': MobileTransformer.__optional_value(database_profile, 'file', ""),
-            'mFileTypeProfilePicture': MobileTransformer.__optional_value(database_profile, 'file_type_profile_picture', ""),
+            'mProfilePicture': MobileTransformer.__optional_value(database_profile, 'profile_picture', DEFAULT_IMAGE),
+            'mFileTypeProfilePicture': MobileTransformer.__optional_value(database_profile, 'file_type_profile_picture', DEFAULT_IMAGE_TYPE),
             'mFriendshipList': database_profile['friendshipList'],
             'mStories': stories
         }
@@ -118,11 +125,12 @@ class MobileTransformer(object):
         for user in user_list:
             mobile_user = {
                 'mFacebookUserId': user['facebookUserId'],
-                'mFirebaseId': MobileTransformer.__optional_value(user, 'firebase_id', None),
-                'mFirstName': MobileTransformer.__optional_value(user, 'first_name', None),
-                'mLastName': MobileTransformer.__optional_value(user, 'last_name', None),
-                'mProfilePictureId': MobileTransformer.__optional_value(user, 'profile_picture_id', None),
-                'mProfilePicture': MobileTransformer.__optional_value(user, 'file', None)
+                'mFirebaseId': MobileTransformer.__optional_value(user, 'firebase_id', ''),
+                'mFirstName': MobileTransformer.__optional_value(user, 'first_name', ''),
+                'mLastName': MobileTransformer.__optional_value(user, 'last_name', ''),
+                'mProfilePictureId': MobileTransformer.__optional_value(user, 'profile_picture_id', ''),
+                'mProfilePicture': MobileTransformer.__optional_value(user, 'profile_picture', DEFAULT_IMAGE),
+                'mFileTypeProfilePicture': MobileTransformer.__optional_value(user, 'file_type_profile_picture', DEFAULT_IMAGE_TYPE)
             }
 
             mobile_users.append(mobile_user)

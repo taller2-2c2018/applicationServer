@@ -243,6 +243,23 @@ class UserTests(BaseTestCase):
         self.assertEqual(comment['mFirstName'], 'name')
         self.assertEqual(comment['mLastName'], 'surname')
 
+    def test_get_user_profile_no_modifications(self):
+        TestsCommons.create_default_user()
+        TestsCommons.create_default_story()
+
+        request = Object()
+        request.headers = TestsCommons.default_header()
+        response_user_profile = UserService.get_user_profile(request, 'facebookUserId')
+
+        self.assertEqual(response_user_profile.status_code, 200)
+
+        response_json = response_user_profile.get_json()['data']
+
+        self.assertEqual(response_json['mFirstName'], 'first_name')
+        self.assertEqual(response_json['mLastName'], 'last_name')
+        self.assertEqual(response_json['mProfilePicture'], 'defaultImage')
+        self.assertEqual(response_json['mFileTypeProfilePicture'], 'jpg')
+
     def test_send_friendship_request(self):
         TestsCommons.create_default_user()
         UserService.register_new_user({'facebookUserId': 'target', 'facebookAuthToken': 'facebookAuthToken'})
@@ -608,7 +625,11 @@ class UserTests(BaseTestCase):
 
         self.assertEqual(len(user_list), 2)
         self.assertTrue(user_list[0]['mFacebookUserId'] is not 'facebookUserId')
+        self.assertEqual(user_list[0]['mProfilePicture'], 'defaultImage')
+        self.assertEqual(user_list[0]['mFileTypeProfilePicture'], 'jpg')
         self.assertTrue(user_list[1]['mFacebookUserId'] is not 'facebookUserId')
+        self.assertEqual(user_list[1]['mProfilePicture'], 'defaultImage')
+        self.assertEqual(user_list[1]['mFileTypeProfilePicture'], 'jpg')
 
     def test_list_users_invalid_header(self):
         TestsCommons.create_default_user()

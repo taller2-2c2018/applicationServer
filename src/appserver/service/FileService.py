@@ -75,7 +75,8 @@ class FileService(object):
         return user_with_image_list
 
     @staticmethod
-    def add_file_to_dictionary_default_value(dictionary, file_id, default_insert_key='file', default_insert_value=''):
+    def add_file_to_dictionary_default_value(dictionary, file_id, default_insert_key='file', default_file_type_key='file_type_profile_picture',
+                                             default_insert_value=None, default_file_type=None):
         if file_id is not '':
             file_response = SharedServer.get_file(file_id)
             shared_server_response_validation = JsonValidator.validate_file_response(file_response)
@@ -84,8 +85,10 @@ class FileService(object):
                 decoded_content = file_response.content.decode('utf-8', 'ignore')
                 dictionary.update({default_insert_key: decoded_content})
             else:
-                dictionary.update({default_insert_key: default_insert_value})
+                dictionary.update({default_insert_key: default_insert_value,
+                                   default_file_type_key: default_file_type})
         else:
-            dictionary.update({default_insert_key: default_insert_value})
+            dictionary.update({default_insert_key: default_insert_value,
+                               default_file_type_key: default_file_type})
 
         return dictionary

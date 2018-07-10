@@ -214,7 +214,8 @@ class StoryTests(BaseTestCase):
         self.assertEqual(story['mLocation'], 'San Telmo, Buenos Aires')
         self.assertTrue(story['mRelevance'] is not None)
         self.assertTrue('mProfilePictureId' in story)
-        self.assertEqual(story['mProfilePicture'], '')
+        self.assertEqual(story['mProfilePicture'], 'defaultImage')
+        self.assertEqual(story['mFileTypeProfilePicture'], 'jpg')
         self.assertTrue('mFirstName' in story)
         self.assertTrue('mLastName' in story)
 
