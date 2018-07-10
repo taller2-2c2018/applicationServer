@@ -1,5 +1,3 @@
-import os
-
 from appserver.datastructure.ApplicationResponse import ApplicationResponse
 from appserver.externalcommunication.sharedServer import SharedServer
 from appserver.logger import LoggerFactory
@@ -7,8 +5,6 @@ from appserver.repository.storyRepository import StoryRepository
 from appserver.validator.jsonValidator import JsonValidator
 
 LOGGER = LoggerFactory().get_logger(__name__)
-DEFAULT_IMAGE = os.environ.get('DEFAULT_IMAGE', 'https://firebasestorage.googleapis.com/v0/b/taller2-199117.appspot.com/o/default_image.jpeg?alt=media&token=d5147918-820e-44c6-8ef2-7ba3ef625891')
-DEFAULT_IMAGE_TYPE = os.environ.get('DEFAULT_IMAGE_TYPE', 'jpeg')
 
 
 class FileService(object):
@@ -80,7 +76,7 @@ class FileService(object):
 
     @staticmethod
     def add_file_to_dictionary_default_value(dictionary, file_id, default_insert_key='file', default_file_type_key='file_type_profile_picture',
-                                             default_insert_value=DEFAULT_IMAGE, default_file_type=DEFAULT_IMAGE_TYPE):
+                                             default_insert_value=None, default_file_type=None):
         if file_id is not '':
             file_response = SharedServer.get_file(file_id)
             shared_server_response_validation = JsonValidator.validate_file_response(file_response)
