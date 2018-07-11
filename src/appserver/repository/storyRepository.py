@@ -8,7 +8,10 @@ from appserver.time.Time import Time
 LOGGER = LoggerFactory.get_logger(__name__)
 
 story_collection = app.database.story
-flash_story_valid_hours = os.environ.get('FLASH_STORY_VALID_HOURS', 4)
+try:
+    flash_story_valid_hours = float(os.environ.get('FLASH_STORY_VALID_HOURS'))
+except:
+    flash_story_valid_hours = 4
 
 
 class StoryRepository(object):
