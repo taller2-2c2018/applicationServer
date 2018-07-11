@@ -18,7 +18,7 @@ class StoryRepository(object):
     @staticmethod
     def create_story(request_json):
         LOGGER.info('Creating a new story')
-        app.memory_database.sadd('story', request_json)
+        #app.memory_database.sadd('story', request_json)
         story_id = story_collection.insert_one(request_json)
         return story_id
 
@@ -26,7 +26,7 @@ class StoryRepository(object):
     def get_all_permanent_stories():
         LOGGER.info('Getting all permanent stories')
         #TODO meter aca cache
-        stories = app.memory_database.get('story')
+        #stories = app.memory_database.get('story')
 
         return story_collection.find({'is_flash': False})
 
