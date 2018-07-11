@@ -482,6 +482,8 @@ class UserTests(BaseTestCase):
         friend = friends_list[0]
         self.assertEqual(friend['mFirebaseId'], '5678')
         self.assertEqual(friend['mFacebookUserId'], 'requester')
+        self.assertEqual(friend['mFirstName'], 'first_name')
+        self.assertEqual(friend['mLastName'], 'last_name')
 
     def test_modify_profile_picture_stream(self):
         TestsCommons.create_default_user()
