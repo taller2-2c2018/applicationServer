@@ -72,8 +72,7 @@ class UserRepository(object):
     @staticmethod
     def get_friends_information_list(list_of_friend_facebook_ids):
         return list(user_collection.find({'facebookUserId': {'$in': list_of_friend_facebook_ids}},
-                                         {'facebookUserId': 1, 'last_name': 1, 'first_name': 1, 'mail': 1,
-                                          'firebase_id': 1, 'birth_date': 1, '_id': 0}))
+                                         {'facebookUserId': 1, 'last_name': 1, 'first_name': 1, 'firebase_id': 1}))
 
     @staticmethod
     def get_all_but(user_facebook_id):

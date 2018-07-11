@@ -112,8 +112,9 @@ class MobileTransformer(object):
         for friend in friends_list:
             mobile_friend = {
                 'mFirebaseId': friend['firebase_id'],
-                'mBirthDate': friend['birth_date'],
-                'mFacebookUserId': friend['facebookUserId']
+                'mFacebookUserId': friend['facebookUserId'],
+                'mFirstName': friend['first_name'],
+                'mLastName': friend['last_name']
             }
             mobile_friend_list.append(mobile_friend)
 
