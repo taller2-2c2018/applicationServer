@@ -1,5 +1,7 @@
 import os
 
+from appserver.time.Time import Time
+
 DEFAULT_IMAGE = os.environ.get('DEFAULT_IMAGE', 'https://firebasestorage.googleapis.com/v0/b/taller2-199117.appspot.com/o/default_image.jpeg?alt=media&token=d5147918-820e-44c6-8ef2-7ba3ef625891')
 DEFAULT_IMAGE_TYPE = os.environ.get('DEFAULT_IMAGE_TYPE', 'jpeg')
 
@@ -36,7 +38,8 @@ class MobileTransformer(object):
                 'mProfilePicture': MobileTransformer.__optional_value(story, 'profile_picture', DEFAULT_IMAGE),
                 'mFileTypeProfilePicture': MobileTransformer.__optional_value(story, 'file_type_profile_picture', DEFAULT_IMAGE_TYPE),
                 'mFirstName': story['first_name'],
-                'mLastName': story['last_name']
+                'mLastName': story['last_name'],
+                'mPublicationDate': Time.convert_time_argentina_time(story['publication_date'])
             }
 
     @staticmethod

@@ -79,6 +79,7 @@ class StoryTests(BaseTestCase):
         self.assertEqual(story['file_type'], 'jpg')
         self.assertEqual(story['location'], 'San Telmo, Buenos Aires')
         self.assertEqual(story['total_friends'], 1)
+        self.assertTrue(story['publication_date'] is not None)
         self.assertEqual(story['stories_posted_today'], 0)
 
     def test_post_new_story_shared_server_gives_wrong_response(self):
@@ -213,6 +214,7 @@ class StoryTests(BaseTestCase):
         self.assertEqual(story['mFileTypeProfilePicture'], 'jpg')
         self.assertTrue('mFirstName' in story)
         self.assertTrue('mLastName' in story)
+        self.assertTrue(story['mPublicationDate'] is not None)
 
     def test_get_all_stories_for_requester_with_no_facebook_user_id_in_header_gives_bad_request(self):
         TestsCommons.create_default_user()
@@ -257,6 +259,7 @@ class StoryTests(BaseTestCase):
         self.assertTrue('mProfilePictureId' in story)
         self.assertTrue('mFirstName' in story)
         self.assertTrue('mLastName' in story)
+        self.assertTrue(story['mPublicationDate'] is not None)
 
     @patch('appserver.time.Time.Time.now', mock_time_now)
     def test_get_all_stories_for_requester_gets_stories_ordered_by_relevance(self):
@@ -285,6 +288,7 @@ class StoryTests(BaseTestCase):
         self.assertTrue('mProfilePictureId' in first_story)
         self.assertTrue('mFirstName' in first_story)
         self.assertTrue('mLastName' in first_story)
+        self.assertTrue(first_story['mPublicationDate'] is not None)
 
         second_story = stories_list[1]
         self.assertTrue(second_story['mStoryId'] is not None)
@@ -301,6 +305,7 @@ class StoryTests(BaseTestCase):
         self.assertTrue('mProfilePictureId' in second_story)
         self.assertTrue('mFirstName' in second_story)
         self.assertTrue('mLastName' in second_story)
+        self.assertTrue(second_story['mPublicationDate'] is not None)
 
         self.assertTrue(second_story['mRelevance'] < first_story['mRelevance'])
 
