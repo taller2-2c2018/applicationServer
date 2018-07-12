@@ -12,6 +12,7 @@ from appserver.repository.userRepository import UserRepository
 from appserver.rules.RelevanceEngine import RelevanceEngine
 from appserver.rules.StoryRelevance import StoryRelevance
 from appserver.service.FileService import FileService
+from appserver.threading.RunAsync import run_async
 from appserver.time.Time import Time
 from appserver.transformer.MobileTransformer import MobileTransformer
 from appserver.validator.jsonValidator import JsonValidator
@@ -102,6 +103,7 @@ class StoryService(object):
         StoryService.__send_notification_to_friends(facebook_id_poster, title, body)
 
     @staticmethod
+    @run_async
     def __send_notification_to_friends(facebook_id_poster, title, body):
         list_of_friends = UserRepository.get_friendship_list(facebook_id_poster)
         if facebook_id_poster in list_of_friends:
@@ -204,18 +206,21 @@ class StoryService(object):
         story = FileService.add_file_to_dictionary(story, 'file_id')
         story = StoryService.__add_profile_data_to_story(story)
         story_for_mobile = MobileTransformer.database_story_to_mobile(story)
-        StoryService.__send_new_comment_notification(facebook_user_id, body=story_for_mobile)
+        StoryService.__send_new_comment_notification(facebook_user_id, story_body=story_for_mobile)
 
         return ApplicationResponse.created('Comment created successfully')
 
     @staticmethod
-    def __send_new_comment_notification(facebook_user_id, body):
+    @run_async
+    def __send_new_comment_notification(facebook_user_id, story_body):
         LOGGER.info('Sending comment notification')
         user = UserRepository.get_profile(facebook_user_id)
         user_name = user['first_name'] + ' ' + user['last_name']
         title = user_name + ' ha realizado un comentario en tu historia'
+        story_creator_firebase_id = UserRepository.get_profile(story_body['mFacebookUserId'])['firebase_id']
 
-        StoryService.__send_notification_to_friends(facebook_user_id, title, body)
+        FirebaseCloudMessaging.send_notification(title=title, body=story_body,
+                                                 list_of_firebase_ids=list(story_creator_firebase_id))
 
     @staticmethod
     def post_reaction(header, json_reaction, story_id):
@@ -253,18 +258,21 @@ class StoryService(object):
         story = FileService.add_file_to_dictionary(story, 'file_id')
         story = StoryService.__add_profile_data_to_story(story)
         story_for_mobile = MobileTransformer.database_story_to_mobile(story)
-        StoryService.__send_new_reaction_notification(facebook_user_id, reaction, body=story_for_mobile)
+        StoryService.__send_new_reaction_notification(facebook_user_id, reaction, story_body=story_for_mobile)
 
         return ApplicationResponse.created('Reaction created successfully')
 
     @staticmethod
-    def __send_new_reaction_notification(facebook_user_id, reaction, body):
+    @run_async
+    def __send_new_reaction_notification(facebook_user_id, reaction, story_body):
         LOGGER.info('Sending reaction notification')
         user = UserRepository.get_profile(facebook_user_id)
         user_name = user['first_name'] + ' ' + user['last_name']
         title = user_name + ' ha reaccionado con un ' + reaction + ' a tu historia'
+        story_creator_firebase_id = UserRepository.get_profile(story_body['mFacebookUserId'])['firebase_id']
 
-        StoryService.__send_notification_to_friends(facebook_user_id, title, body)
+        FirebaseCloudMessaging.send_notification(title=title, body=story_body,
+                                                 list_of_firebase_ids=list(story_creator_firebase_id))
 
     @staticmethod
     def __add_profile_data_to_stories(filtered_stories):

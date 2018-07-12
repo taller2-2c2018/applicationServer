@@ -9,6 +9,7 @@ from appserver.repository.friendshipRepository import FriendshipRepository
 from appserver.repository.userRepository import UserRepository
 from appserver.service.FileService import FileService
 from appserver.service.StoryService import StoryService
+from appserver.threading.RunAsync import run_async
 from appserver.transformer.MobileTransformer import MobileTransformer
 from appserver.validator.databaseValidator import DatabaseValidator
 from appserver.validator.jsonValidator import JsonValidator
@@ -120,6 +121,7 @@ class UserService(object):
         return ApplicationResponse.bad_request(message='Target username doesn\'t exist')
 
     @staticmethod
+    @run_async
     def __send_notification_of_friendship_request(facebook_id_requester, facebook_id_target, requester_message):
         requester = UserRepository.get_profile(facebook_id_requester)
         requester_name = requester['first_name'] + ' ' + requester['last_name']
@@ -127,10 +129,7 @@ class UserService(object):
         title = requester_name + ' quiere ser tu amigo'
         body = {'mMessage': requester_message}
 
-        try:
-            FirebaseCloudMessaging.send_notification(title=title, body=body, list_of_firebase_ids=list(target['firebase_id']))
-        except:
-            LOGGER.warn('No firebase Id found for user, not sending push notification')
+        FirebaseCloudMessaging.send_notification(title=title, body=body, list_of_firebase_ids=list(target['firebase_id']))
 
     @staticmethod
     def get_friendship_requests(request_header):
@@ -213,6 +212,7 @@ class UserService(object):
         return ApplicationResponse.bad_request(message='Friendship request couldn\'t be found')
 
     @staticmethod
+    @run_async
     def __send_notification_of_friendship_accepted(facebook_id_acceptor, facebook_id_target):
         acceptor = UserRepository.get_profile(facebook_id_acceptor)
         acceptor_name = acceptor['first_name'] + ' ' + acceptor['last_name']
@@ -220,10 +220,7 @@ class UserService(object):
         title = acceptor_name + ' ha aceptado tu solicitud de amistad'
         body = {'mMessage': 'Tú y ' + acceptor_name + ' ahora son amigos'}
 
-        try:
-            FirebaseCloudMessaging.send_notification(title=title, body=body, list_of_firebase_ids=list(target['firebase_id']))
-        except:
-            LOGGER.warn('No firebase Id found for user, not sending push notification')
+        FirebaseCloudMessaging.send_notification(title=title, body=body, list_of_firebase_ids=list(target['firebase_id']))
 
     @staticmethod
     def modify_user_profile(request_json, request_header):
