@@ -7,6 +7,7 @@ from appserver import app
 from appserver.datastructure.ApplicationResponse import ApplicationResponse
 from appserver.logger import LoggerFactory
 from appserver.repository.userRepository import UserRepository
+from appserver.threading.RunAsync import run_async
 
 LOGGER = LoggerFactory.get_logger(__name__)
 user_collection = app.database.user
@@ -28,17 +29,22 @@ def secure(method):
             token = request.headers.get('Authorization')
             if (token != user['token']) and (app.skip_auth is False):
                 return ApplicationResponse.unauthorized('User token is invalid')
-        except:
+        except Exception as e:
+            LOGGER.info('User was not authenticated. Reason: ' + str(e))
             return ApplicationResponse.bad_request('Missing request header Authorization')
 
         timestamp_now = int(time.time())
         if (timestamp_now > int(user['expires_at'])) and (app.skip_auth is False):
             return ApplicationResponse.unauthorized('Provided token expired')
 
-        firebase_id = request.headers.get('firebaseId')
-        if firebase_id is not None and firebase_id is not '':
-            UserRepository.update_firebase_id(facebook_id, firebase_id)
+        update_firebase_id_for_user(facebook_id, request.headers.get('firebaseId'))
 
         return method(*args, **kwargs)
 
     return check_authorization
+
+
+@run_async
+def update_firebase_id_for_user(facebook_id, firebase_id):
+    if firebase_id is not None and firebase_id is not '':
+        UserRepository.update_firebase_id(facebook_id, firebase_id)

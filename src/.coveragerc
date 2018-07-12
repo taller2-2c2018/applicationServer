@@ -9,3 +9,4 @@ omit =
   *config/*
   *logger/*
   *authValidator.py
+  *threading/*

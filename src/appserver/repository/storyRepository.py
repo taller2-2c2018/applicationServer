@@ -8,19 +8,23 @@ from appserver.time.Time import Time
 LOGGER = LoggerFactory.get_logger(__name__)
 
 story_collection = app.database.story
-flash_story_valid_hours = os.environ.get('FLASH_STORY_VALID_HOURS', 4)
+try:
+    flash_story_valid_hours = float(os.environ.get('FLASH_STORY_VALID_HOURS'))
+except:
+    flash_story_valid_hours = 4
 
 
 class StoryRepository(object):
     @staticmethod
     def create_story(request_json):
         LOGGER.info('Creating a new story')
-        story_id = story_collection.insert_one(request_json)
-        return story_id
+
+        return story_collection.insert_one(request_json)
 
     @staticmethod
     def get_all_permanent_stories():
         LOGGER.info('Getting all permanent stories')
+
         return story_collection.find({'is_flash': False})
 
     @staticmethod
