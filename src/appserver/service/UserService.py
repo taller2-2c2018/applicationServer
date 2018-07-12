@@ -128,7 +128,7 @@ class UserService(object):
         body = {'mMessage': requester_message}
 
         try:
-            FirebaseCloudMessaging.send_notification(title=title, body=body, list_of_firebase_ids=target['firebase_id'])
+            FirebaseCloudMessaging.send_notification(title=title, body=body, list_of_firebase_ids=list(target['firebase_id']))
         except:
             LOGGER.warn('No firebase Id found for user, not sending push notification')
 
@@ -221,7 +221,7 @@ class UserService(object):
         body = {'mMessage': 'Tú y ' + acceptor_name + ' ahora son amigos'}
 
         try:
-            FirebaseCloudMessaging.send_notification(title=title, body=body, list_of_firebase_ids=target['firebase_id'])
+            FirebaseCloudMessaging.send_notification(title=title, body=body, list_of_firebase_ids=list(target['firebase_id']))
         except:
             LOGGER.warn('No firebase Id found for user, not sending push notification')
 

@@ -29,3 +29,5 @@ class BaseTestCase(unittest.TestCase):
         database.drop_collection('friendship')
         database.drop_collection('user')
         database.drop_collection('story')
+        app.memory_database.flushall()
+        app.memory_database.flushdb()
