@@ -2,6 +2,7 @@ import os
 import requests
 
 from appserver.logger import LoggerFactory
+from appserver.threading.RunAsync import run_async
 
 LOGGER = LoggerFactory().get_logger(__name__)
 URL = 'https://fcm.googleapis.com/fcm/send'
@@ -15,6 +16,7 @@ else:
 class FirebaseCloudMessaging(object):
 
     @staticmethod
+    @run_async
     def send_notification(title, body, list_of_firebase_ids):
         try:
             json = {
