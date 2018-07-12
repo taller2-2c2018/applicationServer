@@ -10,6 +10,10 @@ class Time(object):
         return datetime.now(pytz.timezone(zone='America/Argentina/Buenos_Aires'))
 
     @staticmethod
+    def convert_time_argentina_time(date_time):
+        return date_time.astimezone(pytz.timezone("America/Argentina/Buenos_Aires"))
+
+    @staticmethod
     def timedelta(hours):
         return timedelta(hours=hours)
 
